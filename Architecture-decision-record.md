@@ -15,6 +15,11 @@ We will split the ADR into two sections, one for frontend, one for backend
   - Risks
     - Given that our project scope is small having more functionality and customization just increases the chance of rabbit holing 
   - For practicallity we wont need that many graphs so Chart.js fits our needs perfectly
+### Color scheme
+  - We chose a blue and white color scheme for every page on our website(includes login page, homepage, dashboard)
+  - The blue is an arcade blue similar to the one that fits our teams theme from the google slides
+### Why the choice was made
+  - The frontend team decided that post hog's UI was very overloaded with colors and animations. We found this to be not very useful for an app that is just meant to track metrics and notify users of any outages
 ## Backend
    ### Login info
    - We chose to have login info be email and a user selected password
@@ -26,4 +31,5 @@ We will split the ADR into two sections, one for frontend, one for backend
     
    - Risk
       - Not a risk, but just not neccesary for the scope of the project.
+  ### 
   
