@@ -24,20 +24,19 @@ We have assembled 18 user stories spanning features users would want from our ba
 - The client app sending data to `POST /api/collect` should include a version number in its JSON payload so the backend can group metrics by release.
 - On the frontend, we can display this as either a table or a Chart.js graph so developers can compare versions side by side.
 - A useful first version would be a table showing version number, total uptime, number of reported bugs, and the most recent check-in time.
-- This follows the ADR direction of keeping the system simple: one collector endpoint gathers the data, MongoDB stores it, and Chart.js or a table component displays it on the dashboard.
+- We are following the ADR direction of keeping the system simple. One collector endpoint gathers the data, MongoDB stores it, and Chart.js or a table component displays it on the dashboard.
 
 ## As a developer, I want to use a performance metric app that doesn't slow down my own app, so that the performance errors I see are due to my app and not WatchTower slowing my app down
 - We should keep the WatchTower client lightweight by sending small JSON payloads asynchronously so the monitored app does not block while reporting metrics.
 - The collector design from the ADR supports this because the app only needs to send data to one centralized endpoint instead of doing heavy processing on the client side.
 - On the frontend side of the monitored app, any WatchTower reporting script should run in the background with minimal logic, mostly collecting basic metrics and forwarding them to the backend.
 - On the backend, MongoDB and the collector endpoint can handle storing and processing the data after it is received, which moves work away from the user's application.
-- For the MVP, we can limit the tracked metrics to essential values such as uptime, version, and bug count so the monitoring remains simple and low-overhead.
+- In this MVP, we limit the tracked metrics to essential values such as uptime, version, and bug count so the monitoring remains simple and low-overhead.
 
 ## As a developer who values security, I want my data to be protected my email and encrypted password, so that I can be worry free using watchtower in my apps.
 - This user story connects directly to the ADR decision to use email and password as login information for each account.
 - We can store the user's email in MongoDB and store only a hashed and salted version of the password rather than the raw password itself.
 - On the backend, JavaScript libraries such as `bcrypt` can be used to encrypt password data before saving it in the database.
-- We should also validate login input, use HTTPS when sending login requests, and create authenticated sessions or tokens so only the correct user can access their apps and metrics.
 - This keeps the account system simple for the MVP while still following standard security practices for user authentication.
 
 ## As a developer, I want not make much changes to my existing code and want to just add a single collector file to my repo to collect performance/error data, so that my code stays clean and adding watchtower is not a cumbersome process
@@ -61,13 +60,6 @@ We have assembled 18 user stories spanning features users would want from our ba
 - This also works well with the alert system, since repeated failed checks can automatically trigger notifications to the developer.
 - The result is a simple monitoring pipeline: scheduled checks create uptime data, MongoDB stores it, and the dashboard visualizes it.
 
-## As a developer, I would want a performance metric app that does not have any significant performance impact on my own software, so that the metrics that I observe from WatchTower are accurate to the app itself and not affected by the running of WatchTower.
-- We can satisfy this by making the collector file small, asynchronous, and focused only on gathering essential metrics before sending them to the backend.
-- The monitored app should not do expensive chart rendering, heavy computation, or large logging operations as part of the collector logic.
-- Instead, the backend should handle aggregation and longer-term analysis after the data reaches the centralized endpoint.
-- This keeps the instrumentation clean and helps ensure that WatchTower itself does not distort the performance results it is meant to observe.
-- For the MVP, this means starting with a narrow set of metrics and optimizing the collector for minimal overhead.
-
 ## As a developer who wants to be able to clearly trace the origin of errors, I would want metrics that capture the error origin in extreme detail, including the app version, timestamps, page that the error is from, etc.
 - This can be built by defining a richer JSON format for the collector file to send into `POST /api/collect`.
 - Each error event can include fields such as app version, timestamp, route or page name, error message, stack trace, browser or runtime environment, and severity level.
@@ -81,4 +73,32 @@ We have assembled 18 user stories spanning features users would want from our ba
 - The frontend dashboard can include a project selector such as a dropdown or sidebar list that lets the developer switch between projects without leaving the main dashboard.
 - Once a project is selected, the dashboard can request that specific project's data from the backend and redraw the charts, widgets, and logs using Chart.js and table views.
 - This keeps the experience simple for the MVP because one account can manage multiple monitored apps through the same login while the backend keeps each project's data separated.
+
+## As a user, I want a simple flow of the application, meaning I want a clear path to get my apps errors and not a lot of fluff in order to get straight to my metrics and errors
+- This user story matches the ADR's frontend decision to avoid an overloaded interface with too many colors, animations, or unnecessary features.
+- We can design the site so that the main flow is straightforward: log in, select a project, and immediately see the dashboard with uptime, errors, and performance metrics.
+- The navigation bar should stay simple, with only the most useful tabs such as Dashboard, Documentation, and Settings.
+- The dashboard itself can prioritize the most important information first, such as current uptime status, recent errors, and performance charts, while secondary details stay in optional widgets or lower sections.
+- Using basic JavaScript or a lightweight framework like React, we can keep each page focused and reduce clutter so the user gets to their metrics quickly.
+
+## As a developer I would want to see who pushed the changes that caused the error in order to better understand how to fix the error
+- We can support this by extending the collector data model so each deployed app version is associated with metadata such as commit ID, version number, deployment time, and the developer who pushed the change.
+- MongoDB can store this deployment metadata alongside the project's uptime and error records, which lets us connect a spike in errors back to a specific release.
+- When an error is logged, the backend can match its timestamp and app version to the deployment record that was active at that time.
+- On the dashboard, we can show the developer name, version, and deployment information next to each major error event or inside the version stability widget.
+- For the MVP, a simple implementation would be to let the collector file include the version and commit information in its JSON payload, then display that data in a table so developers can quickly see which release likely introduced the issue.
+
+## As a user, I would want to avoid false alarms from my website going down, I would want the application to periodically check for downtime and if the app is down for more than 3 checks, notify me. I want this in order to minimize being notified even when the website is experiencing infrequent downtime that resolves by itself.
+- We can implement this by having WatchTower run scheduled uptime checks against the user's website or service endpoint and store the result of each check in MongoDB.
+- Instead of sending an alert after a single failed check, the backend can wait until the app fails more than 3 checks in a row before marking the incident as a real outage.
+- This reduces false alarms caused by short network interruptions, brief restarts, or other temporary issues that resolve on their own.
+- Once the failed-check threshold is reached, the backend can trigger an email notification using the account email already stored for the user.
+- On the dashboard, we can also show the recent check history so the user can see whether the outage was a one-time failure or part of a longer downtime period.
+
+## As a user I would want a simple dashboard, with only a symbol telling me whether my site is down, with errors, or is up, with not a lot of clutter, in order to easily tell when my website is up
+- This matches the ADR's frontend choice to avoid a crowded interface and keep the design focused on useful information.
+- We can make the main dashboard center around a single status indicator that clearly shows whether the site is up, down, or experiencing errors.
+- A simple implementation would use one large symbol with color-coded states, for example green for up, red for down, and yellow for warning or active errors.
+- More detailed charts, logs, and widgets can still exist, but they should be placed below the main indicator or hidden behind optional views so the first screen stays uncluttered.
+- Using basic JavaScript or React, we can update this status symbol in real time based on the latest uptime and error data coming from the backend.
   
