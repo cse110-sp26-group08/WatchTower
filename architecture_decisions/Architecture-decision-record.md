@@ -20,7 +20,10 @@ We will split the ADR into two sections, one for frontend, one for backend
   - The blue is an arcade blue similar to the one that fits our teams theme from the google slides
 ### Why the choice was made
   - The frontend team decided that post hog's UI was very overloaded with colors and animations. We found this to be not very useful for an app that is just meant to track metrics and notify users of any outages
-## Backend
+## Backend 
+  - check [Backend architecture PDF](./architecture_backend.pdf) for more details on more detailed documentation for the backend and [Backend collector PDF](./collector.pdf)
+
+
    ### Login info
    - We chose to have login info be email and a user selected password
    - Login info would allow us to track specific apps of a user, enabling them to track multiple projects uptime metrics at the same time!
@@ -31,5 +34,18 @@ We will split the ADR into two sections, one for frontend, one for backend
     
    - Risk
       - Not a risk, but just not neccesary for the scope of the project.
-  ### 
+   ### MongoDB
+    - We would need MongoDB to store the login info.
+    - Since our app won't be a full fledged production app, if MongoDB is not allowed we can switch to storing the info in SQLite.
+    - Nikita took CSE 135 and suggested we use MongoDB
+   ### Why the choice was made
+   - The backend team was most famillar with MongoDB from past projects as opposed to other ways to store user information
+   - We also had experince with using MongoDB from our slot machine app from Warmup 2
+   - Risk  
+    - We had some trouble with mongodb in our warmup, but as we became more experinced with MongoDB, our uncertainty around how to use MongoDB shrunk and I think everyone in the group is more comfortable with using it.
+        
+   ###  POST /api/collect — centralized collector endpoint 
+    - This would be needed to collect the data that the UI/UX team has detailed would be needed as per their research and meeting with professor Powell.
+   ### Why the choice was made 
+   - Nikita drew from her experince from CSE 135 and said that this worked best for their watch-tower replication
   
