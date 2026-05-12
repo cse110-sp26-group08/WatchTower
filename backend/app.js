@@ -15,7 +15,7 @@ function createApp() {
   const app = express();
 
   app.use(formidable());
-  __dirname = import.meta.dirname;
+  const __dirname = import.meta.dirname;
   app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
   app.use('/js', express.static(path.join(__dirname, '../frontend/js')));
 
