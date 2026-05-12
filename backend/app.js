@@ -3,9 +3,9 @@
  * @module backend/app
  */
 
-const express = require('express');
-const formidable = require('express-formidable');
-const path = require('path');
+import express from 'express';
+import formidable from 'express-formidable';
+import path from 'path';
 
 /**
  * Create an Express application.
@@ -15,7 +15,7 @@ function createApp() {
   const app = express();
 
   app.use(formidable());
-
+  __dirname = import.meta.dirname;
   app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
   app.use('/js', express.static(path.join(__dirname, '../frontend/js')));
 
