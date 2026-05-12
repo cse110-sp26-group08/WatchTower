@@ -1,0 +1,13 @@
+{
+  "name": "watchtower-backend",
+  "version": "1.0.0",
+  "description": "Express backend for WatchTower frontend serving homepage and static assets.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.4",
+    "express-formidable": "^1.2.0"
+  }
+}
