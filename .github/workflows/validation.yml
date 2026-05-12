@@ -1,0 +1,14 @@
+name: HTML & CSS Validation
+on: [push, pull_request]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate HTML and CSS
+        uses: anishathalye/proof-html@v2
+        with:
+          directory: ./frontend  # Path to your built site
