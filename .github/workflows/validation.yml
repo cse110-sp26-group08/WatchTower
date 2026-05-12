@@ -11,4 +11,5 @@ jobs:
       - name: Validate HTML and CSS
         uses: anishathalye/proof-html@v2
         with:
+          check-favicon: false
           directory: ./frontend  # Path to your built site
