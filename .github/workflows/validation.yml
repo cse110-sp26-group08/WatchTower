@@ -12,4 +12,5 @@ jobs:
         uses: anishathalye/proof-html@v2
         with:
           check_favicon: false
+          check_css: true
           directory: ./frontend  # Path to your built site
