@@ -13,7 +13,6 @@ jobs:
 
       - name: Validate HTML and CSS
         uses: github/super-linter@v5
-        working-directory: frontend
         env:
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_HTML: true
