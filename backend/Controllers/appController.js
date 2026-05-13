@@ -1,16 +1,5 @@
-import mongoose from 'mongoose';
-import { App } from '../schema/schemas.js';
-
-const { isValid, createFromHexString } = mongoose.Types.ObjectId;
-
-/**
- * Validate that a value is a valid MongoDB ObjectId.
- * @param {unknown} id
- * @returns {boolean}
- */
-function isValidId(id) {
-  return isValid(id) && createFromHexString(id.toString()).toString() === id.toString();
-}
+import { App } from '../schema/appModel.js';
+import { isValidId } from '../util/idValidator.js';
 
 /**
  * Create a new app document.
