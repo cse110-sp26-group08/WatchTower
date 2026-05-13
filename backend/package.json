@@ -8,13 +8,21 @@
     "start": "node app.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/jest.setup.js"
+    ],
+    "testEnvironment": "node"
+  },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^4.18.4",
     "express-formidable": "^1.2.0",
     "mongoose": "^8.19.3"
   },
   "devDependencies": {
     "jest": "^30.4.2",
+    "mongodb-memory-server": "^11.1.0",
     "supertest": "^7.2.2"
   }
 }
