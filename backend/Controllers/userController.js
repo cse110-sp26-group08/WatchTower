@@ -1,21 +1,8 @@
 import bcrypt from 'bcrypt';
-import mongoose from 'mongoose';
-import { User } from '../schema/schemas.js';
- 
-const { isValid, createFromHexString } = mongoose.Types.ObjectId;
+import { User } from '../schema/userModel.js';
+import { isValidId } from '../util/idValidator.js';
  
 const ALLOWED_UPDATE_FIELDS = ['username', 'email', 'passwordHash'];
- 
-/**
- * Validate that a value is a valid MongoDB ObjectId.
- * Uses a round-trip check to catch false positives from isValid() alone
- * (e.g. short strings like "123" pass isValid but aren't real ObjectIds).
- * @param {unknown} id
- * @returns {boolean}
- */
-function isValidId(id) {
-  return isValid(id) && createFromHexString(id.toString()).toString() === id.toString();
-}
 
 /**
  * Create a new user document.

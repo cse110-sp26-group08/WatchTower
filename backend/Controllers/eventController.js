@@ -1,21 +1,8 @@
-import mongoose from 'mongoose';
-import { Event } from '../schema/schemas.js';
- 
-const { isValid, createFromHexString } = mongoose.Types.ObjectId;
+import { Event } from '../schema/eventModel.js';
+import { isValidId } from '../util/idValidator.js';
  
 const VALID_EVENT_TYPES = ['error', 'performance', 'feedback', 'release'];
  
-/**
- * Validate that a value is a valid MongoDB ObjectId.
- * Uses a round-trip check to catch false positives from isValid() alone
- * (e.g. short strings like "123" pass isValid but aren't real ObjectIds).
- * @param {unknown} id
- * @returns {boolean}
- */
-function isValidId(id) {
-  return isValid(id) && createFromHexString(id.toString()).toString() === id.toString();
-}
-
 /**
  * Create a new event document.
  * Only whitelisted fields are passed to the DB — metadata is accepted as-is
