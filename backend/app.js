@@ -7,12 +7,17 @@
 
 import express from 'express';
 import formidable from 'express-formidable';
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { collectError } from './endpoints/collectError.js';
 import { collectPerformance } from './endpoints/collectPerformance.js';
 import { connectDatabase } from './util/database.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 /**
  * Create an Express application.
@@ -22,8 +27,6 @@ function createApp() {
   const app = express();
 
   app.use(formidable());
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
 
   // Serve static assets for the frontend
   app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
