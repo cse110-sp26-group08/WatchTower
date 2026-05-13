@@ -1,3 +1,5 @@
+/* eslint-env node */
+
 /**
  * @fileoverview Express server for WatchTower backend.
  * @module backend/app
