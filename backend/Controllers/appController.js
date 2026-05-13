@@ -58,6 +58,4 @@ async function deleteAppById(id) {
   return App.findByIdAndDelete(id).exec();
 }
 
-var x = 10
-
 export { createApp, getAppById, getAllAppsByOwnerId, deleteAppById };
