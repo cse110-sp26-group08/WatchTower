@@ -31,7 +31,7 @@ a {
   text-decoration: none;
 }
 
-.login-page {
+.signup-page {
   min-height: 100vh;
 }
 
@@ -117,14 +117,14 @@ a {
   box-shadow: 0 18px 36px rgba(31, 73, 255, 0.28);
 }
 
-.login-shell {
+.signup-shell {
   width: min(1240px, calc(100% - 48px));
   margin: 0 auto;
 }
 
-.login-layout {
+.signup-layout {
   display: grid;
-  grid-template-columns: minmax(0, 470px) minmax(320px, 460px);
+  grid-template-columns: minmax(0, 470px) minmax(320px, 480px);
   justify-content: space-between;
   align-items: center;
   gap: 48px;
@@ -132,12 +132,12 @@ a {
   padding: 28px 18px 56px;
 }
 
-.login-copy {
+.signup-copy {
   max-width: 470px;
   animation: pageFade 700ms ease-out both;
 }
 
-.login-copy h1 {
+.signup-copy h1 {
   margin: 0;
   font-size: clamp(2.7rem, 5vw, 4.2rem);
   line-height: 1;
@@ -145,15 +145,15 @@ a {
   font-weight: 800;
 }
 
-.login-description {
-  max-width: 380px;
+.signup-description {
+  max-width: 390px;
   margin: 18px 0 0;
   font-size: clamp(0.95rem, 1.35vw, 1.12rem);
   line-height: 1.5;
   color: var(--muted);
 }
 
-.login-card {
+.signup-card {
   padding: 30px 28px;
   border: 1px solid rgba(15, 15, 18, 0.08);
   border-radius: 28px;
@@ -162,12 +162,12 @@ a {
   backdrop-filter: blur(18px);
 }
 
-.login-card-header {
+.signup-card-header {
   margin-bottom: 24px;
   text-align: center;
 }
 
-.login-card-brand {
+.signup-card-brand {
   margin: 0 0 10px;
   font-size: 0.82rem;
   font-weight: 800;
@@ -176,14 +176,14 @@ a {
   color: var(--blue);
 }
 
-.login-card-header h2 {
+.signup-card-header h2 {
   margin: 0;
   font-size: 2rem;
   line-height: 1.05;
   letter-spacing: -0.06em;
 }
 
-.login-form {
+.signup-form {
   display: grid;
   gap: 16px;
 }
@@ -209,21 +209,17 @@ a {
   color: var(--text);
 }
 
-.form-field input::placeholder {
-  color: #8a8ca0;
-}
-
-.login-submit {
+.signup-submit {
   width: 100%;
 }
 
-.login-signup {
+.signup-login {
   margin: 18px 0 0;
   text-align: center;
   color: var(--muted);
 }
 
-.login-signup a {
+.signup-login a {
   color: var(--blue);
   font-weight: 700;
 }
@@ -249,18 +245,18 @@ a {
     padding: 12px 14px;
   }
 
-  .login-shell {
+  .signup-shell {
     width: min(100%, calc(100% - 28px));
   }
 
-  .login-layout {
+  .signup-layout {
     grid-template-columns: 1fr;
     justify-content: stretch;
     min-height: auto;
     padding: 24px 6px 48px;
   }
 
-  .login-card {
+  .signup-card {
     max-width: 560px;
   }
 }
@@ -287,26 +283,26 @@ a {
     width: 100%;
   }
 
-  .login-layout {
+  .signup-layout {
     padding-top: 14px;
     gap: 28px;
   }
 
-  .login-copy h1 {
+  .signup-copy h1 {
     font-size: clamp(2.2rem, 10.5vw, 3.1rem);
   }
 
-  .login-description,
-  .login-signup {
+  .signup-description,
+  .signup-login {
     font-size: 0.92rem;
   }
 
-  .login-card {
+  .signup-card {
     padding: 24px 18px;
     border-radius: 22px;
   }
 
-  .login-card-header h2 {
+  .signup-card-header h2 {
     font-size: 1.7rem;
   }
 }

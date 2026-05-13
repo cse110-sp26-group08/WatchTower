@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WatchTower Sign Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="../styling/signup.css">
+</head>
+<body class="signup-page">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <div class="brand-mark">
+        <a href="/" class="brand-link">WatchTower</a>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="#docs">Docs</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="login.html" class="nav-login">Log in</a>
+        <a href="signup.html" class="button button-primary">Get started</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="signup-shell">
+    <section class="signup-layout" aria-label="Sign up page content">
+      <div class="signup-copy">
+        <h1>Sign up!</h1>
+        <p class="signup-description">
+          Set up WatchTower and start tracking errors as they happen.
+        </p>
+      </div>
+
+      <section class="signup-card" aria-label="Sign up form">
+        <div class="signup-card-header">
+          <p class="signup-card-brand">WatchTower</p>
+          <h2>Create your account</h2>
+        </div>
+
+        <form class="signup-form">
+          <div class="form-field">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+            >
+          </div>
+
+          <div class="form-field">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+            >
+          </div>
+
+          <div class="form-field">
+            <label for="confirm-password">Confirm password</label>
+            <input
+              id="confirm-password"
+              name="confirm-password"
+              type="password"
+            >
+          </div>
+
+          <button type="submit" class="button button-primary signup-submit">Create account</button>
+        </form>
+
+        <p class="signup-login">Already have an account? <a href="login.html">Log in</a></p>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
