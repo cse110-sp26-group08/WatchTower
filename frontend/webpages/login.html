@@ -43,13 +43,15 @@
           <h2>Log in to Watch Tower</h2>
         </div>
 
-        <form class="login-form">
+        <form class="login-form" method="post" action="/login">
           <div class="form-field">
             <label for="work-email">Email</label>
             <input
               id="work-email"
-              name="work-email"
+              name="email"
               type="email"
+              autocomplete="email"
+              required
             >
           </div>
 
@@ -59,6 +61,8 @@
               id="password"
               name="password"
               type="password"
+              autocomplete="current-password"
+              required
             >
           </div>
 
