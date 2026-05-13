@@ -7,10 +7,12 @@
 
 import express from 'express';
 import formidable from 'express-formidable';
+import 'dotenv/config';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { collectError } from './endpoints/collectError.js';
 import { collectPerformance } from './endpoints/collectPerformance.js';
+import { connectDatabase } from './util/database.js';
 
 /**
  * Create an Express application.
@@ -40,13 +42,24 @@ function createApp() {
 }
 
 const app = createApp();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`WatchTower backend listening on http://localhost:${port}`);
-  });
+  connectDatabase()
+    .then(() => {
+      // eslint-disable-next-line no-console
+      console.log('Connected to MongoDB');
+
+      app.listen(port, () => {
+        // eslint-disable-next-line no-console
+        console.log(`WatchTower backend listening on http://localhost:${port}`);
+      });
+    })
+    .catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to connect to MongoDB:', error.message);
+      process.exit(1);
+    });
 }
 
 export { createApp };
