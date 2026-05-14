@@ -18,7 +18,6 @@ describe('Event endpoints', () => {
   });
 
   test('POST /api/events/error saves an error event', async () => {
-    const appId = new mongoose.Types.ObjectId();
     const savedApp = await App.create({ ownerId: new mongoose.Types.ObjectId(), name: 'Web' });
 
     const response = await request(app)
@@ -32,7 +31,6 @@ describe('Event endpoints', () => {
         severity: 'high',
         release: '1.0.0',
       });
-
     expect(response.statusCode).toBe(201);
     expect(response.body.event.type).toBe('error');
     expect(response.body.event.metadata.message).toBe('Something broke');
