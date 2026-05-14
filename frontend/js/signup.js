@@ -14,7 +14,7 @@ function addSignupFormListener() {
         const username = formData.get('username');
         const email = formData.get('email');
         const password = formData.get('password');
-        const confirmPassword = formData.get('confirm-password');
+        const confirmPassword = formData.get('confirmPassword');
         if (password !== confirmPassword) {
             alert('Passwords do not match. Please try again.');
             return;
@@ -26,7 +26,7 @@ function addSignupFormListener() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify({ username, email, password, confirmPassword }),
             });
         
             if (response.ok) {
