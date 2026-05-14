@@ -197,3 +197,5 @@ const Collector = (() => {
     return { init, trackError, trackPerformance, trackApiPerformance };
 
 })();
+
+export { Collector };
