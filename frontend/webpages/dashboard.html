@@ -3,21 +3,17 @@
 
 <head class="container">
     <!--Add any metadata here-->
-    <meta>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Dashboard</title>
 
     <!--Link css stylesheet-->
+    <link rel="stylesheet" href="../styling/dashboard.css">
 
     <!--Link js file-->
-
     <!--Link favicon-->
     <link rel="icon" type="image/x-icon" href="assets/favicon-here.ico">
-
-    <!--WatchTower logo-->
-    <div class="logo">
-        <img src="assets/logo-here.png" alt="watch-tower-logo">
-    </div>
 </head>
 
 <body class="container">
@@ -230,8 +226,16 @@
 
         <!--graph inserted here-->
         <div class="graph">
-            <!--import graph/table image here-->
-            <img src="assets/default-graph.png" alt="default-graph">
+            <div class="graph-card">
+                <div class="graph-card-header">
+                    <div>
+                        <p class="graph-eyebrow">Service health</p>
+                        <h2>Error volume over time</h2>
+                    </div>
+                    <p class="graph-summary">Fake data preview for the frontend dashboard</p>
+                </div>
+                <canvas id="dashboardChart" aria-label="Dashboard error chart"></canvas>
+            </div>
         </div>
         <!--Yusuf's add-on - Recent logs/outage table placeholder-->
         <div class="logs-container">
@@ -258,6 +262,8 @@
             </table>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/graphs.js"></script>
 </body>
 
 </html>
