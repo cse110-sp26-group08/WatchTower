@@ -2,7 +2,7 @@
 
 import bcrypt from 'bcrypt';
 import {
-  checkUserPassword,
+  checkLoginCredentials,
   createUser,
   deleteUserById,
   editUser,
@@ -15,13 +15,14 @@ describe('userController', () => {
     const user = await createUser({
       username: ' anaya ',
       email: 'ANAYA@example.com',
-      passwordHash: 'hashed-password',
+      password: 'plain-password',
     });
 
     expect(user._id).toBeDefined();
     expect(user.username).toBe('anaya');
     expect(user.email).toBe('anaya@example.com');
-    expect(user.passwordHash).toBe('hashed-password');
+    expect(user.passwordHash).not.toBe('plain-password');
+    await expect(bcrypt.compare('plain-password', user.passwordHash)).resolves.toBe(true);
 
     const savedUser = await User.findById(user._id).exec();
     expect(savedUser).not.toBeNull();
@@ -33,28 +34,34 @@ describe('userController', () => {
       createUser({
         username: '',
         email: 'missing-username@example.com',
-        passwordHash: 'hashed-password',
+        password: 'plain-password',
       })
     ).rejects.toThrow('username is required and must be a non-empty string');
   });
 
-  test('checkUserPassword verifies bcrypt password hashes', async () => {
+  test('checkLoginCredentials returns a safe user for valid credentials', async () => {
     const passwordHash = await bcrypt.hash('correct-password', 10);
-    const user = await User.create({
-      username: 'bcrypthash',
-      email: 'bcrypthash@example.com',
+    await User.create({
+      username: 'loginuser',
+      email: 'loginuser@example.com',
       passwordHash,
     });
 
-    await expect(checkUserPassword(user._id, 'correct-password')).resolves.toBe(true);
-    await expect(checkUserPassword(user._id, 'wrong-password')).resolves.toBe(false);
+    const user = await checkLoginCredentials('LOGINUSER@example.com', 'correct-password');
+
+    expect(user.username).toBe('loginuser');
+    expect(user.email).toBe('loginuser@example.com');
+    expect(user.passwordHash).toBeUndefined();
+    await expect(
+      checkLoginCredentials('loginuser@example.com', 'wrong-password')
+    ).resolves.toBeNull();
   });
 
   test('getUserById returns a saved user', async () => {
     const user = await createUser({
       username: 'owner',
       email: 'owner@example.com',
-      passwordHash: 'hashed-password',
+      password: 'plain-password',
     });
 
     const foundUser = await getUserById(user._id);
@@ -67,7 +74,7 @@ describe('userController', () => {
     const user = await createUser({
       username: 'owner',
       email: 'owner@example.com',
-      passwordHash: 'hashed-password',
+      password: 'plain-password',
     });
 
     const updatedUser = await editUser(user._id, {
@@ -87,7 +94,7 @@ describe('userController', () => {
     const user = await createUser({
       username: 'owner',
       email: 'owner@example.com',
-      passwordHash: 'hashed-password',
+      password: 'plain-password',
     });
 
     const deletedUser = await deleteUserById(user._id);

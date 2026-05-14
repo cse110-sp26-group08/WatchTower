@@ -2,25 +2,27 @@ import bcrypt from 'bcrypt';
 import { User } from '../schema/userModel.js';
 import { isValidId } from '../util/idValidator.js';
 
-const ALLOWED_UPDATE_FIELDS = ['username', 'email', 'passwordHash'];
+const ALLOWED_UPDATE_FIELDS = ['username', 'email'];
+const SALT_ROUNDS = 10;
 
 /**
  * Create a new user document.
- * @param {{username:string, email:string, passwordHash:string}} userData
+ * @param {{username:string, email:string, password:string}} userData
  * @returns {Promise<import('mongoose').Document>}
  * @throws {Error} if any required field is missing or invalid
  */
-async function createUser({ username, email, passwordHash }) {
+async function createUser({ username, email, password }) {
   if (!username || typeof username !== 'string' || !username.trim()) {
     throw new Error('username is required and must be a non-empty string');
   }
   if (!email || typeof email !== 'string' || !email.trim()) {
     throw new Error('email is required and must be a non-empty string');
   }
-  if (!passwordHash || typeof passwordHash !== 'string') {
-    throw new Error('passwordHash is required and must be a string');
+  if (!password || typeof password !== 'string') {
+    throw new Error('password is required and must be a string');
   }
- 
+
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
   return User.create({ username: username.trim(), email: email.trim(), passwordHash });
 }
 
@@ -35,26 +37,32 @@ async function getUserById(id) {
 }
 
 /**
- * Check whether a plain-text password matches a user's stored bcrypt hash.
- * @param {string|import('mongoose').Types.ObjectId} id
+ * Check whether login credentials match a saved user.
+ * @param {string} email
  * @param {string} password - plain-text password to verify
- * @returns {Promise<boolean>}
+ * @returns {Promise<object|null>} safe user object when login succeeds, otherwise null
  */
-async function checkUserPassword(id, password) {
-  if (!isValidId(id)) return false;
-  if (!password || typeof password !== 'string') return false;
- 
-  const user = await User.findById(id).exec();
-  if (!user) return false;
+async function checkLoginCredentials(email, password) {
+  if (!email || typeof email !== 'string' || !email.trim()) return null;
+  if (!password || typeof password !== 'string') return null;
 
-  return bcrypt.compare(password, user.passwordHash);
+  const user = await User.findOne({ email: email.trim().toLowerCase() }).exec();
+  if (!user) return null;
+
+  const passwordMatches = await bcrypt.compare(password, user.passwordHash);
+  if (!passwordMatches) return null;
+
+  const safeUser = user.toObject();
+  delete safeUser.passwordHash;
+
+  return safeUser;
 }
  
 /**
  * Update a user document by its ObjectId.
- * Only whitelisted fields (username, email, passwordHash) are applied.
+ * Only whitelisted fields (username, email) are applied.
  * @param {string|import('mongoose').Types.ObjectId} id
- * @param {Partial<{username:string, email:string, passwordHash:string}>} updateData
+ * @param {Partial<{username:string, email:string}>} updateData
  * @returns {Promise<import('mongoose').Document|null>}
  */
 async function editUser(id, updateData) {
@@ -84,4 +92,10 @@ async function deleteUserById(id) {
   return User.findByIdAndDelete(id).exec();
 }
 
-export { createUser, getUserById, checkUserPassword, editUser, deleteUserById };
+export {
+  createUser,
+  getUserById,
+  checkLoginCredentials,
+  editUser,
+  deleteUserById,
+};
