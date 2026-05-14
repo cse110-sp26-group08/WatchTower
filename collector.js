@@ -45,7 +45,10 @@ const Collector = (() => {
     function sendEvent(payload) {
         const endpoint = routes[payload.type];
         const data = JSON.stringify(payload);
-        const sent = navigator.sendBeacon?.(endpoint, data);
+        const blob = new Blob([data], {
+            type: "application/json",
+        });
+        const sent = navigator.sendBeacon?.(endpoint, blob);
         if (!sent) {
             fetch(endpoint, {
                 method: "POST",
