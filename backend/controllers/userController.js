@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { User } from '../schema/userModel.js';
 import { isValidId } from '../util/idValidator.js';
- 
+
 const ALLOWED_UPDATE_FIELDS = ['username', 'email', 'passwordHash'];
 
 /**
@@ -46,7 +46,7 @@ async function checkUserPassword(id, password) {
  
   const user = await User.findById(id).exec();
   if (!user) return false;
- 
+
   return bcrypt.compare(password, user.passwordHash);
 }
  

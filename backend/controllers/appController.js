@@ -28,6 +28,16 @@ async function getAppById(id) {
 }
 
 /**
+ * Find an app by its API key.
+ * @param {string} apiKey
+ * @returns {Promise<import('mongoose').Document|null>}
+ */
+async function getAppByApiKey(apiKey) {
+  if (!apiKey || typeof apiKey !== 'string' || !apiKey.trim()) return null;
+  return App.findOne({ apiKey: apiKey.trim() }).select('+apiKey').exec();
+}
+
+/**
  * Find all apps belonging to a specific owner.
  * @param {string|import('mongoose').Types.ObjectId} ownerId
  * @returns {Promise<import('mongoose').Document[]>}
@@ -47,4 +57,4 @@ async function deleteAppById(id) {
   return App.findByIdAndDelete(id).exec();
 }
 
-export { createApp, getAppById, getAllAppsByOwnerId, deleteAppById };
+export { createApp, getAppByApiKey, getAppById, getAllAppsByOwnerId, deleteAppById };
