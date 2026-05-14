@@ -1,12 +1,13 @@
 {
   "name": "watchtower",
   "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node backend/app.js",
+    "test": "npm --prefix backend test"
+  },
   "description": "- [Minimal_viable_product.md](C:/Users/Matth/WatchTower/Minimal_viable_product.md): MVP user stories plus short implementation notes tied to the architecture decisions. - [backlog.md](C:/Users/Matth/WatchTower/backlog.md): backlog list of user stories for the project.",
   "main": "index.js",
-  "scripts": {
-    "start": "http-server ./frontend -o /",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cse110-sp26-group08/WatchTower.git"
@@ -18,8 +19,5 @@
   "bugs": {
     "url": "https://github.com/cse110-sp26-group08/WatchTower/issues"
   },
-  "homepage": "https://github.com/cse110-sp26-group08/WatchTower#readme",
-  "devDependencies": {
-    "http-server": "^14.1.1"
-  }
+  "homepage": "https://github.com/cse110-sp26-group08/WatchTower#readme"
 }
