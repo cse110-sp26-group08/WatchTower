@@ -13,9 +13,12 @@ const Collector = (() => {
      */
     function init(userConfig) {
         config = userConfig;
+
+        trackApiPerformance();
+
         window.addEventListener("error", (e) => trackError(e.error));
         window.addEventListener("unhandledrejection", (e) => trackError(e.reason));
-        trackPerformance();
+        window.addEventListener('load', () => trackPerformance());
     }
     /**
      * Sends a Watchtower event payload to the matching API endpoint.
@@ -29,6 +32,12 @@ const Collector = (() => {
      *   url?: string,
      *   errorType?: string,
      *   severity?: "low" | "medium" | "high" | "critical",
+     *   loadTimeMs?: number,
+     *   domContentLoadedMs?: number,
+     *   ttfbMs?: number,
+     *   apiEndpoint?: string | null,
+     *   apiLatencyMs?: number | null,
+     *   memoryMB?: number | null,
      *   release?: string,
      *   timestamp?: string
      * }} payload - Event data to send.
@@ -88,8 +97,96 @@ const Collector = (() => {
         return "low";
     }
 
+    /**
+     * Tracks browser page performance using the Performance API.
+     * Collects metrics such as:
+     * - loadTimeMs: total time for the page to fully load
+     * - domContentLoadedMs: time until the DOM content is loaded
+     * - ttfbMs: time for the server/network response
+     * - memoryMB: estimated JavaScript memory usage in MB
+     *
+     * Sends the collected performance metrics to the
+     * Watchtower performance endpoint using sendEvent().
+     */
     function trackPerformance() {
+        const navigation = performance.getEntriesByType("navigation");
+        const nav = navigation[0];
+
+        if (!nav) return;
+
+        const loadTimeMs = nav.loadEventEnd - nav.startTime;
+        const domContentLoadedMs = nav.domContentLoadedEventEnd - nav.startTime;
+        const serverResponseTimeMs = nav.responseEnd - nav.requestStart;
+        const memoryMB = performance.memory? performance.memory.usedJSHeapSize / 1024 / 1024: null;
+
+        sendEvent({
+            type: "performance",
+            apiKey: config.apiKey,
+            url: window.location.href,
+            loadTimeMs: loadTimeMs,
+            domContentLoadedMs: domContentLoadedMs,
+            ttfbMs: serverResponseTimeMs,
+            apiEndpoint: null,
+            apiLatencyMs: null,
+            memoryMB: memoryMB,
+            release: config.release,
+            timestamp: new Date().toISOString(),
+        });
+    }
+    /**
+     * Tracks API request performance by intercepting fetch() calls.
+     * Collects metrics such as:
+     * - apiEndpoint: the API route being requested
+     * - apiLatencyMs: total time for the API request to complete
+     *
+     * Sends the collected API performance metrics to the
+     * Watchtower performance endpoint using sendEvent().
+     */
+    function trackApiPerformance() {
+        const originalFetch = window.fetch;
+
+        window.fetch = async (...args) => {
+            const startTime = Date.now();
+            const apiEndpoint =
+                typeof args[0] === "string" ? args[0] : args[0]?.url;
+
+            if (apiEndpoint === routes.performance || apiEndpoint === routes.error){
+                return originalFetch(...args);
+            }
+
+            try {
+                const response = await originalFetch(...args);
+                const endTime = Date.now();
+
+                sendEvent({
+                    type: "performance",
+                    apiKey: config.apiKey,
+                    apiEndpoint,
+                    apiLatencyMs: endTime - startTime,
+                    url: window.location.href,
+                    release: config.release,
+                    timestamp: new Date().toISOString(),
+                });
+
+                return response;
+            } catch (error) {
+                const endTime = Date.now();
+
+                sendEvent({
+                    type: "performance",
+                    apiKey: config.apiKey,
+                    apiEndpoint,
+                    apiLatencyMs: endTime - startTime,
+                    url: window.location.href,
+                    release: config.release,
+                    timestamp: new Date().toISOString(),
+                });
+
+                throw error;
+            }
+        };
     }
 
-    return { init, trackError, trackPerformance };
+    return { init, trackError, trackPerformance, trackApiPerformance };
+
 })();
