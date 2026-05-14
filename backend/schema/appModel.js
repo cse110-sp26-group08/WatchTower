@@ -26,6 +26,8 @@ const AppSchema = new Schema(
       type: String,
       required: true,
       default: () => crypto.randomBytes(32).toString('hex'),
+      unique: true,
+      index: true,
       select: false,
     },
   },
