@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/cse110-sp26-group08/WatchTower/issues"
   },
-  "homepage": "https://github.com/cse110-sp26-group08/WatchTower#readme"
+  "homepage": "https://github.com/cse110-sp26-group08/WatchTower#readme",
+  "dependencies": {
+    "cors": "^2.8.6"
+  }
 }
