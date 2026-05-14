@@ -1,11 +1,11 @@
 :root {
   --text: #0f0f12;
   --muted: #65677a;
-  --line: rgba(15, 15, 18, 0.08);
+  --line: rgb(15 15 18 / 8%);
   --blue: #1f49ff;
   --blue-deep: #1037dd;
-  --shadow-soft: 0 24px 60px rgba(27, 38, 89, 0.08);
-  --shadow-button: 0 14px 30px rgba(31, 73, 255, 0.22);
+  --shadow-soft: 0 24px 60px rgb(27 38 89 / 8%);
+  --shadow-button: 0 14px 30px rgb(31 73 255 / 22%);
 }
 
 * {
@@ -18,11 +18,11 @@ html {
 
 body {
   margin: 0;
-  font-family: "Manrope", sans-serif;
+  font-family: Manrope, sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.96), transparent 34%),
-    radial-gradient(circle at 85% 30%, rgba(31, 73, 255, 0.08), transparent 24%),
+    radial-gradient(circle at top left, rgb(255 255 255 / 96%), transparent 34%),
+    radial-gradient(circle at 85% 30%, rgb(31 73 255 / 8%), transparent 24%),
     linear-gradient(180deg, #fbfbf8 0%, #f4f3ef 100%);
 }
 
@@ -49,7 +49,7 @@ a {
   padding: 13px 20px;
   border: 1px solid var(--line);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgb(255 255 255 / 75%);
   box-shadow: var(--shadow-soft);
   backdrop-filter: blur(18px);
 }
@@ -82,6 +82,11 @@ a {
   transition: opacity 180ms ease, color 180ms ease;
 }
 
+.signup-login a {
+  color: var(--blue);
+  font-weight: 700;
+}
+
 .nav-links a:hover,
 .nav-login:hover {
   opacity: 0.66;
@@ -108,13 +113,13 @@ a {
 }
 
 .button-primary {
-  color: #ffffff;
+  color: #fff;
   background: linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);
   box-shadow: var(--shadow-button);
 }
 
 .button-primary:hover {
-  box-shadow: 0 18px 36px rgba(31, 73, 255, 0.28);
+  box-shadow: 0 18px 36px rgb(31 73 255 / 28%);
 }
 
 .signup-shell {
@@ -134,7 +139,7 @@ a {
 
 .signup-copy {
   max-width: 470px;
-  animation: pageFade 700ms ease-out both;
+  animation: page-fade 700ms ease-out both;
 }
 
 .signup-copy h1 {
@@ -155,9 +160,9 @@ a {
 
 .signup-card {
   padding: 30px 28px;
-  border: 1px solid rgba(15, 15, 18, 0.08);
+  border: 1px solid rgb(15 15 18 / 8%);
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgb(255 255 255 / 78%);
   box-shadow: var(--shadow-soft);
   backdrop-filter: blur(18px);
 }
@@ -202,9 +207,9 @@ a {
   width: 100%;
   min-height: 50px;
   padding: 0 16px;
-  border: 1px solid rgba(15, 15, 18, 0.12);
+  border: 1px solid rgb(15 15 18 / 12%);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgb(255 255 255 / 90%);
   font: inherit;
   color: var(--text);
 }
@@ -219,12 +224,7 @@ a {
   color: var(--muted);
 }
 
-.signup-login a {
-  color: var(--blue);
-  font-weight: 700;
-}
-
-@keyframes pageFade {
+@keyframes page-fade {
   from {
     opacity: 0;
     transform: translateY(18px);
@@ -236,7 +236,7 @@ a {
   }
 }
 
-@media (max-width: 980px) {
+@media (width <= 980px) {
   .site-header {
     padding: 14px 14px 0;
   }
@@ -261,7 +261,7 @@ a {
   }
 }
 
-@media (max-width: 700px) {
+@media (width <= 700px) {
   .site-nav {
     flex-wrap: wrap;
     justify-content: center;

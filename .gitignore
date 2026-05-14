@@ -4,6 +4,7 @@ Thumbs.db
 .vscode/
 coverage/
 dist/
+
+.env
 .env.*
 !.env.example
-
