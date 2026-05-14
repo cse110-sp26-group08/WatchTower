@@ -234,7 +234,11 @@
                     </div>
                     <p class="graph-summary">Fake data preview for the frontend dashboard</p>
                 </div>
-                <canvas id="dashboardChart" aria-label="Dashboard error chart"></canvas>
+
+                <!--Ki: fix for infinite height increase of chart-->
+                <div>
+                    <canvas id="dashboardChart" aria-label="Dashboard error chart"></canvas>
+                </div>
             </div>
         </div>
         <!--Yusuf's add-on - Recent logs/outage table placeholder-->
