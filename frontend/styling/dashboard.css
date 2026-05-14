@@ -131,6 +131,18 @@ body {
   font-weight: 700;
 }
 
+/* Yusuf - Make current status easier to notice */
+.status-container {
+  border-left: 5px solid var(--green);
+}
+
+.status-indicator {
+  background: #ecfdf3;
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
 .metric-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -176,13 +188,23 @@ body {
   padding: 16px;
 }
 
+/* Yusuf - Improved graph option button styling */
 .graph-setting {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px;
+  justify-content: center;
+  gap: 0;
+  padding: 16px;
   border-radius: 14px;
   background: var(--panel-alt);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.graph-setting:hover {
+  background: #eef3ff;
+  transform: translateY(-2px);
 }
 
 .graph-setting img {
@@ -192,10 +214,19 @@ body {
   border-radius: 6px;
 }
 
+/* Yusuf - Hide placeholder icons until real assets are added */
+.nav-img,
+.compare-yesterday img,
+.graph-setting img {
+  display: none;
+}
+
 .graph-card {
-  padding: 16px;
+  padding: 20px;
   width: 100%;
-  max-width: 420px;
+  max-width: 760px;
+  min-height: 340px;
+  margin: 0 auto;
 }
 
 .graph-card-header {
@@ -217,14 +248,18 @@ body {
 .graph-summary {
   color: var(--muted);
 }
-
+/* Yusuf - Better graph section spacing/layout */
 .graph {
   min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0;
 }
 
 #dashboardChart {
-  width: 100%;
-  height: 110px;
+  width: 100% !important;
+  height: 230px !important;
 }
 
 .logs-table {
