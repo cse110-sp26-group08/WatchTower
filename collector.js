@@ -18,7 +18,11 @@ const Collector = (() => {
 
         window.addEventListener("error", (e) => trackError(e.error));
         window.addEventListener("unhandledrejection", (e) => trackError(e.reason));
-        window.addEventListener('load', () => trackPerformance());
+        if (document.readyState === "complete") {
+            trackPerformance();
+        } else {
+            window.addEventListener("load", () => trackPerformance());
+        }
     }
     /**
      * Sends a Watchtower event payload to the matching API endpoint.
