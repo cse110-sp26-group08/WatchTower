@@ -135,14 +135,14 @@ function createApp() {
   // API ENDPOINTS
   // Error Endpoints
   app.options('/api/events/error', telemetryCors);
-  app.post('/api/events/error', createErrorEndpoint);
+  app.post('/api/events/error', telemetryCors, createErrorEndpoint);
   app.get('/api/events/error/apps/:appId', getErrorsByAppEndpoint);
   app.get('/api/events/error/:id', getErrorEndpoint);
   app.delete('/api/events/error/:id', deleteErrorEndpoint);
 
   // Performance Endpoints
   app.options('/api/events/performance', telemetryCors);
-  app.post('/api/events/performance', createPerformanceEndpoint);
+  app.post('/api/events/performance', telemetryCors, createPerformanceEndpoint);
   app.get('/api/events/performance/apps/:appId', getPerformanceByAppEndpoint);
   app.get('/api/events/performance/:id', getPerformanceEndpoint);
   app.delete('/api/events/performance/:id', deletePerformanceEndpoint);
