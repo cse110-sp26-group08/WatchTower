@@ -14,7 +14,7 @@
  * @param release The release version of app
  */
 function Collector(apiKey, release) {
-    const baseUrl = "localhost:3000"; // Update with your backend URL if different
+    const baseUrl = "http://localhost:3000"; // Update with your backend URL if different
 
     const routes = {
         error: `${baseUrl}/api/events/error`,
