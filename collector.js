@@ -1,28 +1,32 @@
-const Collector = (() => {
-    let config = {};
+/**
+ * Initializes the Watchtower collector for a monitored application.
+ * Automatically attaches global error listeners, tracks page performance,
+ * and intercepts fetch() calls to monitor API latency.
+ * 
+ * @example
+ * Drop this script tag into any app 
+ * <script id="collector-script" 
+ *     src="link to collector file" 
+ *     data-apikey="[apiKey]" 
+ *     data-release="[release version]">
+ * </script>
+ * @param apiKey The apiKey for app
+ * @param release The release version of app
+ */
+function Collector(apiKey, release) {
     const routes = {
         error: "/api/events/error",
         performance: "/api/events/performance",
     };
-    /**
-     * Initializes the Watchtower collector with user configuration.
-     * Stores the provided config, registers global browser listeners for
-     * uncaught errors and unhandled promise rejections, and starts performance
-     * tracking.
-     * @param {{ apiKey: string, release?: string }} userConfig - Collector configuration.
-     */
-    function init(userConfig) {
-        config = userConfig;
 
-        trackApiPerformance();
+    trackApiPerformance();
 
-        window.addEventListener("error", (e) => trackError(e.error));
-        window.addEventListener("unhandledrejection", (e) => trackError(e.reason));
-        if (document.readyState === "complete") {
-            trackPerformance();
-        } else {
-            window.addEventListener("load", () => trackPerformance());
-        }
+    window.addEventListener("error", (e) => trackError(e.error));
+    window.addEventListener("unhandledrejection", (e) => trackError(e.reason));
+    if (document.readyState === "complete") {
+        trackPerformance();
+    } else {
+        window.addEventListener("load", () => trackPerformance());
     }
     /**
      * Sends a Watchtower event payload to the matching API endpoint.
@@ -71,13 +75,13 @@ const Collector = (() => {
     function trackError(error) {
         sendEvent({
             type: "error",
-            apiKey: config.apiKey,
+            apiKey: apiKey,
             message: error?.message || String(error),
             stack: error?.stack || null,
             url: window.location.href,
             errorType: error?.constructor?.name || "Error",
             severity: getSeverity(error),
-            release: config.release,
+            release: release,
             timestamp: new Date().toISOString(),
         });
     }
@@ -96,11 +100,11 @@ const Collector = (() => {
         if (!error) return "low";
         const message = error.message?.toLowerCase() || "";
         const type = error.constructor?.name || "";
-        if (type == "TypeError" || type == "ReferenceError") return "critical";
-        if (type == "SyntaxError") return "high";
+        if (type === "TypeError" || type === "ReferenceError") return "critical";
+        if (type === "SyntaxError") return "high";
         if (message.includes("network") || message.includes("fetch") || message.includes("failed")) return "high";
         if (message.includes("timeout")) return "medium";
-        if (type == "RangeError") return "medium";
+        if (type === "RangeError") return "medium";
         return "low";
     }
 
@@ -124,11 +128,11 @@ const Collector = (() => {
         const loadTimeMs = nav.loadEventEnd - nav.startTime;
         const domContentLoadedMs = nav.domContentLoadedEventEnd - nav.startTime;
         const serverResponseTimeMs = nav.responseEnd - nav.requestStart;
-        const memoryMB = performance.memory? performance.memory.usedJSHeapSize / 1024 / 1024: null;
+        const memoryMB = performance.memory ? performance.memory.usedJSHeapSize / 1024 / 1024 : null;
 
         sendEvent({
             type: "performance",
-            apiKey: config.apiKey,
+            apiKey: apiKey,
             url: window.location.href,
             loadTimeMs: loadTimeMs,
             domContentLoadedMs: domContentLoadedMs,
@@ -136,7 +140,7 @@ const Collector = (() => {
             apiEndpoint: null,
             apiLatencyMs: null,
             memoryMB: memoryMB,
-            release: config.release,
+            release: release,
             timestamp: new Date().toISOString(),
         });
     }
@@ -157,7 +161,7 @@ const Collector = (() => {
             const apiEndpoint =
                 typeof args[0] === "string" ? args[0] : args[0]?.url;
 
-            if (apiEndpoint === routes.performance || apiEndpoint === routes.error){
+            if (apiEndpoint === routes.performance || apiEndpoint === routes.error) {
                 return originalFetch(...args);
             }
 
@@ -167,11 +171,11 @@ const Collector = (() => {
 
                 sendEvent({
                     type: "performance",
-                    apiKey: config.apiKey,
+                    apiKey: apiKey,
                     apiEndpoint,
                     apiLatencyMs: endTime - startTime,
                     url: window.location.href,
-                    release: config.release,
+                    release: release,
                     timestamp: new Date().toISOString(),
                 });
 
@@ -181,11 +185,11 @@ const Collector = (() => {
 
                 sendEvent({
                     type: "performance",
-                    apiKey: config.apiKey,
+                    apiKey: apiKey,
                     apiEndpoint,
                     apiLatencyMs: endTime - startTime,
                     url: window.location.href,
-                    release: config.release,
+                    release: release,
                     timestamp: new Date().toISOString(),
                 });
 
@@ -193,9 +197,8 @@ const Collector = (() => {
             }
         };
     }
-
-    return { init, trackError, trackPerformance, trackApiPerformance };
-
-})();
-
-export { Collector };
+}
+const script = document.getElementById('collector-script');
+const apiKey = script.dataset.apikey;
+const release = script.dataset.release;
+Collector(apiKey, release);
