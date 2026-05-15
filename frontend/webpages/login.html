@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WatchTower Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="../styling/login.css">
+</head>
+<body class="login-page">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <div class="brand-mark">
+        <a href="./" class="brand-link">WatchTower</a>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="#docs">Docs</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="./login" class="nav-login">Log in</a>
+        <a href="./signup" class="button button-primary">Get started</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="login-shell">
+    <section class="login-layout" aria-label="Login page content">
+      <div class="login-copy">
+        <h1>Welcome back</h1>
+        <p class="login-description">Log in to your Watch Tower workspace.</p>
+      </div>
+
+      <section class="login-card" aria-label="Login form">
+        <div class="login-card-header">
+          <p class="login-card-brand">WatchTower</p>
+          <h2>Log in to Watch Tower</h2>
+        </div>
+
+        <form class="login-form" id="login-form">
+          <div class="form-field">
+            <label for="work-email">Email</label>
+            <input
+              id="work-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+            >
+          </div>
+
+          <div class="form-field">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+
+          <button type="submit" class="button button-primary login-submit">Log in</button>
+        </form>
+
+        <p class="login-signup">Don't have an account? <a href="./signup">Sign up</a></p>
+      </section>
+    </section>
+  </main>
+
+  <script src="./js/login.js"></script>
+</body>
+</html>
