@@ -10,6 +10,7 @@ import formidable from 'express-formidable';
 import session from 'express-session';
 import dotenv from 'dotenv';
 import path from 'path';
+import cors from 'cors';
 import { fileURLToPath } from 'url';
 import {
   createErrorEndpoint,
@@ -42,6 +43,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, '.env') });
+
+const telemetryCors = cors({
+  origin: true,
+  methods: ['POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  credentials: false,
+});
 
 /**
  * Create an Express application.
@@ -126,13 +134,15 @@ function createApp() {
 
   // API ENDPOINTS
   // Error Endpoints
-  app.post('/api/events/error', createErrorEndpoint);
+  app.options('/api/events/error', telemetryCors);
+  app.post('/api/events/error', telemetryCors, createErrorEndpoint);
   app.get('/api/events/error/apps/:appId', getErrorsByAppEndpoint);
   app.get('/api/events/error/:id', getErrorEndpoint);
   app.delete('/api/events/error/:id', deleteErrorEndpoint);
 
   // Performance Endpoints
-  app.post('/api/events/performance', createPerformanceEndpoint);
+  app.options('/api/events/performance', telemetryCors);
+  app.post('/api/events/performance', telemetryCors, createPerformanceEndpoint);
   app.get('/api/events/performance/apps/:appId', getPerformanceByAppEndpoint);
   app.get('/api/events/performance/:id', getPerformanceEndpoint);
   app.delete('/api/events/performance/:id', deletePerformanceEndpoint);
