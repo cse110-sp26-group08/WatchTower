@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WatchTower App Selection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="/styling/app_selection.css">
+</head>
+<body class="app-selection-page">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <div class="brand-mark">
+        <a href="/" class="brand-link">WatchTower</a>
+      </div>
+
+      <div class="nav-actions">
+        <button type="button" class="button button-secondary" id="logout-button">Log out</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="selection-shell">
+    <section class="selection-hero" aria-label="App selection overview">
+      <p class="eyebrow">Workspace setup</p>
+      <h1>Choose an app or initialize a new project.</h1>
+      <p class="selection-copy" id="welcome-message">Loading your workspace...</p>
+    </section>
+
+    <section class="selection-grid">
+      <section class="selection-card create-card" aria-labelledby="create-app-title">
+        <div class="card-header">
+          <p class="card-eyebrow">Create</p>
+          <h2 id="create-app-title">Initialize a new project</h2>
+          <p class="card-copy">Provide the app name. WatchTower will create the app under your account.</p>
+        </div>
+
+        <form id="create-app-form" class="create-app-form">
+          <label for="app-name">Project name</label>
+          <input id="app-name" name="name" type="text" placeholder="WatchTower Web" required>
+          <label for="app-url">Project URL</label>
+          <input
+            id="app-url"
+            name="url"
+            type="url"
+            placeholder="https://example.com"
+            inputmode="url"
+          >
+          <button type="submit" class="button button-primary">Initialize app</button>
+        </form>
+
+        <p class="form-message" id="create-app-message" aria-live="polite"></p>
+      </section>
+
+      <section class="selection-card apps-card" aria-labelledby="apps-title">
+        <div class="card-header">
+          <p class="card-eyebrow">Your apps</p>
+          <h2 id="apps-title">Already initialized projects</h2>
+          <p class="card-copy">Select one of your existing apps to continue to the dashboard.</p>
+        </div>
+
+        <div id="apps-list" class="apps-list" aria-live="polite"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/js/app_selection.js"></script>
+</body>
+</html>
