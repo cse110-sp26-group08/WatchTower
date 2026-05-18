@@ -135,15 +135,7 @@ function createApp() {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
   });
 
-  app.get('/app_selection.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
-  }); 
-
   app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/dashboard.html'));
-  });
-
-  app.get('/dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/dashboard.html'));
   });
 
