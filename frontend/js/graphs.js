@@ -443,7 +443,7 @@ function renderBarChart(filteredPerformance) {
 }
 
 function createOrUpdateChart(type, data) {
-    const context = document.getElementById('dashboardChart');
+    const context = document.getElementById('dashboard-chart');
 
     destroyChart();
     dashboardChart = new Chart(context, {

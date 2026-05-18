@@ -1,6 +1,6 @@
 :root {
   --bg: #eef4ff;
-  --panel: #ffffff;
+  --panel: #fff;
   --panel-alt: #f7faff;
   --text: #101828;
   --muted: #667085;
@@ -8,7 +8,7 @@
   --blue: #1f49ff;
   --blue-dark: #1738c9;
   --blue-soft: #e8eeff;
-  --shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  --shadow: 0 20px 40px rgb(15 23 42 / 8%);
 }
 
 * {
@@ -17,10 +17,10 @@
 
 body {
   margin: 0;
-  font-family: 'Manrope', sans-serif;
+  font-family: Manrope, sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(31, 73, 255, 0.12), transparent 28%),
+    radial-gradient(circle at top left, rgb(31 73 255 / 12%), transparent 28%),
     linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
 }
 
@@ -34,7 +34,7 @@ body {
   justify-content: space-between;
   gap: 16px;
   padding: 18px 20px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgb(255 255 255 / 85%);
   border: 1px solid var(--line);
   border-radius: 24px;
   box-shadow: var(--shadow);
@@ -127,7 +127,7 @@ body {
   padding: 0 16px;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: #ffffff;
+  background: #fff;
   font: inherit;
 }
 
@@ -145,7 +145,7 @@ body {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  background: linear-gradient(180deg, #fff 0%, #f8fbff 100%);
   text-align: left;
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
@@ -153,8 +153,8 @@ body {
 
 .app-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(31, 73, 255, 0.25);
-  box-shadow: 0 18px 36px rgba(31, 73, 255, 0.1);
+  border-color: rgb(31 73 255 / 25%);
+  box-shadow: 0 18px 36px rgb(31 73 255 / 10%);
 }
 
 .add-project-card-wrapper {
@@ -168,8 +168,8 @@ body {
   place-items: center;
   border-style: dashed;
   background:
-    radial-gradient(circle at top right, rgba(31, 73, 255, 0.14), transparent 35%),
-    linear-gradient(180deg, #ffffff 0%, #f3f7ff 100%);
+    radial-gradient(circle at top right, rgb(31 73 255 / 14%), transparent 35%),
+    linear-gradient(180deg, #fff 0%, #f3f7ff 100%);
 }
 
 .add-project-card-content {
@@ -202,7 +202,7 @@ body {
 }
 
 .app-card:focus-visible {
-  outline: 3px solid rgba(31, 73, 255, 0.25);
+  outline: 3px solid rgb(31 73 255 / 25%);
   outline-offset: 3px;
 }
 
@@ -275,7 +275,7 @@ body {
 }
 
 .button-primary {
-  color: #ffffff;
+  color: #fff;
   background: linear-gradient(135deg, var(--blue) 0%, #3c63ff 100%);
 }
 
@@ -285,7 +285,7 @@ body {
 
 .button-secondary {
   color: var(--text);
-  background: #ffffff;
+  background: #fff;
   border: 1px solid var(--line);
 }
 
@@ -315,11 +315,11 @@ body {
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 28px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 24px 60px rgb(15 23 42 / 18%);
 }
 
 .project-dialog::backdrop {
-  background: rgba(15, 23, 42, 0.42);
+  background: rgb(15 23 42 / 42%);
   backdrop-filter: blur(8px);
 }
 
@@ -327,7 +327,7 @@ body {
   display: grid;
   gap: 18px;
   padding: 24px;
-  background: linear-gradient(180deg, #ffffff 0%, var(--panel-alt) 100%);
+  background: linear-gradient(180deg, #fff 0%, var(--panel-alt) 100%);
 }
 
 .project-dialog-header {
@@ -352,7 +352,7 @@ body {
   justify-content: flex-start;
 }
 
-@media (max-width: 860px) {
+@media screen and (max-width: 860px) {
   .site-nav {
     align-items: flex-start;
     flex-direction: column;

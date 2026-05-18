@@ -106,6 +106,10 @@ function createApp() {
     }
   });
 
+  app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/signup.html'));
+  });
+
   app.post('/signup', async (req, res) => {
     try {
       const { username, email, password, confirmPassword } = req.fields || req.body;
@@ -127,18 +131,13 @@ function createApp() {
     }
   });
 
-
-  app.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/signup.html'));
-  });
-
   app.get('/app-selection', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
   });
 
   app.get('/app_selection.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
-  });
+  }); 
 
   app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/dashboard.html'));
