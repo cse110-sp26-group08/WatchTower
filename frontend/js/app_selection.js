@@ -98,21 +98,17 @@ function renderApps(apps, ownerId) {
 }
 
 function createAddProjectCard(ownerId) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'add-project-card-wrapper';
+    wrapper.innerHTML = '<span class="add-project-label">Create new project</span>';
+
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'app-card add-project-card';
     card.setAttribute('onclick', 'window.watchtowerOpenCreateProject && window.watchtowerOpenCreateProject()');
     card.innerHTML = `
-        <div class="app-card-top">
-          <span class="app-badge">New</span>
-          <div>
-            <h3>Add project</h3>
-            <p class="app-meta">Create a project card for this workspace.</p>
-          </div>
-        </div>
-        <div class="app-card-footer">
-          <span class="app-open-label">Create project</span>
-          <span class="app-arrow" aria-hidden="true">+</span>
+        <div class="add-project-card-content">
+          <span class="add-project-plus" aria-hidden="true">+</span>
         </div>
     `;
     card.addEventListener('click', () => {
@@ -123,7 +119,8 @@ function createAddProjectCard(ownerId) {
 
         openCreateProjectDialog();
     });
-    return card;
+    wrapper.appendChild(card);
+    return wrapper;
 }
 
 function bindProjectDialogControls() {
