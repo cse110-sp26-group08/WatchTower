@@ -7,6 +7,7 @@
   --line: #d7dfef;
   --blue: #1f49ff;
   --blue-dark: #1738c9;
+  --blue-soft: #e8eeff;
   --shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
 }
 
@@ -80,15 +81,9 @@ body {
 .selection-copy,
 .card-copy,
 .form-message,
-.app-meta {
+.app-meta,
+.app-description {
   color: var(--muted);
-}
-
-.selection-grid {
-  display: grid;
-  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
-  gap: 24px;
-  align-items: start;
 }
 
 .selection-card {
@@ -99,49 +94,106 @@ body {
   box-shadow: var(--shadow);
 }
 
+.projects-panel {
+  display: grid;
+  gap: 22px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
 .card-header {
-  margin-bottom: 20px;
+  max-width: 620px;
 }
 
 .card-copy {
   margin: 12px 0 0;
 }
 
-.create-app-form {
+.form-field {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
-.create-app-form label {
+.form-field label {
   font-weight: 700;
 }
 
-.create-app-form input {
-  min-height: 50px;
+.form-field input {
+  min-height: 52px;
   padding: 0 16px;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: var(--panel-alt);
+  background: #ffffff;
   font: inherit;
 }
 
 .apps-list {
   display: grid;
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
 }
 
 .app-card {
   display: grid;
-  gap: 12px;
+  gap: 14px;
+  width: 100%;
   padding: 18px;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 22px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.app-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(31, 73, 255, 0.25);
+  box-shadow: 0 18px 36px rgba(31, 73, 255, 0.1);
+}
+
+.add-project-card {
+  border-style: dashed;
+  background:
+    radial-gradient(circle at top right, rgba(31, 73, 255, 0.14), transparent 35%),
+    linear-gradient(180deg, #ffffff 0%, #f3f7ff 100%);
+}
+
+.add-project-card .app-arrow {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.app-card:focus-visible {
+  outline: 3px solid rgba(31, 73, 255, 0.25);
+  outline-offset: 3px;
+}
+
+.app-card-top {
+  display: grid;
+  gap: 10px;
+}
+
+.app-badge {
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .app-card h3 {
   margin: 0;
   font-size: 1.15rem;
+  line-height: 1.15;
 }
 
 .app-meta {
@@ -157,6 +209,26 @@ body {
 
 .app-link:hover {
   text-decoration: underline;
+}
+
+.app-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.app-open-label {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.app-arrow {
+  color: var(--blue);
+  font-size: 1.2rem;
+  font-weight: 800;
 }
 
 .button {
@@ -186,7 +258,7 @@ body {
 }
 
 .empty-state {
-  padding: 18px;
+  padding: 20px;
   border: 1px dashed var(--line);
   border-radius: 18px;
   color: var(--muted);
@@ -195,7 +267,7 @@ body {
 
 .form-message {
   min-height: 1.5rem;
-  margin: 14px 0 0;
+  margin: 0;
 }
 
 .form-message.error {
@@ -206,13 +278,63 @@ body {
   color: #027a48;
 }
 
+.project-dialog {
+  width: min(680px, calc(100% - 32px));
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+.project-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(8px);
+}
+
+.project-dialog-card {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, var(--panel-alt) 100%);
+}
+
+.project-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.project-dialog-header h2 {
+  margin: 0;
+}
+
+.project-dialog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.project-dialog-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
 @media (max-width: 860px) {
-  .selection-grid {
+  .site-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .panel-header {
+    align-items: flex-start;
+  }
+
+  .project-dialog-grid {
     grid-template-columns: 1fr;
   }
 
-  .site-nav {
-    align-items: flex-start;
+  .project-dialog-header {
     flex-direction: column;
   }
 }

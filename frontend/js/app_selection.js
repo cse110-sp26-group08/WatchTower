@@ -1,3 +1,5 @@
+let currentUser = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     init();
 });
@@ -10,9 +12,10 @@ function init() {
         return;
     }
 
-    setWelcomeMessage(user);
-    addCreateAppFormListener(user);
+    currentUser = user;
     addLogoutListener();
+    bindProjectDialogControls();
+    window.watchtowerOpenCreateProject = openCreateProjectDialog;
     loadApps(user._id);
 }
 
@@ -32,114 +35,57 @@ function getStoredUser() {
     }
 }
 
-function setWelcomeMessage(user) {
-    const welcomeMessage = document.getElementById('welcome-message');
-    const name = user.username || user.email || 'there';
-    welcomeMessage.textContent = `Signed in as ${name}. Start a new app or continue with an existing project.`;
-}
-
-function addCreateAppFormListener(user) {
-    const form = document.getElementById('create-app-form');
-    const message = document.getElementById('create-app-message');
-
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const formData = new FormData(form);
-        const name = String(formData.get('name') || '').trim();
-        const url = String(formData.get('url') || '').trim();
-
-        if (!name) {
-            updateMessage(message, 'Project name is required.', 'error');
-            return;
-        }
-
-        if (url && !isValidUrl(url)) {
-            updateMessage(message, 'Project URL must be a valid URL.', 'error');
-            return;
-        }
-
-        updateMessage(message, 'Initializing app...', '');
-
-        try {
-            const response = await fetch('/api/apps', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ownerId: user._id,
-                    name,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                updateMessage(message, data.message || data.error || 'Failed to initialize app.', 'error');
-                return;
-            }
-
-            if (data.app?._id && url) {
-                saveAppUrl(data.app._id, url);
-            }
-
-            updateMessage(message, 'App initialized.', 'success');
-            form.reset();
-            await loadApps(user._id);
-        } catch (error) {
-            console.error('Error creating app:', error);
-            updateMessage(message, 'Could not initialize app right now.', 'error');
-        }
-    });
-}
-
 async function loadApps(ownerId) {
     const appsList = document.getElementById('apps-list');
-    appsList.innerHTML = '<div class="empty-state">Loading apps...</div>';
+    appsList.innerHTML = '<div class="empty-state">Loading project cards...</div>';
 
     try {
         const response = await fetch(`/api/apps/users/${ownerId}`);
         const data = await response.json();
         const apps = Array.isArray(data.apps) ? data.apps : [];
 
-        renderApps(apps);
+        renderApps(apps, ownerId);
     } catch (error) {
         console.error('Error loading apps:', error);
-        appsList.innerHTML = '<div class="empty-state">Could not load apps.</div>';
+        appsList.innerHTML = '<div class="empty-state">Could not load projects.</div>';
     }
 }
 
-function renderApps(apps) {
+function renderApps(apps, ownerId) {
     const appsList = document.getElementById('apps-list');
     const storedUrls = getStoredAppUrls();
+    appsList.innerHTML = '';
+    appsList.appendChild(createAddProjectCard(ownerId));
 
     if (!apps.length) {
-        appsList.innerHTML = '<div class="empty-state">No apps yet. Initialize your first project on the left.</div>';
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.textContent = 'No project cards yet. Add your first project to get started.';
+        appsList.appendChild(emptyState);
         return;
     }
 
-    appsList.innerHTML = '';
-
     apps.forEach((app) => {
-        const article = document.createElement('article');
-        article.className = 'app-card';
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'app-card';
         const appUrl = storedUrls[app._id] || '';
 
-        const createdLabel = app.createdAt
-            ? new Date(app.createdAt).toLocaleDateString()
-            : 'Unknown date';
-
-        article.innerHTML = `
-            <div>
-              <h3>${escapeHtml(app.name)}</h3>
-              <p class="app-meta">Created ${escapeHtml(createdLabel)}</p>
-              ${appUrl ? `<a class="app-link" href="${escapeAttribute(appUrl)}" target="_blank" rel="noreferrer">${escapeHtml(appUrl)}</a>` : '<p class="app-meta">No URL saved</p>'}
+        card.innerHTML = `
+            <div class="app-card-top">
+              <span class="app-badge">Project</span>
+              <div>
+                <h3>${escapeHtml(app.name)}</h3>
+              </div>
+              <p class="app-description">${appUrl ? escapeHtml(appUrl) : 'No URL saved yet'}</p>
             </div>
-            <button type="button" class="button button-primary">Open dashboard</button>
+            <div class="app-card-footer">
+              <span class="app-open-label">Open dashboard</span>
+              <span class="app-arrow" aria-hidden="true">&rarr;</span>
+            </div>
         `;
 
-        const button = article.querySelector('button');
-        button.addEventListener('click', () => {
+        card.addEventListener('click', () => {
             localStorage.setItem('watchtowerSelectedApp', JSON.stringify({
                 ...app,
                 url: appUrl || undefined,
@@ -147,8 +93,126 @@ function renderApps(apps) {
             window.location.href = `/dashboard?appId=${encodeURIComponent(app._id)}`;
         });
 
-        appsList.appendChild(article);
+        appsList.appendChild(card);
     });
+}
+
+function createAddProjectCard(ownerId) {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'app-card add-project-card';
+    card.setAttribute('onclick', 'window.watchtowerOpenCreateProject && window.watchtowerOpenCreateProject()');
+    card.innerHTML = `
+        <div class="app-card-top">
+          <span class="app-badge">New</span>
+          <div>
+            <h3>Add project</h3>
+            <p class="app-meta">Create a project card for this workspace.</p>
+          </div>
+        </div>
+        <div class="app-card-footer">
+          <span class="app-open-label">Create project</span>
+          <span class="app-arrow" aria-hidden="true">+</span>
+        </div>
+    `;
+    card.addEventListener('click', () => {
+        if (!currentUser?._id || currentUser._id !== ownerId) {
+            window.location.href = '/login';
+            return;
+        }
+
+        openCreateProjectDialog();
+    });
+    return card;
+}
+
+function bindProjectDialogControls() {
+    const dialog = document.getElementById('create-project-dialog');
+    const form = document.getElementById('create-project-form');
+    const closeButton = document.getElementById('close-project-dialog');
+
+    closeButton.addEventListener('click', () => {
+        dialog.close();
+    });
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await createProjectFromDialog();
+    });
+}
+
+function openCreateProjectDialog() {
+    const dialog = document.getElementById('create-project-dialog');
+    const nameInput = document.getElementById('project-name-input');
+    const urlInput = document.getElementById('project-url-input');
+    const form = document.getElementById('create-project-form');
+
+    form.reset();
+    dialog.showModal();
+    nameInput.focus();
+    urlInput.value = 'https://';
+}
+
+async function createProjectFromDialog() {
+    const user = currentUser;
+    const message = document.getElementById('create-app-message');
+    const dialog = document.getElementById('create-project-dialog');
+    const nameInput = document.getElementById('project-name-input');
+    const urlInput = document.getElementById('project-url-input');
+    const name = nameInput.value.trim();
+
+    if (!name) {
+        updateMessage(message, 'Project name is required.', 'error');
+        nameInput.focus();
+        return;
+    }
+
+    const url = urlInput.value.trim();
+
+    if (!url) {
+        updateMessage(message, 'Project URL is required.', 'error');
+        urlInput.focus();
+        return;
+    }
+
+    if (!isValidUrl(url)) {
+        updateMessage(message, 'Project URL must be a valid URL.', 'error');
+        urlInput.focus();
+        return;
+    }
+
+    updateMessage(message, 'Creating project card...', '');
+
+    try {
+        const response = await fetch('/api/apps', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ownerId: user._id,
+                name,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            updateMessage(message, data.message || data.error || 'Failed to create project.', 'error');
+            return;
+        }
+
+        if (data.app?._id) {
+            saveAppUrl(data.app._id, url);
+        }
+
+        updateMessage(message, 'Project card created.', 'success');
+        dialog.close();
+        await loadApps(user._id);
+    } catch (error) {
+        console.error('Error creating app:', error);
+        updateMessage(message, 'Could not create project right now.', 'error');
+    }
 }
 
 function addLogoutListener() {
@@ -203,8 +267,4 @@ function escapeHtml(value) {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#39;');
-}
-
-function escapeAttribute(value) {
-    return escapeHtml(value);
 }

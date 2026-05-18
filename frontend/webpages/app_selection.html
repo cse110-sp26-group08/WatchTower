@@ -27,47 +27,49 @@
 
   <main class="selection-shell">
     <section class="selection-hero" aria-label="App selection overview">
-      <p class="eyebrow">Workspace setup</p>
-      <h1>Choose an app or initialize a new project.</h1>
-      <p class="selection-copy" id="welcome-message">Loading your workspace...</p>
+      <h1>Select a current project or create a new one!</h1>
     </section>
 
-    <section class="selection-grid">
-      <section class="selection-card create-card" aria-labelledby="create-app-title">
+    <section class="projects-panel selection-card" aria-labelledby="apps-title">
+      <div class="panel-header">
         <div class="card-header">
-          <p class="card-eyebrow">Create</p>
-          <h2 id="create-app-title">Initialize a new project</h2>
-          <p class="card-copy">Provide the app name. WatchTower will create the app under your account.</p>
+          <p class="card-eyebrow" id="apps-title">Your projects</p>
         </div>
+      </div>
 
-        <form id="create-app-form" class="create-app-form">
-          <label for="app-name">Project name</label>
-          <input id="app-name" name="name" type="text" placeholder="WatchTower Web" required>
-          <label for="app-url">Project URL</label>
-          <input
-            id="app-url"
-            name="url"
-            type="url"
-            placeholder="https://example.com"
-            inputmode="url"
-          >
-          <button type="submit" class="button button-primary">Initialize app</button>
-        </form>
+      <p class="form-message" id="create-app-message" aria-live="polite"></p>
 
-        <p class="form-message" id="create-app-message" aria-live="polite"></p>
-      </section>
-
-      <section class="selection-card apps-card" aria-labelledby="apps-title">
-        <div class="card-header">
-          <p class="card-eyebrow">Your apps</p>
-          <h2 id="apps-title">Already initialized projects</h2>
-          <p class="card-copy">Select one of your existing apps to continue to the dashboard.</p>
-        </div>
-
-        <div id="apps-list" class="apps-list" aria-live="polite"></div>
-      </section>
+      <div id="apps-list" class="apps-list" aria-live="polite"></div>
     </section>
   </main>
+
+  <dialog id="create-project-dialog" class="project-dialog">
+    <form method="dialog" class="project-dialog-card" id="create-project-form">
+      <div class="project-dialog-header">
+        <div>
+          <p class="card-eyebrow">New project</p>
+          <h2>Add project</h2>
+        </div>
+        <button type="button" class="button button-secondary project-dialog-close" id="close-project-dialog">Cancel</button>
+      </div>
+
+      <div class="project-dialog-grid">
+        <div class="form-field">
+          <label for="project-name-input">Project name</label>
+          <input id="project-name-input" name="name" type="text" placeholder="WatchTower Web" required>
+        </div>
+
+        <div class="form-field">
+          <label for="project-url-input">Project URL</label>
+          <input id="project-url-input" name="url" type="url" placeholder="https://example.com" required>
+        </div>
+      </div>
+
+      <div class="project-dialog-actions">
+        <button type="submit" class="button button-primary">Create project</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="/js/app_selection.js"></script>
 </body>
