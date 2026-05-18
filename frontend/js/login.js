@@ -23,13 +23,13 @@ function addLoginFormListener() {
                 body: JSON.stringify({ email, password }),
             });
 
-            if (response.ok) {  
-                // Handle successful login (e.g., redirect to dashboard)
-                window.location.href = '/dashboard';
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('watchtowerUser', JSON.stringify(data.user));
+                window.location.href = '/app_selection.html';
             } else {
-                // Handle login failure (e.g., show error message)
-                const errorData = await response.json();
-                alert(`Login failed: ${errorData.message}`);
+                alert(`Login failed: ${data.message}`);
             }
             
         } catch (error) {

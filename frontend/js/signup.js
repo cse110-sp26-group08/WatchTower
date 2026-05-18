@@ -28,14 +28,14 @@ function addSignupFormListener() {
                 },
                 body: JSON.stringify({ username, email, password, confirmPassword }),
             });
+
+            const data = await response.json();
         
             if (response.ok) {
-                // Handle successful signup (e.g., redirect to dashboard)
-                window.location.href = '/dashboard';
+                localStorage.setItem('watchtowerUser', JSON.stringify(data.user));
+                window.location.href = '/app_selection.html';
             } else {
-                // Handle signup failure (e.g., show error message)
-                const errorData = await response.json();
-                alert(`Signup failed: ${errorData.message}`);
+                alert(`Signup failed: ${data.message}`);
             }
         } catch (error) {
             console.error('Error during signup:', error);

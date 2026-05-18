@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WatchTower App Selection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="/styling/app_selection.css">
+</head>
+<body class="app-selection-page">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <div class="brand-mark">
+        <a href="/" class="brand-link">WatchTower</a>
+      </div>
+
+      <div class="nav-actions">
+        <button type="button" class="button button-secondary" id="logout-button">Log out</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="selection-shell">
+    <section class="selection-hero" aria-label="App selection overview">
+      <h1>Select a current project or create a new one!</h1>
+    </section>
+
+    <section class="projects-panel selection-card" aria-labelledby="apps-title">
+      <div class="panel-header">
+        <div class="card-header">
+          <p class="card-eyebrow" id="apps-title">Your projects</p>
+        </div>
+      </div>
+
+      <p class="form-message" id="create-app-message" aria-live="polite"></p>
+
+      <div id="apps-list" class="apps-list" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <dialog id="create-project-dialog" class="project-dialog">
+    <form method="dialog" class="project-dialog-card" id="create-project-form">
+      <div class="project-dialog-header">
+        <div>
+          <p class="card-eyebrow">New project</p>
+          <h2>Add project</h2>
+        </div>
+        <button type="button" class="button button-secondary project-dialog-close" id="close-project-dialog">Cancel</button>
+      </div>
+
+      <div class="project-dialog-grid">
+        <div class="form-field">
+          <label for="project-name-input">Project name</label>
+          <input id="project-name-input" name="name" type="text" placeholder="WatchTower Web" required>
+        </div>
+
+        <div class="form-field">
+          <label for="project-url-input">Project URL</label>
+          <input id="project-url-input" name="url" type="url" placeholder="https://example.com" required>
+        </div>
+      </div>
+
+      <div class="project-dialog-actions">
+        <button type="submit" class="button button-primary">Create project</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/js/app_selection.js"></script>
+</body>
+</html>
