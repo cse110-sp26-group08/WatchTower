@@ -333,11 +333,6 @@ body {
   border-collapse: collapse;
 }
 
-.chart-data-table td:last-child {
-  max-width: 280px;
-  word-break: break-word;
-}
-
 .logs-table th,
 .logs-table td {
   padding: 14px 10px;
@@ -345,7 +340,12 @@ body {
   text-align: left;
 }
 
-@media screen and (max-width: 900px) {
+.chart-data-table td:last-child {
+  max-width: 280px;
+  word-break: break-word;
+}
+
+@media (width <= 900px) {
   .nav-panel {
     position: static;
     width: 100%;
