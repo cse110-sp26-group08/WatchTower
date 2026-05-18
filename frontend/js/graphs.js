@@ -446,7 +446,7 @@ function createOrUpdateChart(type, data) {
     const context = document.getElementById('dashboard-chart');
 
     destroyChart();
-    dashboardChart = new Chart(context, {
+    dashboardChart = new window.Chart(context, {
         type,
         data,
         options: {
