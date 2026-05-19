@@ -2,9 +2,6 @@
 
 This is for features that are out of the scope of the minimal viable product, but if we have time would be nice to have for the user.
 
-
-
-
 ## As a developer I would want to see who pushed the changes that caused the error in order to better understand how to fix the error
 - We can support this by extending the collector data model so each deployed app version is associated with metadata such as commit ID, version number, deployment time, and the developer who pushed the change.
 - MongoDB can store this deployment metadata alongside the project's uptime and error records, which lets us connect a spike in errors back to a specific release.
