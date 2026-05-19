@@ -16,16 +16,22 @@
   <header class="site-header">
     <nav class="site-nav" aria-label="Main navigation">
       <div class="brand-mark">
-        <a href="./" class="brand-link">WatchTower</a>
+        <a href="/" class="brand-link">WatchTower</a>
       </div>
 
       <ul class="nav-links">
+        <li><a href="#product">Product</a></li>
         <li><a href="#docs">Docs</a></li>
       </ul>
 
       <div class="nav-actions">
-        <a href="./login" class="nav-login">Log in</a>
-        <a href="./signup" class="button button-primary">Get started</a>
+        <a href="https://github.com/cse110-sp26-group08/WatchTower" class="github-link" aria-label="WatchTower on GitHub">
+          <img class="github-icon github-icon-default" src="../assets/github-icon-default.svg" alt="">
+          <img class="github-icon github-icon-hover" src="../assets/github-icon-hover.svg" alt="">
+        </a>
+        <a href="/login" class="nav-login">Sign in</a>
+        <a href="mailto:contact@watchtower.dev" class="button button-dark">Contact Us</a>
+        <a href="/signup" class="button button-primary">Get started</a>
       </div>
     </nav>
   </header>
@@ -33,13 +39,54 @@
   <main class="hero-shell">
     <section class="hero" aria-label="Hero">
       <div class="hero-copy">
-        <p class="eyebrow">Watch smarter</p>
-        <h1>Catch all your errors in real-time!</h1>
+        <h1>Know when your app goes down.</h1>
         <p class="hero-description">
-          catches errors, bugs, and notifies you when they happen
+          Monitor availability and response time, then get alerted when your app or
+          API is slow or unavailable.
         </p>
       </div>
 
+      <div class="hero-diagram" id="product" aria-label="Collector script plus configuration equals health dashboard">
+        <article class="collector-card" aria-label="collector.js">
+          <img src="../assets/collector-js.png" alt="">
+          <span class="collector-label">collector</span>
+        </article>
+
+        <span class="operator" aria-hidden="true">+</span>
+
+        <article class="code-card" id="docs" aria-label="WatchTower configuration code">
+          <div class="code-title">YourProject.html</div>
+          <div class="code-window">
+            <div class="code-line"><span>1</span><code>&lt;script&gt;</code></div>
+            <div class="code-line"><span>2</span><code>  const WATCHTOWER_CONFIG = {</code></div>
+            <div class="code-line"><span>3</span><code>    apiKey: "s0f949f5b2763e114a4be</code></div>
+            <div class="code-line"><span>4</span><code>3582be790e6885699e4a28815555228ad",</code></div>
+            <div class="code-line"><span>5</span><code>    release: "1.0.0",</code></div>
+            <div class="code-line"><span>6</span><code>    forceFetchFallback: true,</code></div>
+            <div class="code-line"><span>7</span><code>  };</code></div>
+            <div class="code-line"><span>8</span><code>&lt;/script&gt;</code></div>
+          </div>
+        </article>
+
+        <span class="operator" aria-hidden="true">=</span>
+
+        <article class="health-card" aria-label="Application health score">
+          <h2>Overall Health</h2>
+          <div class="health-content">
+            <div class="gauge" aria-hidden="true">
+              <div class="gauge-core">
+                <strong>85</strong>
+                <span>Good</span>
+              </div>
+            </div>
+            <div class="health-copy">
+              <h3>Your system is performing well</h3>
+              <p>You're all clear right now.</p>
+              <a href="/dashboard" class="dashboard-button">Dashboard</a>
+            </div>
+          </div>
+        </article>
+      </div>
     </section>
   </main>
 </body>
