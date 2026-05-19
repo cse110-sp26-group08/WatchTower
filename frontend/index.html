@@ -11,30 +11,13 @@
     rel="stylesheet"
   >
   <link rel="stylesheet" href="styling/homepage.css">
+  <script src="js/navbar.js" defer></script>
 </head>
 <body class="homepage">
-  <header class="site-header">
-    <nav class="site-nav" aria-label="Main navigation">
-      <div class="brand-mark">
-        <a href="/" class="brand-link">WatchTower</a>
-      </div>
-
-      <ul class="nav-links">
-        <li><a href="#product">Product</a></li>
-        <li><a href="#docs">Docs</a></li>
-      </ul>
-
-      <div class="nav-actions">
-        <a href="https://github.com/cse110-sp26-group08/WatchTower" class="github-link" aria-label="WatchTower on GitHub">
-          <img class="github-icon github-icon-default" src="assets/github-icon-default.svg" alt="">
-          <img class="github-icon github-icon-hover" src="assets/github-icon-hover.svg" alt="">
-        </a>
-        <a href="webpages/login.html" class="nav-login">Sign in</a>
-        <a href="mailto:contact@watchtower.dev" class="button button-dark">Contact Us</a>
-        <a href="webpages/signup.html" class="button button-primary">Get started</a>
-      </div>
-    </nav>
-  </header>
+  <watchtower-navbar
+    login-href="webpages/login.html"
+    signup-href="webpages/signup.html"
+  ></watchtower-navbar>
 
   <main class="hero-shell">
     <section class="hero" aria-label="Hero">
@@ -82,7 +65,7 @@
             <div class="health-copy">
               <h3>Your system is performing well</h3>
               <p>You're all clear right now.</p>
-              <a href="webpages/dashboard.html" class="dashboard-button">Dashboard</a>
+              <a class="dashboard-button">Dashboard</a>
             </div>
           </div>
         </article>

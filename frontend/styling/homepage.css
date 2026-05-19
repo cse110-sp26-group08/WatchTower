@@ -54,197 +54,9 @@ a {
   filter: blur(0.3px);
 }
 
-.site-header,
 .hero-shell {
   position: relative;
   z-index: 1;
-}
-
-.site-header {
-  padding: 16px 0 0;
-}
-
-.site-nav {
-  width: min(1436px, calc(100% - 48px));
-  min-height: 74px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  border: 1px solid rgb(255 255 255 / 78%);
-  border-radius: 30px;
-  background: var(--panel);
-  box-shadow: var(--shadow-nav);
-  backdrop-filter: blur(22px);
-}
-
-.brand-mark {
-  display: flex;
-  align-items: center;
-  justify-self: start;
-}
-
-.brand-link {
-  font-size: 1.72rem;
-  font-weight: 800;
-  letter-spacing: 0;
-}
-
-.nav-links,
-.nav-actions {
-  display: flex;
-  align-items: center;
-}
-
-.nav-links {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  gap: 4.6rem;
-  color: var(--text);
-  font-size: 0.98rem;
-  font-weight: 700;
-  transform: translateX(-52px);
-}
-
-.nav-actions {
-  justify-self: end;
-  gap: 18px;
-}
-
-.nav-login {
-  font-size: 0.98rem;
-  font-weight: 700;
-  color: rgb(33 31 36 / 82%);
-}
-
-.nav-links a,
-.nav-login {
-  transition: color 180ms ease, opacity 180ms ease, transform 180ms ease;
-}
-
-.nav-links a:hover,
-.nav-links a:focus-visible,
-.nav-login:hover,
-.nav-login:focus-visible {
-  color: #486bea;
-}
-
-.github-link {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgb(33 31 36 / 14%);
-  border-radius: 8px;
-  background: rgb(255 255 255 / 74%);
-  box-shadow: 0 8px 18px rgb(33 31 36 / 8%);
-  overflow: hidden;
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms ease;
-}
-
-.github-link:hover,
-.github-link:focus-visible {
-  border-color: transparent;
-  background: transparent;
-  box-shadow: 0 10px 22px rgb(33 31 36 / 14%);
-  transform: translateY(-1px);
-}
-
-.github-link:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 4px;
-}
-
-.github-icon {
-  display: block;
-  pointer-events: none;
-  object-fit: contain;
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease;
-}
-
-.github-icon-default {
-  width: 28px;
-  height: 28px;
-  opacity: 1;
-  transform: scale(1);
-}
-
-.github-icon-hover {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 28px;
-  height: 28px;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.92);
-}
-
-.github-link:is(:hover, :focus-visible) .github-icon-default {
-  opacity: 0;
-  transform: scale(0.88);
-}
-
-.github-link:is(:hover, :focus-visible) .github-icon-hover {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 50px;
-  padding: 0 24px;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  box-shadow: none;
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease,
-    background-color 180ms ease,
-    filter 180ms ease;
-}
-
-.button:hover {
-  transform: translateY(-1px);
-}
-
-.button-dark {
-  color: #fff;
-  background-color: #030303;
-  box-shadow: 0 16px 28px rgb(0 0 0 / 26%);
-}
-
-.button-dark:hover,
-.button-dark:focus-visible {
-  background-color: #514a58;
-  box-shadow: 0 14px 24px rgb(33 31 36 / 18%);
-}
-
-.button-primary {
-  color: #fff;
-  background: linear-gradient(180deg, #486bea 0%, var(--blue-deep) 100%);
-  box-shadow: var(--shadow-blue);
-}
-
-.button-primary:hover,
-.button-primary:focus-visible {
-  filter: brightness(1.12) saturate(1.08);
-  box-shadow: 0 18px 34px rgb(56 100 223 / 31%);
-}
-
-.hero-shell {
   width: min(1360px, calc(100% - 48px));
   margin: 0 auto;
 }
@@ -494,14 +306,6 @@ a {
 }
 
 @media (width <= 1280px) {
-  .site-nav {
-    width: min(1120px, calc(100% - 40px));
-  }
-
-  .nav-links {
-    gap: 4.6rem;
-  }
-
   .hero {
     padding-top: 7rem;
   }
@@ -547,28 +351,6 @@ a {
 }
 
 @media (width <= 980px) {
-  .site-header {
-    padding-top: 12px;
-  }
-
-  .site-nav {
-    width: min(100% - 28px, 720px);
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 18px;
-  }
-
-  .brand-mark,
-  .nav-actions {
-    justify-self: center;
-  }
-
-  .nav-links {
-    justify-content: center;
-    gap: 42px;
-    transform: none;
-  }
-
   .hero-shell {
     width: min(100% - 28px, 760px);
   }
@@ -607,36 +389,6 @@ a {
 }
 
 @media (width <= 620px) {
-  .site-nav {
-    border-radius: 22px;
-  }
-
-  .brand-link {
-    font-size: 1.45rem;
-  }
-
-  .nav-actions {
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  .github-link {
-    order: -1;
-  }
-
-  .nav-login {
-    min-height: 42px;
-    display: inline-flex;
-    align-items: center;
-  }
-
-  .button {
-    min-height: 44px;
-    padding-inline: 18px;
-  }
-
   .hero {
     padding-top: 4rem;
   }
