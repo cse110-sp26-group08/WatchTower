@@ -12,7 +12,7 @@ describe('App endpoints', () => {
     const response = await request(app).get('/app_selection.html');
 
     expect(response.statusCode).toBe(200);
-    expect(response.text).toContain('Choose an application');
+    expect(response.text).toContain('Select a current project or create a new one!');
   });
 
   test('POST /api/apps creates an app for an owner', async () => {
