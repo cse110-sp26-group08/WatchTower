@@ -8,6 +8,13 @@ import { User } from '../schema/userModel.js';
 describe('App endpoints', () => {
   const app = createApp();
 
+  test('GET /app_selection.html serves the app selection page', async () => {
+    const response = await request(app).get('/app_selection.html');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toContain('Choose an application');
+  });
+
   test('POST /api/apps creates an app for an owner', async () => {
     const user = await User.create({
       username: 'owner',

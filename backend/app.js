@@ -131,7 +131,7 @@ function createApp() {
     }
   });
 
-  app.get('/app-selection', (req, res) => {
+  app.get(['/app-selection', '/app_selection.html'], (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
   });
 
