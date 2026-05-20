@@ -24,6 +24,7 @@ async function initDashboard() {
     if (!selectedApp?._id) {
         setStatus('DOWN', 'No selected project.', 'Return to app selection and choose a project.');
         renderEmptyLogs('No selected app.');
+        renderLineChart([]);
         return;
     }
 
@@ -260,7 +261,6 @@ function renderMetrics(allErrors, filteredErrors, previousErrors, filteredPerfor
     const previousAvgResponse = average(getResponseTimes(previousPerformance));
     const criticalErrors = filteredErrors.filter(isCriticalError).length;
     const uptime = calculateUptime(filteredErrors, filteredPerformance);
-    const activeUrls = countUniqueUrls(filteredErrors, filteredPerformance);
 
     document.getElementById('errors-today-value').textContent = String(todayErrors);
     document.getElementById('errors-today-compare').textContent = buildDeltaText(todayErrors, yesterdayErrors, 'from yesterday');
@@ -270,8 +270,6 @@ function renderMetrics(allErrors, filteredErrors, previousErrors, filteredPerfor
     document.getElementById('critical-errors-compare').textContent = `${filteredErrors.length} total matching errors`;
     document.getElementById('uptime-value').textContent = `${uptime}%`;
     document.getElementById('uptime-compare').textContent = 'derived from event coverage';
-    document.getElementById('active-urls-value').textContent = String(activeUrls);
-    document.getElementById('active-urls-compare').textContent = activeUrls ? 'unique endpoints in range' : 'no tracked URLs';
 }
 
 function renderGraph(filteredErrors, filteredPerformance) {
@@ -279,6 +277,17 @@ function renderGraph(filteredErrors, filteredPerformance) {
     const graphSummary = document.getElementById('graph-summary');
     const chartCanvasShell = document.getElementById('chart-canvas-shell');
     const chartTableShell = document.getElementById('chart-table-shell');
+
+    const noEvents = !filteredErrors.length && !filteredPerformance.length;
+
+    if (noEvents) {
+        graphTitle.textContent = 'Demo placeholder chart';
+        graphSummary.textContent = 'Demo placeholder data shown until real app events load.';
+        chartCanvasShell.hidden = false;
+        chartTableShell.hidden = true;
+        renderLineChart([]);
+        return;
+    }
 
     if (selectedChartView === 'table') {
         graphTitle.textContent = 'Recent event table';
@@ -380,6 +389,25 @@ function renderChartTable(filteredErrors) {
 }
 
 function renderLineChart(filteredErrors) {
+    if (!filteredErrors.length) {
+        createOrUpdateChart('line', {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Demo Error Volume',
+                data: [2, 5, 3, 8, 4, 6, 3],
+                borderColor: '#1f49ff',
+                backgroundColor: 'rgb(31 73 255 / 18%)',
+                tension: 0.3,
+                fill: true,
+            }],
+        });
+
+        document.getElementById('graph-summary').textContent =
+            'Demo placeholder data shown until real app events load.';
+
+        return;
+    }
+
     const range = document.getElementById('time-range').value;
     const bucketSize = range === '24h' ? 'hour' : 'day';
     const buckets = bucketErrors(filteredErrors, bucketSize);
@@ -390,7 +418,7 @@ function renderLineChart(filteredErrors) {
             label: 'Errors',
             data: buckets.values,
             borderColor: '#1f49ff',
-            backgroundColor: 'rgba(31, 73, 255, 0.18)',
+            backgroundColor: 'rgb(31 73 255 / 18%)',
             tension: 0.3,
             fill: true,
         }],

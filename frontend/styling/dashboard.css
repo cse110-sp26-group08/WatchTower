@@ -169,15 +169,15 @@ body {
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
-  background: #ecfdf3;
+  background: rgb(31 73 255 / 12%);
   width: fit-content;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 999px;
 }
 
 .status-symbol,
 .status-text {
-  color: var(--green);
+  color: var(--blue);
   font-weight: 700;
 }
 
@@ -188,7 +188,8 @@ body {
   gap: 36px;
   align-items: center;
   padding: 24px;
-  border-left: 5px solid var(--green);
+  background: var(--panel);
+  border-left: 5px solid rgb(31 73 255 / 22%);
 }
 
 .status-main {
@@ -253,12 +254,16 @@ body {
 
 .metric-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
 }
 
 .metric {
-  padding: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
 }
 
 .metric-name,
@@ -269,9 +274,27 @@ body {
   margin: 0;
 }
 
+.metric-name {
+  color: var(--muted);
+  font-size: 0.94rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .metric-val {
-  margin-top: 10px;
-  font-size: 1.9rem;
+  margin-top: 16px;
+  font-size: 2rem;
+  line-height: 1.05;
+  color: var(--text);
+}
+
+.compare-yesterday {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 0.95rem;
 }
 
 .compare-yesterday {
@@ -335,11 +358,12 @@ body {
 }
 
 .graph-card {
-  padding: 20px;
+  padding: 28px;
   width: 100%;
-  max-width: 760px;
-  min-height: 340px;
-  margin: 0 auto;
+  min-height: 360px;
+  border-radius: 24px;
+  border: 1px solid rgb(15 23 42 / 6%);
+  box-shadow: 0 18px 40px rgb(15 23 42 / 8%);
 }
 
 .graph-card-header {
@@ -373,7 +397,7 @@ body {
 
 #dashboard-chart {
   width: 100% !important;
-  height: 230px !important;
+  height: 280px !important;
 }
 
 .chart-table-shell {
