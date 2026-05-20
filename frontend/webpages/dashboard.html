@@ -188,34 +188,49 @@
                             </div>
                         </div>
 
-                        <div class="graph">
-                            <div class="graph-card">
-                                <div class="graph-card-header">
-                                    <div>
-                                        <p class="graph-eyebrow">Service health</p>
-                                        <h2 id="graph-title">Error volume over time</h2>
+                        <div class="dashboard-body-grid">
+                            <div class="graph">
+                                <div class="graph-card">
+                                    <div class="graph-card-header">
+                                        <div>
+                                            <p class="graph-eyebrow">Service health</p>
+                                            <h2 id="graph-title">Error volume over time</h2>
+                                        </div>
+                                        <p class="graph-summary" id="graph-summary">Loading event data for the selected app.
+                                        </p>
                                     </div>
-                                    <p class="graph-summary" id="graph-summary">Loading event data for the selected app.
-                                    </p>
-                                </div>
 
-                                <div id="chart-canvas-shell">
-                                    <canvas id="dashboard-chart" aria-label="Dashboard error chart"></canvas>
-                                </div>
-                                <div id="chart-table-shell" class="chart-table-shell" hidden>
-                                    <table class="logs-table chart-data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Time</th>
-                                                <th>Severity</th>
-                                                <th>Message</th>
-                                                <th>URL</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="chart-table-body"></tbody>
-                                    </table>
+                                    <div id="chart-canvas-shell">
+                                        <canvas id="dashboard-chart" aria-label="Dashboard error chart"></canvas>
+                                    </div>
+                                    <div id="chart-table-shell" class="chart-table-shell" hidden>
+                                        <table class="logs-table chart-data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Time</th>
+                                                    <th>Severity</th>
+                                                    <th>Message</th>
+                                                    <th>URL</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="chart-table-body"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
+
+                            <aside class="top-issues-card">
+                                <div class="top-issues-header">
+                                    <p class="graph-eyebrow">Overview</p>
+                                    <h2>Top Issues</h2>
+                                </div>
+                                <ul class="top-issues-list">
+                                    <li class="top-issues-item">Slow API Responses</li>
+                                    <li class="top-issues-item">High Error Rate</li>
+                                    <li class="top-issues-item">Timeout Spikes</li>
+                                    <li class="top-issues-item">Failed Requests</li>
+                                </ul>
+                            </aside>
                         </div>
 
                         <div class="logs-container">

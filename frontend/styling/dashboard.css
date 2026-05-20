@@ -358,9 +358,9 @@ body {
 }
 
 .graph-card {
-  padding: 28px;
+  padding: 24px;
   width: 100%;
-  min-height: 360px;
+  min-height: auto;
   border-radius: 24px;
   border: 1px solid rgb(15 23 42 / 6%);
   box-shadow: 0 18px 40px rgb(15 23 42 / 8%);
@@ -372,6 +372,48 @@ body {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
+}
+
+.dashboard-body-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(260px, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.top-issues-card {
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.top-issues-list {
+  flex: 1;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.top-issues-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+
+
+.top-issues-item {
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: var(--panel-alt);
+  border: 1px solid rgb(31 73 255 / 10%);
+  color: var(--text);
+  font-weight: 600;
 }
 
 .graph-eyebrow {
@@ -389,15 +431,12 @@ body {
 /* Yusuf - Better graph section spacing/layout */
 .graph {
   min-width: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 12px 0;
 }
 
 #dashboard-chart {
   width: 100% !important;
-  height: 280px !important;
+  height: 220px !important;
 }
 
 .chart-table-shell {
@@ -436,4 +475,11 @@ body {
   .graph-card-header {
     flex-direction: column;
   }
+
+.dashboard-body-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
 }
