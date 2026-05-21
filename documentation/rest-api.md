@@ -67,12 +67,12 @@ Error responses return:
 
 ## Common IDs
 
-Route parameters named `:id`, `:ownerId`, and `:appId` are MongoDB ObjectId values.
+Route parameters named `:id`, `:ownerId`, and `:appId` are UUID v4 values.
 
 Example:
 
 ```text
-665111111111111111111111
+a1b2c3d4-e5f6-7890-abcd-ef1234567890
 ```
 
 ## Users
@@ -113,12 +113,11 @@ curl -X POST http://localhost:3000/api/users \
 ```json
 {
   "user": {
-    "_id": "665111111111111111111111",
+    "id": "00000000-0000-0000-0000-000000000001",
     "username": "anaya",
     "email": "anaya@example.com",
     "createdAt": "2026-05-14T07:00:00.000Z",
-    "updatedAt": "2026-05-14T07:00:00.000Z",
-    "__v": 0
+    "updatedAt": "2026-05-14T07:00:00.000Z"
   }
 }
 ```
@@ -141,7 +140,7 @@ Fetches a user by ID. The response does not include `passwordHash`.
 #### Example Request
 
 ```bash
-curl http://localhost:3000/api/users/665111111111111111111111
+curl http://localhost:3000/api/users/00000000-0000-0000-0000-000000000001
 ```
 
 #### Example Response
@@ -149,12 +148,11 @@ curl http://localhost:3000/api/users/665111111111111111111111
 ```json
 {
   "user": {
-    "_id": "665111111111111111111111",
+    "id": "00000000-0000-0000-0000-000000000001",
     "username": "anaya",
     "email": "anaya@example.com",
     "createdAt": "2026-05-14T07:00:00.000Z",
-    "updatedAt": "2026-05-14T07:00:00.000Z",
-    "__v": 0
+    "updatedAt": "2026-05-14T07:00:00.000Z"
   }
 }
 ```
@@ -164,7 +162,7 @@ curl http://localhost:3000/api/users/665111111111111111111111
 | Status | Meaning |
 | --- | --- |
 | `200` | User found. |
-| `404` | User not found or ID is invalid. |
+| `404` | User not found. |
 
 ### Update User
 
@@ -185,7 +183,7 @@ Updates an existing user. Only `username`, `email`, and `passwordHash` are accep
 #### Example Request
 
 ```bash
-curl -X PATCH http://localhost:3000/api/users/665111111111111111111111 \
+curl -X PATCH http://localhost:3000/api/users/00000000-0000-0000-0000-000000000001 \
   -H "Content-Type: application/json" \
   -d '{
     "username": "updated-owner",
@@ -198,12 +196,11 @@ curl -X PATCH http://localhost:3000/api/users/665111111111111111111111 \
 ```json
 {
   "user": {
-    "_id": "665111111111111111111111",
+    "id": "00000000-0000-0000-0000-000000000001",
     "username": "updated-owner",
     "email": "anaya@example.com",
     "createdAt": "2026-05-14T07:00:00.000Z",
-    "updatedAt": "2026-05-14T07:10:00.000Z",
-    "__v": 0
+    "updatedAt": "2026-05-14T07:10:00.000Z"
   }
 }
 ```
@@ -214,7 +211,7 @@ curl -X PATCH http://localhost:3000/api/users/665111111111111111111111 \
 | --- | --- |
 | `200` | User updated. |
 | `400` | Invalid update payload. |
-| `404` | User not found, invalid ID, or no allowed update fields were supplied. |
+| `404` | User not found or no allowed update fields were supplied. |
 
 ### Delete User
 
@@ -227,7 +224,7 @@ Deletes a user by ID. The deleted user is returned without `passwordHash`.
 #### Example Request
 
 ```bash
-curl -X DELETE http://localhost:3000/api/users/665111111111111111111111
+curl -X DELETE http://localhost:3000/api/users/00000000-0000-0000-0000-000000000001
 ```
 
 #### Example Response
@@ -235,12 +232,11 @@ curl -X DELETE http://localhost:3000/api/users/665111111111111111111111
 ```json
 {
   "user": {
-    "_id": "665111111111111111111111",
+    "id": "00000000-0000-0000-0000-000000000001",
     "username": "anaya",
     "email": "anaya@example.com",
     "createdAt": "2026-05-14T07:00:00.000Z",
-    "updatedAt": "2026-05-14T07:00:00.000Z",
-    "__v": 0
+    "updatedAt": "2026-05-14T07:00:00.000Z"
   }
 }
 ```
@@ -250,7 +246,7 @@ curl -X DELETE http://localhost:3000/api/users/665111111111111111111111
 | Status | Meaning |
 | --- | --- |
 | `200` | User deleted. |
-| `404` | User not found or ID is invalid. |
+| `404` | User not found. |
 
 </details>
 
@@ -271,7 +267,7 @@ Creates an app owned by a user. The backend generates an `apiKey`, but creation 
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
-| `ownerId` | ObjectId string | Yes | ID of the user who owns the app. |
+| `ownerId` | UUID string | Yes | ID of the user who owns the app. |
 | `name` | string | Yes | App display name. Trimmed before storage. |
 
 #### Example Request
@@ -280,7 +276,7 @@ Creates an app owned by a user. The backend generates an `apiKey`, but creation 
 curl -X POST http://localhost:3000/api/apps \
   -H "Content-Type: application/json" \
   -d '{
-    "ownerId": "665111111111111111111111",
+    "ownerId": "00000000-0000-0000-0000-000000000001",
     "name": "WatchTower Web"
   }'
 ```
@@ -290,12 +286,11 @@ curl -X POST http://localhost:3000/api/apps \
 ```json
 {
   "app": {
-    "_id": "665222222222222222222222",
-    "ownerId": "665111111111111111111111",
+    "id": "00000000-0000-0000-0000-000000000002",
+    "ownerId": "00000000-0000-0000-0000-000000000001",
     "name": "WatchTower Web",
     "createdAt": "2026-05-14T07:00:00.000Z",
-    "updatedAt": "2026-05-14T07:00:00.000Z",
-    "__v": 0
+    "updatedAt": "2026-05-14T07:00:00.000Z"
   }
 }
 ```
@@ -318,7 +313,7 @@ Fetches an app by ID. The response does not include `apiKey`.
 #### Example Request
 
 ```bash
-curl http://localhost:3000/api/apps/665222222222222222222222
+curl http://localhost:3000/api/apps/00000000-0000-0000-0000-000000000002
 ```
 
 #### Example Response
@@ -326,12 +321,11 @@ curl http://localhost:3000/api/apps/665222222222222222222222
 ```json
 {
   "app": {
-    "_id": "665222222222222222222222",
-    "ownerId": "665111111111111111111111",
+    "id": "00000000-0000-0000-0000-000000000002",
+    "ownerId": "00000000-0000-0000-0000-000000000001",
     "name": "WatchTower Web",
     "createdAt": "2026-05-14T07:00:00.000Z",
-    "updatedAt": "2026-05-14T07:00:00.000Z",
-    "__v": 0
+    "updatedAt": "2026-05-14T07:00:00.000Z"
   }
 }
 ```
@@ -341,7 +335,7 @@ curl http://localhost:3000/api/apps/665222222222222222222222
 | Status | Meaning |
 | --- | --- |
 | `200` | App found. |
-| `404` | App not found or ID is invalid. |
+| `404` | App not found. |
 
 ### List Apps By Owner
 
@@ -354,7 +348,7 @@ Lists all apps owned by a user.
 #### Example Request
 
 ```bash
-curl http://localhost:3000/api/apps/users/665111111111111111111111
+curl http://localhost:3000/api/apps/users/00000000-0000-0000-0000-000000000001
 ```
 
 #### Example Response
@@ -363,12 +357,11 @@ curl http://localhost:3000/api/apps/users/665111111111111111111111
 {
   "apps": [
     {
-      "_id": "665222222222222222222222",
-      "ownerId": "665111111111111111111111",
+      "id": "00000000-0000-0000-0000-000000000002",
+      "ownerId": "00000000-0000-0000-0000-000000000001",
       "name": "WatchTower Web",
       "createdAt": "2026-05-14T07:00:00.000Z",
-      "updatedAt": "2026-05-14T07:00:00.000Z",
-      "__v": 0
+      "updatedAt": "2026-05-14T07:00:00.000Z"
     }
   ]
 }
@@ -378,7 +371,7 @@ curl http://localhost:3000/api/apps/users/665111111111111111111111
 
 | Status | Meaning |
 | --- | --- |
-| `200` | Apps returned. Invalid owner IDs return an empty `apps` array. |
+| `200` | Apps returned. Unknown owner IDs return an empty `apps` array. |
 
 ### Delete App
 
@@ -391,7 +384,7 @@ Deletes an app by ID. The deleted app is returned without `apiKey`.
 #### Example Request
 
 ```bash
-curl -X DELETE http://localhost:3000/api/apps/665222222222222222222222
+curl -X DELETE http://localhost:3000/api/apps/00000000-0000-0000-0000-000000000002
 ```
 
 #### Example Response
@@ -399,12 +392,11 @@ curl -X DELETE http://localhost:3000/api/apps/665222222222222222222222
 ```json
 {
   "app": {
-    "_id": "665222222222222222222222",
-    "ownerId": "665111111111111111111111",
+    "id": "00000000-0000-0000-0000-000000000002",
+    "ownerId": "00000000-0000-0000-0000-000000000001",
     "name": "WatchTower Web",
     "createdAt": "2026-05-14T07:00:00.000Z",
-    "updatedAt": "2026-05-14T07:00:00.000Z",
-    "__v": 0
+    "updatedAt": "2026-05-14T07:00:00.000Z"
   }
 }
 ```
@@ -414,7 +406,7 @@ curl -X DELETE http://localhost:3000/api/apps/665222222222222222222222
 | Status | Meaning |
 | --- | --- |
 | `200` | App deleted. |
-| `404` | App not found or ID is invalid. |
+| `404` | App not found. |
 
 </details>
 
@@ -466,8 +458,8 @@ curl -X POST http://localhost:3000/api/events/error \
 ```json
 {
   "event": {
-    "_id": "665333333333333333333333",
-    "appId": "665222222222222222222222",
+    "id": "00000000-0000-0000-0000-000000000003",
+    "appId": "00000000-0000-0000-0000-000000000002",
     "type": "error",
     "timestamp": "2026-05-14T07:00:00.000Z",
     "url": "https://example.com/dashboard",
@@ -478,8 +470,7 @@ curl -X POST http://localhost:3000/api/events/error \
       "severity": "high",
       "release": "1.0.0"
     },
-    "receivedAt": "2026-05-14T07:00:01.000Z",
-    "__v": 0
+    "receivedAt": "2026-05-14T07:00:01.000Z"
   }
 }
 ```
@@ -503,7 +494,7 @@ Fetches an error event by ID. If the event exists but is not an error event, the
 #### Example Request
 
 ```bash
-curl http://localhost:3000/api/events/error/665333333333333333333333
+curl http://localhost:3000/api/events/error/00000000-0000-0000-0000-000000000003
 ```
 
 #### Example Response
@@ -511,16 +502,15 @@ curl http://localhost:3000/api/events/error/665333333333333333333333
 ```json
 {
   "event": {
-    "_id": "665333333333333333333333",
-    "appId": "665222222222222222222222",
+    "id": "00000000-0000-0000-0000-000000000003",
+    "appId": "00000000-0000-0000-0000-000000000002",
     "type": "error",
     "timestamp": "2026-05-14T07:00:00.000Z",
     "url": "https://example.com/dashboard",
     "metadata": {
       "message": "Something broke"
     },
-    "receivedAt": "2026-05-14T07:00:01.000Z",
-    "__v": 0
+    "receivedAt": "2026-05-14T07:00:01.000Z"
   }
 }
 ```
@@ -530,7 +520,7 @@ curl http://localhost:3000/api/events/error/665333333333333333333333
 | Status | Meaning |
 | --- | --- |
 | `200` | Error event found. |
-| `404` | Error event not found, ID is invalid, or the event is a different type. |
+| `404` | Error event not found, or the event is a different type. |
 
 ### List Error Events By App
 
@@ -543,7 +533,7 @@ Lists all error events for an app.
 #### Example Request
 
 ```bash
-curl http://localhost:3000/api/events/error/apps/665222222222222222222222
+curl http://localhost:3000/api/events/error/apps/00000000-0000-0000-0000-000000000002
 ```
 
 #### Example Response
@@ -552,15 +542,14 @@ curl http://localhost:3000/api/events/error/apps/665222222222222222222222
 {
   "events": [
     {
-      "_id": "665333333333333333333333",
-      "appId": "665222222222222222222222",
+      "id": "00000000-0000-0000-0000-000000000003",
+      "appId": "00000000-0000-0000-0000-000000000002",
       "type": "error",
       "timestamp": "2026-05-14T07:00:00.000Z",
       "metadata": {
         "message": "Something broke"
       },
-      "receivedAt": "2026-05-14T07:00:01.000Z",
-      "__v": 0
+      "receivedAt": "2026-05-14T07:00:01.000Z"
     }
   ]
 }
@@ -570,7 +559,7 @@ curl http://localhost:3000/api/events/error/apps/665222222222222222222222
 
 | Status | Meaning |
 | --- | --- |
-| `200` | Error events returned. Invalid app IDs return an empty `events` array. |
+| `200` | Error events returned. Unknown app IDs return an empty `events` array. |
 
 ### Delete Error Event
 
@@ -583,7 +572,7 @@ Deletes an error event by ID.
 #### Example Request
 
 ```bash
-curl -X DELETE http://localhost:3000/api/events/error/665333333333333333333333
+curl -X DELETE http://localhost:3000/api/events/error/00000000-0000-0000-0000-000000000003
 ```
 
 #### Example Response
@@ -591,15 +580,14 @@ curl -X DELETE http://localhost:3000/api/events/error/665333333333333333333333
 ```json
 {
   "event": {
-    "_id": "665333333333333333333333",
-    "appId": "665222222222222222222222",
+    "id": "00000000-0000-0000-0000-000000000003",
+    "appId": "00000000-0000-0000-0000-000000000002",
     "type": "error",
     "timestamp": "2026-05-14T07:00:00.000Z",
     "metadata": {
       "message": "Something broke"
     },
-    "receivedAt": "2026-05-14T07:00:01.000Z",
-    "__v": 0
+    "receivedAt": "2026-05-14T07:00:01.000Z"
   }
 }
 ```
@@ -609,7 +597,7 @@ curl -X DELETE http://localhost:3000/api/events/error/665333333333333333333333
 | Status | Meaning |
 | --- | --- |
 | `200` | Error event deleted. |
-| `404` | Error event not found, ID is invalid, or the event is a different type. |
+| `404` | Error event not found, or the event is a different type. |
 
 </details>
 
@@ -665,8 +653,8 @@ curl -X POST http://localhost:3000/api/events/performance \
 ```json
 {
   "event": {
-    "_id": "665444444444444444444444",
-    "appId": "665222222222222222222222",
+    "id": "00000000-0000-0000-0000-000000000004",
+    "appId": "00000000-0000-0000-0000-000000000002",
     "type": "performance",
     "timestamp": "2026-05-14T07:00:00.000Z",
     "url": "https://example.com/dashboard",
@@ -679,8 +667,7 @@ curl -X POST http://localhost:3000/api/events/performance \
       "memoryMB": 64,
       "release": "1.0.0"
     },
-    "receivedAt": "2026-05-14T07:00:01.000Z",
-    "__v": 0
+    "receivedAt": "2026-05-14T07:00:01.000Z"
   }
 }
 ```
@@ -704,7 +691,7 @@ Fetches a performance event by ID. If the event exists but is not a performance 
 #### Example Request
 
 ```bash
-curl http://localhost:3000/api/events/performance/665444444444444444444444
+curl http://localhost:3000/api/events/performance/00000000-0000-0000-0000-000000000004
 ```
 
 #### Example Response
@@ -712,15 +699,14 @@ curl http://localhost:3000/api/events/performance/665444444444444444444444
 ```json
 {
   "event": {
-    "_id": "665444444444444444444444",
-    "appId": "665222222222222222222222",
+    "id": "00000000-0000-0000-0000-000000000004",
+    "appId": "00000000-0000-0000-0000-000000000002",
     "type": "performance",
     "timestamp": "2026-05-14T07:00:00.000Z",
     "metadata": {
       "loadTimeMs": 1200
     },
-    "receivedAt": "2026-05-14T07:00:01.000Z",
-    "__v": 0
+    "receivedAt": "2026-05-14T07:00:01.000Z"
   }
 }
 ```
@@ -730,7 +716,7 @@ curl http://localhost:3000/api/events/performance/665444444444444444444444
 | Status | Meaning |
 | --- | --- |
 | `200` | Performance event found. |
-| `404` | Performance event not found, ID is invalid, or the event is a different type. |
+| `404` | Performance event not found, or the event is a different type. |
 
 ### List Performance Events By App
 
@@ -743,7 +729,7 @@ Lists all performance events for an app.
 #### Example Request
 
 ```bash
-curl http://localhost:3000/api/events/performance/apps/665222222222222222222222
+curl http://localhost:3000/api/events/performance/apps/00000000-0000-0000-0000-000000000002
 ```
 
 #### Example Response
@@ -752,15 +738,14 @@ curl http://localhost:3000/api/events/performance/apps/665222222222222222222222
 {
   "events": [
     {
-      "_id": "665444444444444444444444",
-      "appId": "665222222222222222222222",
+      "id": "00000000-0000-0000-0000-000000000004",
+      "appId": "00000000-0000-0000-0000-000000000002",
       "type": "performance",
       "timestamp": "2026-05-14T07:00:00.000Z",
       "metadata": {
         "loadTimeMs": 1200
       },
-      "receivedAt": "2026-05-14T07:00:01.000Z",
-      "__v": 0
+      "receivedAt": "2026-05-14T07:00:01.000Z"
     }
   ]
 }
@@ -770,7 +755,7 @@ curl http://localhost:3000/api/events/performance/apps/665222222222222222222222
 
 | Status | Meaning |
 | --- | --- |
-| `200` | Performance events returned. Invalid app IDs return an empty `events` array. |
+| `200` | Performance events returned. Unknown app IDs return an empty `events` array. |
 
 ### Delete Performance Event
 
@@ -783,7 +768,7 @@ Deletes a performance event by ID.
 #### Example Request
 
 ```bash
-curl -X DELETE http://localhost:3000/api/events/performance/665444444444444444444444
+curl -X DELETE http://localhost:3000/api/events/performance/00000000-0000-0000-0000-000000000004
 ```
 
 #### Example Response
@@ -791,15 +776,14 @@ curl -X DELETE http://localhost:3000/api/events/performance/66544444444444444444
 ```json
 {
   "event": {
-    "_id": "665444444444444444444444",
-    "appId": "665222222222222222222222",
+    "id": "00000000-0000-0000-0000-000000000004",
+    "appId": "00000000-0000-0000-0000-000000000002",
     "type": "performance",
     "timestamp": "2026-05-14T07:00:00.000Z",
     "metadata": {
       "loadTimeMs": 1200
     },
-    "receivedAt": "2026-05-14T07:00:01.000Z",
-    "__v": 0
+    "receivedAt": "2026-05-14T07:00:01.000Z"
   }
 }
 ```
@@ -809,6 +793,6 @@ curl -X DELETE http://localhost:3000/api/events/performance/66544444444444444444
 | Status | Meaning |
 | --- | --- |
 | `200` | Performance event deleted. |
-| `404` | Performance event not found, ID is invalid, or the event is a different type. |
+| `404` | Performance event not found, or the event is a different type. |
 
 </details>
