@@ -138,6 +138,10 @@ function createApp() {
   app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/dashboard.html'));
   });
+  
+  app.get('/docs', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/docs.html'));
+  });
 
   // API ENDPOINTS
   // Error Endpoints

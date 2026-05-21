@@ -1,0 +1,68 @@
+@import url("./homepage.css");
+
+
+.docs-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 400px) minmax(0, 700px);
+    gap: 120px;
+    align-items: center;
+    min-height: calc(100vh - 90px);
+    padding: 28px 15px 50px;
+}
+
+.docs-layout .hero {
+    min-height: auto;
+    padding: 0;
+}
+
+.docs-main {
+    animation: hero-fade 700ms ease-out both;
+}
+
+.docs-main h2 {
+    text-align: center;
+    margin: 0;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+.docs-main h3 {
+    padding-left: 3em;
+}
+.docs-faq h2 {
+    margin: 0;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+.docs-faq {
+    margin: 3em;
+}
+
+
+@media (width <=980px) {
+    .docs-layout {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        min-height: auto;
+        padding: 25px 5px 40px;
+    }
+}
+
+
+.docs-faq details {
+
+  padding: 18px 0;
+
+  border-top: 1px solid var(--line);
+
+}
+
+.docs-faq summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.docs-faq summary:hover {
+  color: var(--blue);
+}
+
+.docs-faq details p {
+  color: var(--muted);
+}
