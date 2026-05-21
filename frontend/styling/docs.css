@@ -1,6 +1,5 @@
 @import url("./homepage.css");
 
-
 .docs-layout {
     display: grid;
     grid-template-columns: minmax(0, 400px) minmax(0, 700px);
@@ -50,11 +49,8 @@
 
 
 .docs-faq details {
-
     padding: 18px 0;
-
     border-top: 1px solid var(--line);
-
 }
 
 .docs-faq summary {
