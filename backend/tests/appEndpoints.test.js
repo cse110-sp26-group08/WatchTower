@@ -8,8 +8,8 @@ import { User } from '../schema/userModel.js';
 describe('App endpoints', () => {
   const app = createApp();
 
-  test('GET /app_selection.html serves the app selection page', async () => {
-    const response = await request(app).get('/app_selection.html');
+  test('GET /apps serves the app selection page', async () => {
+    const response = await request(app).get('/apps');
 
     expect(response.statusCode).toBe(200);
     expect(response.text).toContain('Select a current project or create a new one!');
