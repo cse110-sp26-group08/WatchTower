@@ -2,14 +2,14 @@
 
 import request from 'supertest';
 import { createApp } from '../app.js';
-import { App } from '../schema/appModel.js';
-import { User } from '../schema/userModel.js';
+import { insertApp, selectAppById } from '../schema/appModel.js';
+import { insertUser } from '../schema/userModel.js';
 
 describe('App endpoints', () => {
   const app = createApp();
 
   test('POST /api/apps creates an app for an owner', async () => {
-    const user = await User.create({
+    const user = await insertUser({
       username: 'owner',
       email: 'owner@example.com',
       passwordHash: 'hashed-password',
@@ -17,71 +17,71 @@ describe('App endpoints', () => {
 
     const response = await request(app)
       .post('/api/apps')
-      .send({ ownerId: user._id.toString(), name: ' WatchTower Web ' });
+      .send({ ownerId: user.id, name: ' WatchTower Web ' });
 
     expect(response.statusCode).toBe(201);
     expect(response.body.app.name).toBe('WatchTower Web');
-    expect(response.body.app.ownerId).toBe(user._id.toString());
+    expect(response.body.app.ownerId).toBe(user.id);
     expect(response.body.app.apiKey).toBeUndefined();
 
-    const savedApp = await App.findById(response.body.app._id).exec();
+    const savedApp = await selectAppById(response.body.app.id);
     expect(savedApp).not.toBeNull();
   });
 
   test('POST /api/apps returns 400 for invalid app payloads', async () => {
     const response = await request(app)
       .post('/api/apps')
-      .send({ ownerId: 'not-an-object-id', name: 'Broken App' });
+      .send({ ownerId: 'not-a-uuid', name: 'Broken App' });
 
     expect(response.statusCode).toBe(400);
     expect(response.body.error).toBe('Invalid ownerId');
   });
 
   test('GET /api/apps/:id returns a saved app', async () => {
-    const user = await User.create({
+    const user = await insertUser({
       username: 'owner',
       email: 'owner@example.com',
       passwordHash: 'hashed-password',
     });
-    const savedApp = await App.create({ ownerId: user._id, name: 'API' });
+    const savedApp = await insertApp({ ownerId: user.id, name: 'API' });
 
-    const getResponse = await request(app).get(`/api/apps/${savedApp._id}`);
+    const getResponse = await request(app).get(`/api/apps/${savedApp.id}`);
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.body.app.name).toBe('API');
     expect(getResponse.body.app.apiKey).toBeUndefined();
   });
 
   test('DELETE /api/apps/:id deletes a saved app', async () => {
-    const user = await User.create({
+    const user = await insertUser({
       username: 'owner',
       email: 'owner@example.com',
       passwordHash: 'hashed-password',
     });
-    const savedApp = await App.create({ ownerId: user._id, name: 'API' });
+    const savedApp = await insertApp({ ownerId: user.id, name: 'API' });
 
-    const deleteResponse = await request(app).delete(`/api/apps/${savedApp._id}`);
+    const deleteResponse = await request(app).delete(`/api/apps/${savedApp.id}`);
 
     expect(deleteResponse.statusCode).toBe(200);
-    expect(deleteResponse.body.app._id).toBe(savedApp._id.toString());
-    await expect(App.findById(savedApp._id).exec()).resolves.toBeNull();
+    expect(deleteResponse.body.app.id).toBe(savedApp.id);
+    await expect(selectAppById(savedApp.id)).resolves.toBeNull();
   });
 
   test('GET /api/apps/users/:ownerId lists apps for a user', async () => {
-    const owner = await User.create({
+    const owner = await insertUser({
       username: 'owner',
       email: 'owner@example.com',
       passwordHash: 'hashed-password',
     });
-    const otherOwner = await User.create({
+    const otherOwner = await insertUser({
       username: 'other',
       email: 'other@example.com',
       passwordHash: 'hashed-password',
     });
-    await App.create({ ownerId: owner._id, name: 'Web' });
-    await App.create({ ownerId: owner._id, name: 'API' });
-    await App.create({ ownerId: otherOwner._id, name: 'Other' });
+    await insertApp({ ownerId: owner.id, name: 'Web' });
+    await insertApp({ ownerId: owner.id, name: 'API' });
+    await insertApp({ ownerId: otherOwner.id, name: 'Other' });
 
-    const response = await request(app).get(`/api/apps/users/${owner._id}`);
+    const response = await request(app).get(`/api/apps/users/${owner.id}`);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.apps).toHaveLength(2);
@@ -89,7 +89,7 @@ describe('App endpoints', () => {
   });
 
   test('GET /api/apps/:id returns 404 for unknown apps', async () => {
-    const response = await request(app).get('/api/apps/000000000000000000000000');
+    const response = await request(app).get('/api/apps/00000000-0000-0000-0000-000000000000');
 
     expect(response.statusCode).toBe(404);
   });
