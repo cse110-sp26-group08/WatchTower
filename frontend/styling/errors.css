@@ -1,0 +1,200 @@
+/* ── Severity badges ──────────────────────────────────────────────────── */
+.severity-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sev-critical { background: #fef3f2; color: #b42318; }
+.sev-high     { background: #fef6ee; color: #b54708; }
+.sev-medium   { background: #fefce8; color: #854d0e; }
+.sev-low      { background: #f0fdf4; color: #166534; }
+
+/* ── Error type badge ─────────────────────────────────────────────────── */
+.error-type-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  background: #eef3ff;
+  color: #1f49ff;
+  font-weight: 600;
+}
+
+/* ── Stack trace toggle + display ────────────────────────────────────── */
+.stack-toggle {
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.stack-toggle:hover {
+  background: var(--panel-alt);
+}
+
+.stack-trace {
+  display: none;
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: #0f172a;
+  color: #94a3b8;
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.stack-trace.open {
+  display: block;
+}
+
+/* ── Errors table ─────────────────────────────────────────────────────── */
+.error-row td {
+  vertical-align: top;
+  padding: 16px 10px;
+}
+
+.url-cell {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.85rem;
+  cursor: help;
+}
+
+.errors-table-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.table-header h2 {
+  margin: 0;
+}
+
+.type-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.type-filter-row label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.type-filter-row select {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-alt);
+}
+
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* ── Severity breakdown cards ─────────────────────────────────────────── */
+.breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.breakdown-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+}
+
+.breakdown-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 0 0 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.breakdown-val {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+}
+
+.breakdown-card.critical { border-left: 4px solid #f04438; border-radius: 0 16px 16px 0; }
+.breakdown-card.high     { border-left: 4px solid #f79009; border-radius: 0 16px 16px 0; }
+.breakdown-card.medium   { border-left: 4px solid #eab308; border-radius: 0 16px 16px 0; }
+.breakdown-card.low      { border-left: 4px solid #16a34a; border-radius: 0 16px 16px 0; }
+.breakdown-card.total    { border-left: 4px solid var(--blue); border-radius: 0 16px 16px 0; }
+
+.breakdown-card.critical .breakdown-val { color: #b42318; }
+.breakdown-card.high     .breakdown-val { color: #b54708; }
+.breakdown-card.medium   .breakdown-val { color: #854d0e; }
+.breakdown-card.low      .breakdown-val { color: #166534; }
+.breakdown-card.total    .breakdown-val { color: var(--blue); }
+
+/* ── Page header ──────────────────────────────────────────────────────── */
+.page-header {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.page-subtitle {
+  color: var(--muted);
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+/* ── Active nav item ──────────────────────────────────────────────────── */
+.nav-option.active {
+  background: rgb(255 255 255 / 12%);
+  border: 1px solid rgb(255 255 255 / 10%);
+}
