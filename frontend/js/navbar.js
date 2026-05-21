@@ -2,6 +2,21 @@ const navbarScriptUrl = document.currentScript ? document.currentScript.src : ''
 const defaultAssetBase = navbarScriptUrl
     ? new URL('../assets', navbarScriptUrl).href
     : '/assets';
+const isProjectRootStaticServer = navbarScriptUrl
+    && new URL(navbarScriptUrl).pathname.endsWith('/frontend/js/navbar.js');
+const defaultHomeHref = isProjectRootStaticServer
+    ? new URL('../webpages/index.html', navbarScriptUrl).href
+    : '/';
+const defaultLoginHref = isProjectRootStaticServer
+    ? new URL('../webpages/login.html', navbarScriptUrl).href
+    : '/login';
+const defaultSignupHref = isProjectRootStaticServer
+    ? new URL('../webpages/signup.html', navbarScriptUrl).href
+    : '/signup';
+const defaultDocsHref = isProjectRootStaticServer
+    ? new URL('../webpages/docs.html', navbarScriptUrl).href
+    : '/docs';
+const defaultProductHref = 'https://github.com/cse110-sp26-group08/WatchTower/blob/main/documentation/rest-api.md';
 
 class WatchTowerNavbar extends HTMLElement {
     connectedCallback() {
@@ -21,23 +36,24 @@ class WatchTowerNavbar extends HTMLElement {
     }
 
     render() {
-        const homeHref = this.getOption('home-href', '/');
-        const productHref = this.getOption('product-href', '/#product');
-        const docsHref = this.getOption('docs-href', '/#docs');
+        const homeHref = this.getOption('home-href', defaultHomeHref);
+        const productHref = this.getOption('product-href', defaultProductHref);
+        const docsHref = this.getOption('docs-href', defaultDocsHref);
         const githubHref = this.getOption(
             'github-href',
             'https://github.com/cse110-sp26-group08/WatchTower',
         );
-        const loginHref = this.getOption('login-href', '/login');
+        const loginHref = this.getOption('login-href', defaultLoginHref);
         const contactHref = this.getOption('contact-href', 'mailto:contact@watchtower.dev');
-        const signupHref = this.getOption('signup-href', '/signup');
+        const signupHref = this.getOption('signup-href', defaultSignupHref);
 
         this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
+                    height: 98px;
                     position: relative;
-                    z-index: 1;
+                    z-index: 1000;
                     font-family: Manrope, Arial, sans-serif;
                     color: #211f24;
                 }
@@ -52,10 +68,31 @@ class WatchTowerNavbar extends HTMLElement {
                 }
 
                 .site-header {
-                    padding: 16px 0 0;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 16px 0 12px;
+                    pointer-events: none;
+                }
+
+                .site-header::before {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    background:
+                        linear-gradient(
+                            180deg,
+                            rgb(250 250 248 / 90%) 0%,
+                            rgb(250 250 248 / 62%) 68%,
+                            rgb(250 250 248 / 0%) 100%
+                        );
+                    backdrop-filter: blur(10px);
                 }
 
                 .site-nav {
+                    position: relative;
+                    z-index: 1;
                     width: fit-content;
                     max-width: calc(100% - 48px);
                     min-height: 66px;
@@ -70,6 +107,7 @@ class WatchTowerNavbar extends HTMLElement {
                     background: rgb(255 255 255 / 72%);
                     box-shadow: 0 18px 48px rgb(64 61 77 / 12%);
                     backdrop-filter: blur(22px);
+                    pointer-events: auto;
                 }
 
                 .brand-mark {
@@ -253,8 +291,12 @@ class WatchTowerNavbar extends HTMLElement {
                 }
 
                 @media (width <= 980px) {
+                    :host {
+                        height: 220px;
+                    }
+
                     .site-header {
-                        padding-top: 12px;
+                        padding: 12px 0 14px;
                     }
 
                     .site-nav {
@@ -276,6 +318,10 @@ class WatchTowerNavbar extends HTMLElement {
                 }
 
                 @media (width <= 620px) {
+                    :host {
+                        height: 252px;
+                    }
+
                     .site-nav {
                         border-radius: 22px;
                     }
@@ -329,6 +375,27 @@ class WatchTowerNavbar extends HTMLElement {
                 </nav>
             </header>
         `;
+
+        const brandLink = this.shadowRoot.querySelector('.brand-link');
+        if (brandLink) {
+            brandLink.addEventListener('click', (event) => {
+                this.handleBrandClick(event, homeHref);
+            });
+        }
+    }
+
+    handleBrandClick(event, homeHref) {
+        const targetUrl = new URL(homeHref, window.location.href);
+        const currentUrl = new URL(window.location.href);
+        const isCurrentPage = targetUrl.origin === currentUrl.origin
+            && targetUrl.pathname === currentUrl.pathname
+            && targetUrl.search === currentUrl.search
+            && targetUrl.hash === currentUrl.hash;
+
+        if (isCurrentPage) {
+            event.preventDefault();
+            window.location.reload();
+        }
     }
 }
 

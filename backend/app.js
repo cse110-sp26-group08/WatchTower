@@ -78,6 +78,7 @@ function createApp() {
   // Serve static assets for the frontend
   app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
   app.use('/js', express.static(path.join(__dirname, '../frontend/js')));
+  app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
 
   // Serve Pages
   app.get('/', (req, res) => {
@@ -108,6 +109,10 @@ function createApp() {
 
   app.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/signup.html'));
+  });
+
+  app.get('/docs', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/docs.html'));
   });
 
   app.post('/signup', async (req, res) => {

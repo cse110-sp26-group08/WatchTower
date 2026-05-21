@@ -37,6 +37,8 @@ a {
 
 .homepage {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   overflow-x: hidden;
   position: relative;
 }
@@ -59,14 +61,19 @@ a {
   z-index: 1;
   width: min(1360px, calc(100% - 48px));
   margin: 0 auto;
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .hero {
-  min-height: calc(100vh - 90px);
-  padding: 9.5rem 0 7.5rem;
+  width: 100%;
+  min-height: 0;
+  padding: clamp(1rem, 3vh, 2.4rem) 0 clamp(1.2rem, 3.2vh, 2.6rem);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
 
 .hero-copy {
@@ -88,14 +95,14 @@ a {
   margin: 12px auto 0;
   font-size: 1.58rem;
   line-height: 1.28;
-  font-weight: 500;
+  font-weight: 200;
   color: var(--text);
   text-wrap: balance;
 }
 
 .hero-diagram {
   width: min(100%, 1240px);
-  margin-top: 8.8rem;
+  margin-top: clamp(2.2rem, 6vh, 4.6rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -307,7 +314,7 @@ a {
 
 @media (width <= 1280px) {
   .hero {
-    padding-top: 7rem;
+    padding-top: clamp(1rem, 2.8vh, 2rem);
   }
 
   .hero h1 {
@@ -319,7 +326,7 @@ a {
   }
 
   .hero-diagram {
-    margin-top: 6.3rem;
+    margin-top: clamp(2rem, 5vh, 3.6rem);
     gap: 18px;
   }
 
@@ -357,7 +364,7 @@ a {
 
   .hero {
     min-height: auto;
-    padding: 5rem 0 4.5rem;
+    padding: 2.6rem 0 3rem;
   }
 
   .hero h1 {
@@ -369,7 +376,7 @@ a {
   }
 
   .hero-diagram {
-    margin-top: 4.2rem;
+    margin-top: 2.8rem;
     flex-direction: column;
     gap: 14px;
   }
@@ -390,7 +397,7 @@ a {
 
 @media (width <= 620px) {
   .hero {
-    padding-top: 4rem;
+    padding-top: 2.2rem;
   }
 
   .hero h1 {
