@@ -32,7 +32,7 @@ async function createErrorEndpoint(req, res) {
     }
 
     const event = await createEvent({
-      appId: app._id,
+      appId: app.id,
       type: 'error',
       timestamp: timestamp ? new Date(timestamp) : new Date(),
       url,
