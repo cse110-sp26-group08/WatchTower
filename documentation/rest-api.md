@@ -18,6 +18,7 @@ This document describes the REST API exposed by `backend/app.js`.
   - [Get App](#get-app)
   - [List Apps By Owner](#list-apps-by-owner)
   - [Delete App](#delete-app)
+  - [Force Status Check](#force-status-check)
 - [Error Events](#error-events)
   - [Create Error Event](#create-error-event)
   - [Get Error Event](#get-error-event)
@@ -261,7 +262,7 @@ curl -X DELETE http://localhost:3000/api/users/00000000-0000-0000-0000-000000000
 POST /api/apps
 ```
 
-Creates an app owned by a user. The backend generates an `apiKey`, but creation responses do not expose it.
+Creates an app owned by a user. The backend generates an `apiKey`, but creation responses do not expose it. If a `url` is provided, an immediate downtime check is run and the result is stored in `downOrNot`. A background cron job then checks all apps with a URL every 5 minutes.
 
 #### Request Body
 
@@ -269,6 +270,7 @@ Creates an app owned by a user. The backend generates an `apiKey`, but creation 
 | --- | --- | --- | --- |
 | `ownerId` | UUID string | Yes | ID of the user who owns the app. |
 | `name` | string | Yes | App display name. Trimmed before storage. |
+| `url` | string | No | URL of the website to monitor. Triggers an immediate downtime check on creation. |
 
 #### Example Request
 
@@ -277,7 +279,8 @@ curl -X POST http://localhost:3000/api/apps \
   -H "Content-Type: application/json" \
   -d '{
     "ownerId": "00000000-0000-0000-0000-000000000001",
-    "name": "WatchTower Web"
+    "name": "WatchTower Web",
+    "url": "https://example.com"
   }'
 ```
 
@@ -289,6 +292,8 @@ curl -X POST http://localhost:3000/api/apps \
     "id": "00000000-0000-0000-0000-000000000002",
     "ownerId": "00000000-0000-0000-0000-000000000001",
     "name": "WatchTower Web",
+    "url": "https://example.com",
+    "downOrNot": [true],
     "createdAt": "2026-05-14T07:00:00.000Z",
     "updatedAt": "2026-05-14T07:00:00.000Z"
   }
@@ -324,6 +329,8 @@ curl http://localhost:3000/api/apps/00000000-0000-0000-0000-000000000002
     "id": "00000000-0000-0000-0000-000000000002",
     "ownerId": "00000000-0000-0000-0000-000000000001",
     "name": "WatchTower Web",
+    "url": "https://example.com",
+    "downOrNot": [true, false, true],
     "createdAt": "2026-05-14T07:00:00.000Z",
     "updatedAt": "2026-05-14T07:00:00.000Z"
   }
@@ -395,6 +402,8 @@ curl -X DELETE http://localhost:3000/api/apps/00000000-0000-0000-0000-0000000000
     "id": "00000000-0000-0000-0000-000000000002",
     "ownerId": "00000000-0000-0000-0000-000000000001",
     "name": "WatchTower Web",
+    "url": "https://example.com",
+    "downOrNot": [true],
     "createdAt": "2026-05-14T07:00:00.000Z",
     "updatedAt": "2026-05-14T07:00:00.000Z"
   }
@@ -406,6 +415,45 @@ curl -X DELETE http://localhost:3000/api/apps/00000000-0000-0000-0000-0000000000
 | Status | Meaning |
 | --- | --- |
 | `200` | App deleted. |
+| `404` | App not found. |
+
+### Force Status Check
+
+```http
+POST /api/apps/:id/forceStatus
+```
+
+Immediately runs a downtime check for the app without altering the existing cron schedule. Updates `downOrNot` in the database if the status changed from the last check.
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:3000/api/apps/00000000-0000-0000-0000-000000000002/forceStatus
+```
+
+#### Example Response
+
+```json
+{
+  "app": {
+    "id": "00000000-0000-0000-0000-000000000002",
+    "ownerId": "00000000-0000-0000-0000-000000000001",
+    "name": "WatchTower Web",
+    "url": "https://example.com",
+    "downOrNot": [true, false],
+    "createdAt": "2026-05-14T07:00:00.000Z",
+    "updatedAt": "2026-05-14T07:05:00.000Z"
+  },
+  "isUp": false
+}
+```
+
+#### Status Codes
+
+| Status | Meaning |
+| --- | --- |
+| `200` | Check ran. `isUp` is `true` if the site responded with a non-5xx status, `false` otherwise. |
+| `400` | App has no URL configured. |
 | `404` | App not found. |
 
 </details>

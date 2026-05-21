@@ -28,6 +28,34 @@ describe('appController', () => {
     expect(savedApp.name).toBe('WatchTower Web');
   });
 
+  test('createApp saves url when provided', async () => {
+    const ownerId = crypto.randomUUID();
+
+    const app = await createApp({
+      ownerId,
+      name: 'Monitored App',
+      url: '  https://example.com  ',
+    });
+
+    expect(app.url).toBe('https://example.com');
+
+    const savedApp = await selectAppById(app.id);
+    expect(savedApp.url).toBe('https://example.com');
+    expect(Array.isArray(savedApp.downOrNot)).toBe(true);
+    expect(savedApp.downOrNot).toEqual([]);
+  });
+
+  test('createApp saves without url when not provided', async () => {
+    const ownerId = crypto.randomUUID();
+
+    const app = await createApp({ ownerId, name: 'No URL App' });
+
+    expect(app.url).toBeNull();
+    const savedApp = await selectAppById(app.id);
+    expect(savedApp.url).toBeNull();
+    expect(savedApp.downOrNot).toEqual([]);
+  });
+
   test('getAppByApiKey returns a saved app with its apiKey', async () => {
     const ownerId = crypto.randomUUID();
     const app = await createApp({ ownerId, name: 'API' });

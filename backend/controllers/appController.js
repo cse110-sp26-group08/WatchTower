@@ -12,17 +12,20 @@ import { withToObject, withToObjectArray } from '../util/toObject.js';
 
 /**
  * Create a new app.
- * @param {{ownerId:string, name:string}} appData
+ * @param {{ownerId:string, name:string, url?:string}} appData
  * @returns {Promise<object>}
  * @throws {Error} if ownerId is invalid or name is missing
  */
-async function createApp({ ownerId, name }) {
+async function createApp({ ownerId, name, url }) {
   if (!isValidId(ownerId)) throw new Error('Invalid ownerId');
   if (!name || typeof name !== 'string' || !name.trim()) {
     throw new Error('name is required and must be a non-empty string');
   }
 
-  return withToObject(await insertApp({ ownerId, name: name.trim() }));
+  const data = { ownerId, name: name.trim() };
+  if (url && typeof url === 'string' && url.trim()) data.url = url.trim();
+
+  return withToObject(await insertApp(data));
 }
 
 /**

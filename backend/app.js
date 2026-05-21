@@ -27,6 +27,7 @@ import {
 import {
   createAppEndpoint,
   deleteAppEndpoint,
+  forceStatusEndpoint,
   getAppEndpoint,
   getAppsByOwnerEndpoint,
 } from './endpoints/apps.js';
@@ -162,6 +163,7 @@ function createApp() {
 
   // App Endpoints
   app.post('/api/apps', createAppEndpoint);
+  app.post('/api/apps/:id/forceStatus', forceStatusEndpoint);
   app.get('/api/apps/:id', getAppEndpoint);
   app.delete('/api/apps/:id', deleteAppEndpoint);
   app.get('/api/apps/users/:ownerId', getAppsByOwnerEndpoint);
