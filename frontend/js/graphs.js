@@ -21,7 +21,7 @@ const AUTO_REFRESH_MS = 5000;
 async function initDashboard() {
     const selectedApp = await resolveSelectedApp();
 
-    if (!selectedApp?._id) {
+    if (!selectedApp?.id) {
         setStatus('DOWN', 'No selected project.', 'Return to app selection and choose a project.');
         renderEmptyLogs('No selected app.');
         return;
@@ -43,7 +43,7 @@ async function resolveSelectedApp() {
             const data = await response.json();
 
             if (response.ok && data.app) {
-                const appWithUrl = storedApp && storedApp._id === data.app._id
+                const appWithUrl = storedApp && storedApp.id === data.app.id
                     ? { ...data.app, url: storedApp.url }
                     : data.app;
                 localStorage.setItem('watchtowerSelectedApp', JSON.stringify(appWithUrl));
@@ -60,7 +60,7 @@ async function resolveSelectedApp() {
 function bindDashboardControls() {
     document.getElementById('refresh-dashboard').addEventListener('click', async () => {
         const selectedApp = readJsonStorage('watchtowerSelectedApp');
-        if (selectedApp?._id) {
+        if (selectedApp?.id) {
             await refreshDashboard(selectedApp);
         }
     });
@@ -83,7 +83,7 @@ function bindDashboardControls() {
         }
 
         const selectedApp = readJsonStorage('watchtowerSelectedApp');
-        if (selectedApp?._id) {
+        if (selectedApp?.id) {
             await refreshDashboard(selectedApp);
         }
     });
@@ -103,8 +103,8 @@ async function refreshDashboard(selectedApp) {
 
     try {
         const [errorResponse, performanceResponse] = await Promise.all([
-            fetch(`/api/events/error/apps/${selectedApp._id}`, { cache: 'no-store' }),
-            fetch(`/api/events/performance/apps/${selectedApp._id}`, { cache: 'no-store' }),
+            fetch(`/api/events/error/apps/${selectedApp.id}`, { cache: 'no-store' }),
+            fetch(`/api/events/performance/apps/${selectedApp.id}`, { cache: 'no-store' }),
         ]);
 
         const errorData = await errorResponse.json();
@@ -129,7 +129,7 @@ function startAutoRefresh() {
     stopAutoRefresh();
     refreshIntervalId = window.setInterval(async () => {
         const selectedApp = readJsonStorage('watchtowerSelectedApp');
-        if (!selectedApp?._id || document.hidden) {
+        if (!selectedApp?.id || document.hidden) {
             return;
         }
 
