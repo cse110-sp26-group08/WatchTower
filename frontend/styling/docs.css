@@ -24,13 +24,16 @@
     margin: 0;
     font-size: clamp(1.8rem, 3vw, 2.4rem);
 }
+
 .docs-main h3 {
     padding-left: 3em;
 }
+
 .docs-faq h2 {
     margin: 0;
     font-size: clamp(1.8rem, 3vw, 2.4rem);
 }
+
 .docs-faq {
     margin: 3em;
 }
@@ -48,21 +51,21 @@
 
 .docs-faq details {
 
-  padding: 18px 0;
+    padding: 18px 0;
 
-  border-top: 1px solid var(--line);
+    border-top: 1px solid var(--line);
 
 }
 
 .docs-faq summary {
-  cursor: pointer;
-  font-weight: 700;
+    cursor: pointer;
+    font-weight: 700;
 }
 
 .docs-faq summary:hover {
-  color: var(--blue);
+    color: var(--blue);
 }
 
 .docs-faq details p {
-  color: var(--muted);
+    color: var(--muted);
 }
