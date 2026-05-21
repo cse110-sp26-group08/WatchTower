@@ -69,7 +69,7 @@ function renderApps(apps, ownerId) {
         const card = document.createElement('button');
         card.type = 'button';
         card.className = 'app-card';
-        const appUrl = storedUrls[app.id] || '';
+        const appUrl = app.url || storedUrls[app.id] || '';
 
         card.innerHTML = `
             <div class="app-card-top">
@@ -189,6 +189,7 @@ async function createProjectFromDialog() {
             body: JSON.stringify({
                 ownerId: user.id,
                 name,
+                url,
             }),
         });
 
@@ -197,10 +198,6 @@ async function createProjectFromDialog() {
         if (!response.ok) {
             updateMessage(message, data.message || data.error || 'Failed to create project.', 'error');
             return;
-        }
-
-        if (data.app?.id) {
-            saveAppUrl(data.app.id, url);
         }
 
         updateMessage(message, 'Project card created.', 'success');

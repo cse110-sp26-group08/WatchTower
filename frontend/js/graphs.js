@@ -43,9 +43,8 @@ async function resolveSelectedApp() {
             const data = await response.json();
 
             if (response.ok && data.app) {
-                const appWithUrl = storedApp && storedApp.id === data.app.id
-                    ? { ...data.app, url: storedApp.url }
-                    : data.app;
+                const resolvedUrl = data.app.url || (storedApp?.id === data.app.id ? storedApp.url : undefined);
+                const appWithUrl = { ...data.app, url: resolvedUrl };
                 localStorage.setItem('watchtowerSelectedApp', JSON.stringify(appWithUrl));
                 return appWithUrl;
             }
