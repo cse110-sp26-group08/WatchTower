@@ -43,7 +43,7 @@ async function createPerformanceEndpoint(req, res) {
     }
 
     const event = await createEvent({
-      appId: app._id,
+      appId: app.id,
       type: 'performance',
       timestamp: timestamp ? new Date(timestamp) : new Date(),
       url,

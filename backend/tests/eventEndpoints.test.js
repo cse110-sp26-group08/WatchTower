@@ -1,10 +1,11 @@
 /* eslint-env jest */
 
 import request from 'supertest';
-import mongoose from 'mongoose';
+import { db } from '../util/database.js';
+import { count } from 'drizzle-orm';
 import { createApp } from '../app.js';
-import { App } from '../schema/appModel.js';
-import { Event } from '../schema/eventModel.js';
+import { insertApp } from '../schema/appModel.js';
+import { insertEvent, selectEventById, events } from '../schema/eventModel.js';
 
 describe('Event endpoints', () => {
   const app = createApp();
@@ -18,7 +19,7 @@ describe('Event endpoints', () => {
   });
 
   test('POST /api/events/error saves an error event', async () => {
-    const savedApp = await App.create({ ownerId: new mongoose.Types.ObjectId(), name: 'Web' });
+    const savedApp = await insertApp({ ownerId: crypto.randomUUID(), name: 'Web' });
 
     const response = await request(app)
       .post('/api/events/error')
@@ -35,9 +36,9 @@ describe('Event endpoints', () => {
     expect(response.body.event.type).toBe('error');
     expect(response.body.event.metadata.message).toBe('Something broke');
 
-    const savedEvent = await Event.findById(response.body.event._id).exec();
+    const savedEvent = await selectEventById(response.body.event.id);
     expect(savedEvent).not.toBeNull();
-    expect(savedEvent.appId.toString()).toBe(savedApp._id.toString());
+    expect(savedEvent.appId).toBe(savedApp.id);
   });
 
   test('POST /api/events/error returns 401 with an invalid apiKey', async () => {
@@ -49,7 +50,8 @@ describe('Event endpoints', () => {
       });
 
     expect(response.statusCode).toBe(401);
-    await expect(Event.countDocuments().exec()).resolves.toBe(0);
+    const [{ total }] = await db.select({ total: count() }).from(events);
+    expect(Number(total)).toBe(0);
   });
 
   test('POST /api/events/performance returns 400 without apiKey', async () => {
@@ -61,7 +63,7 @@ describe('Event endpoints', () => {
   });
 
   test('POST /api/events/performance saves a performance event', async () => {
-    const savedApp = await App.create({ ownerId: new mongoose.Types.ObjectId(), name: 'Web' });
+    const savedApp = await insertApp({ ownerId: crypto.randomUUID(), name: 'Web' });
 
     const response = await request(app)
       .post('/api/events/performance')
@@ -81,9 +83,9 @@ describe('Event endpoints', () => {
     expect(response.body.event.type).toBe('performance');
     expect(response.body.event.metadata.loadTimeMs).toBe(1200);
 
-    const savedEvent = await Event.findById(response.body.event._id).exec();
+    const savedEvent = await selectEventById(response.body.event.id);
     expect(savedEvent).not.toBeNull();
-    expect(savedEvent.appId.toString()).toBe(savedApp._id.toString());
+    expect(savedEvent.appId).toBe(savedApp.id);
   });
 
   test('POST /api/events/performance returns 401 with an invalid apiKey', async () => {
@@ -95,44 +97,47 @@ describe('Event endpoints', () => {
       });
 
     expect(response.statusCode).toBe(401);
-    await expect(Event.countDocuments().exec()).resolves.toBe(0);
+    const [{ total }] = await db.select({ total: count() }).from(events);
+    expect(Number(total)).toBe(0);
   });
 
   test('GET /api/events/error/:id returns a saved error event', async () => {
-    const appId = new mongoose.Types.ObjectId();
-    const event = await Event.create({
-      appId,
+    const event = await insertEvent({
+      appId: crypto.randomUUID(),
       type: 'error',
+      timestamp: new Date(),
+      receivedAt: new Date(),
       metadata: { message: 'Something broke' },
     });
 
-    const getResponse = await request(app).get(`/api/events/error/${event._id}`);
+    const getResponse = await request(app).get(`/api/events/error/${event.id}`);
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.body.event.type).toBe('error');
     expect(getResponse.body.event.metadata.message).toBe('Something broke');
   });
 
   test('DELETE /api/events/error/:id deletes a saved error event', async () => {
-    const appId = new mongoose.Types.ObjectId();
-    const event = await Event.create({
-      appId,
+    const event = await insertEvent({
+      appId: crypto.randomUUID(),
       type: 'error',
+      timestamp: new Date(),
+      receivedAt: new Date(),
       metadata: { message: 'Something broke' },
     });
 
-    const deleteResponse = await request(app).delete(`/api/events/error/${event._id}`);
+    const deleteResponse = await request(app).delete(`/api/events/error/${event.id}`);
 
     expect(deleteResponse.statusCode).toBe(200);
-    expect(deleteResponse.body.event._id).toBe(event._id.toString());
-    await expect(Event.findById(event._id).exec()).resolves.toBeNull();
+    expect(deleteResponse.body.event.id).toBe(event.id);
+    await expect(selectEventById(event.id)).resolves.toBeNull();
   });
 
   test('GET /api/events/error/apps/:appId lists error events for an app', async () => {
-    const appId = new mongoose.Types.ObjectId();
-    const otherAppId = new mongoose.Types.ObjectId();
-    await Event.create({ appId, type: 'error' });
-    await Event.create({ appId, type: 'performance' });
-    await Event.create({ appId: otherAppId, type: 'error' });
+    const appId = crypto.randomUUID();
+    const otherAppId = crypto.randomUUID();
+    await insertEvent({ appId, type: 'error', timestamp: new Date(), receivedAt: new Date() });
+    await insertEvent({ appId, type: 'performance', timestamp: new Date(), receivedAt: new Date() });
+    await insertEvent({ appId: otherAppId, type: 'error', timestamp: new Date(), receivedAt: new Date() });
 
     const response = await request(app).get(`/api/events/error/apps/${appId}`);
 
@@ -142,40 +147,42 @@ describe('Event endpoints', () => {
   });
 
   test('GET /api/events/performance/:id returns a saved performance event', async () => {
-    const appId = new mongoose.Types.ObjectId();
-    const event = await Event.create({
-      appId,
+    const event = await insertEvent({
+      appId: crypto.randomUUID(),
       type: 'performance',
+      timestamp: new Date(),
+      receivedAt: new Date(),
       metadata: { loadTimeMs: 1200 },
     });
 
-    const getResponse = await request(app).get(`/api/events/performance/${event._id}`);
+    const getResponse = await request(app).get(`/api/events/performance/${event.id}`);
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.body.event.type).toBe('performance');
     expect(getResponse.body.event.metadata.loadTimeMs).toBe(1200);
   });
 
   test('DELETE /api/events/performance/:id deletes a saved performance event', async () => {
-    const appId = new mongoose.Types.ObjectId();
-    const event = await Event.create({
-      appId,
+    const event = await insertEvent({
+      appId: crypto.randomUUID(),
       type: 'performance',
+      timestamp: new Date(),
+      receivedAt: new Date(),
       metadata: { loadTimeMs: 1200 },
     });
 
-    const deleteResponse = await request(app).delete(`/api/events/performance/${event._id}`);
+    const deleteResponse = await request(app).delete(`/api/events/performance/${event.id}`);
 
     expect(deleteResponse.statusCode).toBe(200);
-    expect(deleteResponse.body.event._id).toBe(event._id.toString());
-    await expect(Event.findById(event._id).exec()).resolves.toBeNull();
+    expect(deleteResponse.body.event.id).toBe(event.id);
+    await expect(selectEventById(event.id)).resolves.toBeNull();
   });
 
   test('GET /api/events/performance/apps/:appId lists performance events for an app', async () => {
-    const appId = new mongoose.Types.ObjectId();
-    const otherAppId = new mongoose.Types.ObjectId();
-    await Event.create({ appId, type: 'error' });
-    await Event.create({ appId, type: 'performance' });
-    await Event.create({ appId: otherAppId, type: 'performance' });
+    const appId = crypto.randomUUID();
+    const otherAppId = crypto.randomUUID();
+    await insertEvent({ appId, type: 'error', timestamp: new Date(), receivedAt: new Date() });
+    await insertEvent({ appId, type: 'performance', timestamp: new Date(), receivedAt: new Date() });
+    await insertEvent({ appId: otherAppId, type: 'performance', timestamp: new Date(), receivedAt: new Date() });
 
     const response = await request(app).get(`/api/events/performance/apps/${appId}`);
 
@@ -185,13 +192,15 @@ describe('Event endpoints', () => {
   });
 
   test('typed event routes return 404 for unknown or mismatched events', async () => {
-    const performanceEvent = await Event.create({
-      appId: new mongoose.Types.ObjectId(),
+    const performanceEvent = await insertEvent({
+      appId: crypto.randomUUID(),
       type: 'performance',
+      timestamp: new Date(),
+      receivedAt: new Date(),
     });
 
-    const unknownResponse = await request(app).get('/api/events/error/000000000000000000000000');
-    const mismatchResponse = await request(app).get(`/api/events/error/${performanceEvent._id}`);
+    const unknownResponse = await request(app).get('/api/events/error/00000000-0000-0000-0000-000000000000');
+    const mismatchResponse = await request(app).get(`/api/events/error/${performanceEvent.id}`);
 
     expect(unknownResponse.statusCode).toBe(404);
     expect(mismatchResponse.statusCode).toBe(404);
