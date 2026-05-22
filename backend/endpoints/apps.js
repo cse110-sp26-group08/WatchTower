@@ -8,7 +8,7 @@ import {
   getAppById,
 } from '../controllers/appController.js';
 import { selectAllApps, updateAppDownOrNot } from '../schema/appModel.js';
-import { checkAndNotifyDowntime } from '../util/DowntimeNotificationEnsurer.js';
+import { checkAndNotifyDowntime } from '../util/downtimeNotificationEnsurer.js';
 
 /**
  * Check whether a website is up by making an HTTP GET request.

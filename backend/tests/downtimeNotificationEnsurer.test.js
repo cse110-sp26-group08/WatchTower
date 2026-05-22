@@ -15,7 +15,7 @@ jest.unstable_mockModule('../util/emailService.js', () => ({
   sendEmail: jest.fn().mockResolvedValue(undefined),
 }));
 
-const { checkAndNotifyDowntime } = await import('../util/DowntimeNotificationEnsurer.js');
+const { checkAndNotifyDowntime } = await import('../util/downtimeNotificationEnsurer.js');
 const emailService = await import('../util/emailService.js');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
