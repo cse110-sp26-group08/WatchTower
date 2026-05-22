@@ -8,6 +8,7 @@ import {
   getAppById,
 } from '../controllers/appController.js';
 import { selectAllApps, updateAppDownOrNot } from '../schema/appModel.js';
+import { checkAndNotifyDowntime } from '../util/DowntimeNotificationEnsurer.js';
 
 /**
  * Check whether a website is up by making an HTTP GET request.
@@ -52,6 +53,7 @@ if (process.env.NODE_ENV !== 'test') {
     for (const app of allApps) {
       if (app.url) {
         await checkDowntimeStatus(app.id);
+        await checkAndNotifyDowntime(app.id);
       }
     }
   });

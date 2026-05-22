@@ -1,7 +1,7 @@
 /* eslint-env node */
 
 import crypto from 'crypto';
-import { pgTable, text, uuid, timestamp, json } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid, timestamp, json, boolean } from 'drizzle-orm/pg-core';
 import { eq } from 'drizzle-orm';
 import { db } from '../util/database.js';
 
@@ -12,6 +12,7 @@ export const apps = pgTable('apps', {
   url: text('url'),
   apiKey: text('api_key').notNull().unique(),
   downOrNot: json('down_or_not').$type().notNull().default([]),
+  emailSent: boolean('email_sent').notNull().default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -23,6 +24,7 @@ const DEFAULT_APP_COLUMNS = {
   name: apps.name,
   url: apps.url,
   downOrNot: apps.downOrNot,
+  emailSent: apps.emailSent,
   createdAt: apps.createdAt,
   updatedAt: apps.updatedAt,
 };
@@ -101,6 +103,21 @@ async function updateAppDownOrNot(id, downOrNot) {
   return app ?? null;
 }
 
+/**
+ * Update the emailSent flag for an app.
+ * @param {string} id
+ * @param {boolean} emailSent
+ * @returns {Promise<object|null>}
+ */
+async function updateAppEmailSent(id, emailSent) {
+  const [app] = await db
+    .update(apps)
+    .set({ emailSent, updatedAt: new Date() })
+    .where(eq(apps.id, id))
+    .returning(DEFAULT_APP_COLUMNS);
+  return app ?? null;
+}
+
 export {
   insertApp,
   selectAppById,
@@ -109,4 +126,5 @@ export {
   removeApp,
   selectAllApps,
   updateAppDownOrNot,
+  updateAppEmailSent,
 };

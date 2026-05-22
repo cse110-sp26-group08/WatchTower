@@ -252,28 +252,27 @@ curl -X DELETE http://localhost:3000/api/users/00000000-0000-0000-0000-000000000
 </details>
 
 ## Apps
-
+ 
 <details>
 <summary>Show app endpoints</summary>
-
 ### Create App
-
+ 
 ```http
 POST /api/apps
 ```
-
+ 
 Creates an app owned by a user. The backend generates an `apiKey`, but creation responses do not expose it. If a `url` is provided, an immediate downtime check is run and the result is stored in `downOrNot`. A background cron job then checks all apps with a URL every 5 minutes.
-
+ 
 #### Request Body
-
+ 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `ownerId` | UUID string | Yes | ID of the user who owns the app. |
 | `name` | string | Yes | App display name. Trimmed before storage. |
 | `url` | string | No | URL of the website to monitor. Triggers an immediate downtime check on creation. |
-
+ 
 #### Example Request
-
+ 
 ```bash
 curl -X POST http://localhost:3000/api/apps \
   -H "Content-Type: application/json" \
@@ -283,9 +282,9 @@ curl -X POST http://localhost:3000/api/apps \
     "url": "https://example.com"
   }'
 ```
-
+ 
 #### Example Response
-
+ 
 ```json
 {
   "app": {
@@ -294,35 +293,36 @@ curl -X POST http://localhost:3000/api/apps \
     "name": "WatchTower Web",
     "url": "https://example.com",
     "downOrNot": [true],
+    "emailSent": false,
     "createdAt": "2026-05-14T07:00:00.000Z",
     "updatedAt": "2026-05-14T07:00:00.000Z"
   }
 }
 ```
-
+ 
 #### Status Codes
-
+ 
 | Status | Meaning |
 | --- | --- |
 | `201` | App created. |
 | `400` | Invalid `ownerId` or missing/invalid `name`. |
-
+ 
 ### Get App
-
+ 
 ```http
 GET /api/apps/:id
 ```
-
+ 
 Fetches an app by ID. The response does not include `apiKey`.
-
+ 
 #### Example Request
-
+ 
 ```bash
 curl http://localhost:3000/api/apps/00000000-0000-0000-0000-000000000002
 ```
-
+ 
 #### Example Response
-
+ 
 ```json
 {
   "app": {
@@ -331,35 +331,36 @@ curl http://localhost:3000/api/apps/00000000-0000-0000-0000-000000000002
     "name": "WatchTower Web",
     "url": "https://example.com",
     "downOrNot": [true, false, true],
+    "emailSent": false,
     "createdAt": "2026-05-14T07:00:00.000Z",
     "updatedAt": "2026-05-14T07:00:00.000Z"
   }
 }
 ```
-
+ 
 #### Status Codes
-
+ 
 | Status | Meaning |
 | --- | --- |
 | `200` | App found. |
 | `404` | App not found. |
-
+ 
 ### List Apps By Owner
-
+ 
 ```http
 GET /api/apps/users/:ownerId
 ```
-
+ 
 Lists all apps owned by a user.
-
+ 
 #### Example Request
-
+ 
 ```bash
 curl http://localhost:3000/api/apps/users/00000000-0000-0000-0000-000000000001
 ```
-
+ 
 #### Example Response
-
+ 
 ```json
 {
   "apps": [
@@ -373,29 +374,29 @@ curl http://localhost:3000/api/apps/users/00000000-0000-0000-0000-000000000001
   ]
 }
 ```
-
+ 
 #### Status Codes
-
+ 
 | Status | Meaning |
 | --- | --- |
 | `200` | Apps returned. Unknown owner IDs return an empty `apps` array. |
-
+ 
 ### Delete App
-
+ 
 ```http
 DELETE /api/apps/:id
 ```
-
+ 
 Deletes an app by ID. The deleted app is returned without `apiKey`.
-
+ 
 #### Example Request
-
+ 
 ```bash
 curl -X DELETE http://localhost:3000/api/apps/00000000-0000-0000-0000-000000000002
 ```
-
+ 
 #### Example Response
-
+ 
 ```json
 {
   "app": {
@@ -404,35 +405,36 @@ curl -X DELETE http://localhost:3000/api/apps/00000000-0000-0000-0000-0000000000
     "name": "WatchTower Web",
     "url": "https://example.com",
     "downOrNot": [true],
+    "emailSent": false,
     "createdAt": "2026-05-14T07:00:00.000Z",
     "updatedAt": "2026-05-14T07:00:00.000Z"
   }
 }
 ```
-
+ 
 #### Status Codes
-
+ 
 | Status | Meaning |
 | --- | --- |
 | `200` | App deleted. |
 | `404` | App not found. |
-
+ 
 ### Force Status Check
-
+ 
 ```http
 POST /api/apps/:id/forceStatus
 ```
-
+ 
 Immediately runs a downtime check for the app without altering the existing cron schedule. Updates `downOrNot` in the database if the status changed from the last check.
-
+ 
 #### Example Request
-
+ 
 ```bash
 curl -X POST http://localhost:3000/api/apps/00000000-0000-0000-0000-000000000002/forceStatus
 ```
-
+ 
 #### Example Response
-
+ 
 ```json
 {
   "app": {
@@ -441,21 +443,22 @@ curl -X POST http://localhost:3000/api/apps/00000000-0000-0000-0000-000000000002
     "name": "WatchTower Web",
     "url": "https://example.com",
     "downOrNot": [true, false],
+    "emailSent": false,
     "createdAt": "2026-05-14T07:00:00.000Z",
     "updatedAt": "2026-05-14T07:05:00.000Z"
   },
   "isUp": false
 }
 ```
-
+ 
 #### Status Codes
-
+ 
 | Status | Meaning |
 | --- | --- |
 | `200` | Check ran. `isUp` is `true` if the site responded with a non-5xx status, `false` otherwise. |
 | `400` | App has no URL configured. |
 | `404` | App not found. |
-
+ 
 </details>
 
 ## Error Events
