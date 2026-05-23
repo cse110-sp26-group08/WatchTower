@@ -37,7 +37,7 @@ body {
 }
 
 /* Overwrite normal "link" look for navbar */
-a {
+.site-header a {
   color: inherit;
   text-decoration: none;
 }
@@ -86,13 +86,13 @@ a {
 }
 
 .nav-links a,
-.nav-login {
+.nav-logout {
   color: var(--text);
   transition: opacity 180ms ease, color 180ms ease;
 }
 
 .nav-links a:hover,
-.nav-login:hover {
+.nav-logout:hover {
   opacity: 0.66;
 }
 
@@ -137,14 +137,16 @@ a {
 /* aligns nav bar and main dash side-by-side */
 .dashboard-shell {
   display: inline-flex;
-  align-content: flex-start;
+  align-content:start;
 }
 
 /* Ki: altered side nav-panel to accommodate top navbar */
 .nav-panel {
   position: sticky;             /* makes nav panel follow user scroll */
   top: .5em;                    /* gap between top of navbar and top of website on scroll */
-  width: 240px;
+  flex-basis: 240px;            /* makes nav-panel static size in flexbox */
+  flex-grow: 0;                 /* makes nav-panel static size in flexbox */
+  flex-shrink: 0;               /* makes nav-panel static size in flexbox */
   height: 100vh;
   margin-top: 1.8em;            /* creates space for site nav bar above */
   padding: 18px 20px;
@@ -190,6 +192,11 @@ a {
   padding: 1.8em;
   display: grid;
   gap: 24px;
+  width: 100%;
+}
+
+.dashboard-shell {
+  width: 100%;
 }
 
 .project-selector,
