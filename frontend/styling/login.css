@@ -4,6 +4,7 @@
   --line: rgb(15 15 18 / 8%);
   --blue: #1f49ff;
   --blue-deep: #1037dd;
+  --page-bg: #f7f5ef;
   --shadow-soft: 0 24px 60px rgb(27 38 89 / 8%);
   --shadow-button: 0 14px 30px rgb(31 73 255 / 22%);
 }
@@ -20,10 +21,7 @@ body {
   margin: 0;
   font-family: Manrope, sans-serif;
   color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgb(255 255 255 / 96%), transparent 34%),
-    radial-gradient(circle at 85% 30%, rgb(31 73 255 / 8%), transparent 24%),
-    linear-gradient(180deg, #fbfbf8 0%, #f4f3ef 100%);
+  background: var(--page-bg);
 }
 
 a {
@@ -33,6 +31,8 @@ a {
 
 .login-page {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .site-header {
@@ -125,16 +125,20 @@ a {
 .login-shell {
   width: min(1240px, calc(100% - 48px));
   margin: 0 auto;
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .login-layout {
+  width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 470px) minmax(320px, 460px);
   justify-content: space-between;
   align-items: center;
   gap: 48px;
-  min-height: calc(100vh - 124px);
-  padding: 28px 18px 56px;
+  min-height: 0;
+  padding: 18px 18px 20px;
 }
 
 .login-copy {
@@ -257,7 +261,7 @@ a {
     grid-template-columns: 1fr;
     justify-content: stretch;
     min-height: auto;
-    padding: 24px 6px 48px;
+    padding: 22px 6px 30px;
   }
 
   .login-card {

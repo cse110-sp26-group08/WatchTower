@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WatchTower Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="../styling/docs.css">
+</head>
+<body class="docs-page">
+  <watchtower-navbar></watchtower-navbar>
+
+  <main class="docs-shell">
+    <section class="docs-viewer" aria-label="Backend architecture documentation">
+      <iframe
+        src="../assets/docs/architecture_backend.pdf"
+        title="Backend architecture PDF"
+      ></iframe>
+      <p class="docs-fallback">
+        <a href="../assets/docs/architecture_backend.pdf">Open backend architecture PDF</a>
+      </p>
+    </section>
+  </main>
+
+  <watchtower-footer></watchtower-footer>
+  <script src="../js/navbar.js"></script>
+  <script src="../js/footer.js"></script>
+</body>
+</html>

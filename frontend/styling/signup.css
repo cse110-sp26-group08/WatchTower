@@ -4,6 +4,7 @@
   --line: rgb(15 15 18 / 8%);
   --blue: #1f49ff;
   --blue-deep: #1037dd;
+  --page-bg: #f7f5ef;
   --shadow-soft: 0 24px 60px rgb(27 38 89 / 8%);
   --shadow-button: 0 14px 30px rgb(31 73 255 / 22%);
 }
@@ -20,10 +21,7 @@ body {
   margin: 0;
   font-family: Manrope, sans-serif;
   color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgb(255 255 255 / 96%), transparent 34%),
-    radial-gradient(circle at 85% 30%, rgb(31 73 255 / 8%), transparent 24%),
-    linear-gradient(180deg, #fbfbf8 0%, #f4f3ef 100%);
+  background: var(--page-bg);
 }
 
 a {
@@ -33,6 +31,8 @@ a {
 
 .signup-page {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .site-header {
@@ -125,16 +125,20 @@ a {
 .signup-shell {
   width: min(1240px, calc(100% - 48px));
   margin: 0 auto;
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .signup-layout {
+  width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 470px) minmax(320px, 480px);
   justify-content: space-between;
   align-items: center;
   gap: 48px;
-  min-height: calc(100vh - 124px);
-  padding: 28px 18px 56px;
+  min-height: 0;
+  padding: 14px 18px 18px;
 }
 
 .signup-copy {
@@ -159,7 +163,7 @@ a {
 }
 
 .signup-card {
-  padding: 30px 28px;
+  padding: 24px 26px;
   border: 1px solid rgb(15 15 18 / 8%);
   border-radius: 28px;
   background: rgb(255 255 255 / 78%);
@@ -168,7 +172,7 @@ a {
 }
 
 .signup-card-header {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
   text-align: center;
 }
 
@@ -190,7 +194,7 @@ a {
 
 .signup-form {
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 
 .form-field {
@@ -205,7 +209,7 @@ a {
 
 .form-field input {
   width: 100%;
-  min-height: 50px;
+  min-height: 46px;
   padding: 0 16px;
   border: 1px solid rgb(15 15 18 / 12%);
   border-radius: 12px;
@@ -253,7 +257,7 @@ a {
     grid-template-columns: 1fr;
     justify-content: stretch;
     min-height: auto;
-    padding: 24px 6px 48px;
+    padding: 22px 6px 30px;
   }
 
   .signup-card {
