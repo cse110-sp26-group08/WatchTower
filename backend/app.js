@@ -27,6 +27,7 @@ import {
 import {
   createAppEndpoint,
   deleteAppEndpoint,
+  forceStatusEndpoint,
   getAppEndpoint,
   getAppsByOwnerEndpoint,
 } from './endpoints/apps.js';
@@ -37,7 +38,7 @@ import {
   updateUserEndpoint,
 } from './endpoints/users.js';
 import { checkLoginCredentials, createUser } from './controllers/userController.js';
-import { connectDatabase } from './util/database.js';
+import { initDb } from './util/database.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -162,6 +163,7 @@ function createApp() {
 
   // App Endpoints
   app.post('/api/apps', createAppEndpoint);
+  app.post('/api/apps/:id/forceStatus', forceStatusEndpoint);
   app.get('/api/apps/:id', getAppEndpoint);
   app.delete('/api/apps/:id', deleteAppEndpoint);
   app.get('/api/apps/users/:ownerId', getAppsByOwnerEndpoint);
@@ -173,21 +175,11 @@ const app = createApp();
 const port = process.env.PORT || 3000;
 
 if (process.env.NODE_ENV !== 'test') {
-  connectDatabase()
-    .then(() => {
-      // eslint-disable-next-line no-console
-      console.log('Connected to MongoDB');
-
-      app.listen(port, () => {
-        // eslint-disable-next-line no-console
-        console.log(`WatchTower backend listening on http://localhost:${port}`);
-      });
-    })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to connect to MongoDB:', error.message);
-      process.exit(1);
-    });
+  initDb();
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`WatchTower backend listening on http://localhost:${port}`);
+  });
 }
 
 export { createApp };
