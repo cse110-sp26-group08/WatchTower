@@ -1,5 +1,5 @@
 @font-face {
-  font-family: OpenSans;
+  font-family: opensans;
   src: url("https://fonts.gstatic.com/s/opensans/v44/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1x4gaVI.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
@@ -10,8 +10,8 @@
   --navbar-bg: #f7f5ef;
   --nav-accent: #13c8a8;
   --nav-accent-hover: #0ea98f;
-  --font-family-primary: "Open Sans", OpenSans, sans-serif;
-  --font-family-nav: OpenSans, sans-serif;
+  --font-family-primary: "Open Sans", opensans, sans-serif;
+  --font-family-nav: opensans, sans-serif;
   --font-size-md: 16px;
   --font-size-lg: 18px;
   --font-size-2xl: 22px;

@@ -15,7 +15,7 @@
   --danger-soft: #f1d7d9;
   --page-bg: #f7f5ef;
   --shadow-card: 0 24px 56px rgb(45 39 62 / 16%);
-  --font-family-primary: "Open Sans", OpenSans, sans-serif;
+  --font-family-primary: "Open Sans", opensans, sans-serif;
   --font-family-display: "Bitter Pro", sans-serif;
   --font-size-xs: 13.01px;
   --font-size-sm: 14px;
@@ -463,7 +463,7 @@ a {
 
 .flow-arrow path {
   fill: none;
-  stroke: currentColor;
+  stroke: currentcolor;
   stroke-width: 5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -789,17 +789,14 @@ a {
 
   .email-card {
     grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
   }
 
   .critical-content {
     flex-direction: column;
     text-align: center;
     gap: 18px;
-  }
-
-  .email-card {
-    justify-items: center;
-    text-align: center;
   }
 
   .email-title-row {
