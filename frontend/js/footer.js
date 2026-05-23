@@ -2,6 +2,9 @@ const footerScriptUrl = document.currentScript ? document.currentScript.src : ''
 const defaultFooterAssetBase = footerScriptUrl
     ? new URL('../assets', footerScriptUrl).href
     : '/assets';
+const defaultFooterStyleBase = footerScriptUrl
+    ? new URL('../styling', footerScriptUrl).href
+    : '/styling';
 const isFooterProjectRootStaticServer = footerScriptUrl
     && new URL(footerScriptUrl).pathname.endsWith('/frontend/js/footer.js');
 const defaultFooterHomeHref = isFooterProjectRootStaticServer
@@ -29,6 +32,10 @@ class WatchTowerFooter extends HTMLElement {
         return `${this.getOption('asset-base', defaultFooterAssetBase).replace(/\/$/, '')}/${fileName}`;
     }
 
+    getStylePath(fileName) {
+        return `${this.getOption('style-base', defaultFooterStyleBase).replace(/\/$/, '')}/${fileName}`;
+    }
+
     render() {
         const homeHref = this.getOption('home-href', defaultFooterHomeHref);
         const productHref = this.getOption('product-href', defaultFooterProductHref);
@@ -36,126 +43,10 @@ class WatchTowerFooter extends HTMLElement {
         const privacyHref = this.getOption('privacy-href', '#privacy-policy');
         const termsHref = this.getOption('terms-href', '#terms-conditions');
         const logoSrc = this.getAssetPath('watchtower-logo.png');
+        const stylesheetHref = this.getStylePath('footer.css');
 
         this.shadowRoot.innerHTML = `
-            <style>
-                :host {
-                    display: block;
-                    font-family: "Open Sans", OpenSans, sans-serif;
-                    font-size: 18px;
-                    font-weight: 400;
-                    line-height: 27px;
-                    color: #211f24;
-                }
-
-                * {
-                    box-sizing: border-box;
-                }
-
-                a {
-                    color: inherit;
-                    text-decoration: none;
-                }
-
-                .site-footer {
-                    width: min(1240px, calc(100% - 48px));
-                    margin: 10px auto 18px;
-                }
-
-                .footer-panel {
-                    padding: 0;
-                }
-
-                .footer-top,
-                .footer-bottom {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 24px;
-                }
-
-                .footer-top {
-                    padding-bottom: 8px;
-                }
-
-                .footer-brand {
-                    width: 170px;
-                    height: 40px;
-                    display: inline-flex;
-                    align-items: center;
-                }
-
-                .footer-logo {
-                    width: 170px;
-                    height: 30px;
-                    display: block;
-                    object-fit: contain;
-                    object-position: left center;
-                    transform: translateY(-4px);
-                }
-
-                .footer-links,
-                .legal-links {
-                    display: flex;
-                    align-items: center;
-                    gap: 28px;
-                    font-size: 16px;
-                    font-weight: 700;
-                }
-
-                .footer-links {
-                    transform: translateY(3px);
-                }
-
-                .footer-links a,
-                .legal-links a {
-                    transition: color 180ms ease, opacity 180ms ease;
-                }
-
-                .footer-links a:hover,
-                .footer-links a:focus-visible,
-                .legal-links a:hover,
-                .legal-links a:focus-visible {
-                    color: #13c8a8;
-                }
-
-                .footer-bottom {
-                    padding-top: 8px;
-                    font-size: 13.01px;
-                    color: rgb(33 31 36 / 68%);
-                }
-
-                .copyright {
-                    margin: 0;
-                }
-
-                @media (width <= 760px) {
-                    .site-footer {
-                        width: min(100% - 28px, 680px);
-                        margin-top: 12px;
-                    }
-
-                    .footer-panel {
-                        padding: 0;
-                    }
-
-                    .footer-top,
-                    .footer-bottom {
-                        flex-direction: column;
-                        align-items: flex-start;
-                    }
-
-                    .footer-links,
-                    .legal-links {
-                        flex-wrap: wrap;
-                        gap: 16px 24px;
-                    }
-
-                    .footer-links {
-                        transform: none;
-                    }
-                }
-            </style>
+            <link rel="stylesheet" href="${stylesheetHref}">
 
             <footer class="site-footer">
                 <div class="footer-panel">
