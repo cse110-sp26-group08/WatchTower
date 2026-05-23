@@ -1,4 +1,7 @@
 const footerScriptUrl = document.currentScript ? document.currentScript.src : '';
+const defaultFooterAssetBase = footerScriptUrl
+    ? new URL('../assets', footerScriptUrl).href
+    : '/assets';
 const isFooterProjectRootStaticServer = footerScriptUrl
     && new URL(footerScriptUrl).pathname.endsWith('/frontend/js/footer.js');
 const defaultFooterHomeHref = isFooterProjectRootStaticServer
@@ -22,18 +25,26 @@ class WatchTowerFooter extends HTMLElement {
         return this.getAttribute(name) || fallback;
     }
 
+    getAssetPath(fileName) {
+        return `${this.getOption('asset-base', defaultFooterAssetBase).replace(/\/$/, '')}/${fileName}`;
+    }
+
     render() {
         const homeHref = this.getOption('home-href', defaultFooterHomeHref);
         const productHref = this.getOption('product-href', defaultFooterProductHref);
         const docsHref = this.getOption('docs-href', defaultFooterDocsHref);
         const privacyHref = this.getOption('privacy-href', '#privacy-policy');
         const termsHref = this.getOption('terms-href', '#terms-conditions');
+        const logoSrc = this.getAssetPath('watchtower-logo.png');
 
         this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
-                    font-family: Manrope, Arial, sans-serif;
+                    font-family: "Open Sans", OpenSans, sans-serif;
+                    font-size: 18px;
+                    font-weight: 400;
+                    line-height: 27px;
                     color: #211f24;
                 }
 
@@ -47,12 +58,12 @@ class WatchTowerFooter extends HTMLElement {
                 }
 
                 .site-footer {
-                    width: min(1120px, calc(100% - 48px));
-                    margin: 14px auto 18px;
+                    width: min(1240px, calc(100% - 48px));
+                    margin: 10px auto 18px;
                 }
 
                 .footer-panel {
-                    padding: 0 8px;
+                    padding: 0;
                 }
 
                 .footer-top,
@@ -68,9 +79,19 @@ class WatchTowerFooter extends HTMLElement {
                 }
 
                 .footer-brand {
-                    font-size: 1.42rem;
-                    font-weight: 800;
-                    letter-spacing: 0;
+                    width: 170px;
+                    height: 40px;
+                    display: inline-flex;
+                    align-items: center;
+                }
+
+                .footer-logo {
+                    width: 170px;
+                    height: 30px;
+                    display: block;
+                    object-fit: contain;
+                    object-position: left center;
+                    transform: translateY(-4px);
                 }
 
                 .footer-links,
@@ -78,8 +99,12 @@ class WatchTowerFooter extends HTMLElement {
                     display: flex;
                     align-items: center;
                     gap: 28px;
-                    font-size: 0.94rem;
+                    font-size: 16px;
                     font-weight: 700;
+                }
+
+                .footer-links {
+                    transform: translateY(3px);
                 }
 
                 .footer-links a,
@@ -91,12 +116,12 @@ class WatchTowerFooter extends HTMLElement {
                 .footer-links a:focus-visible,
                 .legal-links a:hover,
                 .legal-links a:focus-visible {
-                    color: #486bea;
+                    color: #13c8a8;
                 }
 
                 .footer-bottom {
                     padding-top: 8px;
-                    font-size: 0.82rem;
+                    font-size: 13.01px;
                     color: rgb(33 31 36 / 68%);
                 }
 
@@ -125,13 +150,19 @@ class WatchTowerFooter extends HTMLElement {
                         flex-wrap: wrap;
                         gap: 16px 24px;
                     }
+
+                    .footer-links {
+                        transform: none;
+                    }
                 }
             </style>
 
             <footer class="site-footer">
                 <div class="footer-panel">
                     <div class="footer-top">
-                        <a href="${homeHref}" class="footer-brand">WatchTower</a>
+                        <a href="${homeHref}" class="footer-brand" aria-label="WatchTower home">
+                            <img class="footer-logo" src="${logoSrc}" alt="WatchTower">
+                        </a>
 
                         <nav class="footer-links" aria-label="Footer navigation">
                             <a href="${productHref}">Product</a>

@@ -4,6 +4,7 @@
   --line: rgb(15 15 18 / 8%);
   --blue: #1f49ff;
   --blue-deep: #1037dd;
+  --page-bg: #f7f5ef;
   --shadow-soft: 0 24px 60px rgb(27 38 89 / 8%);
   --shadow-button: 0 14px 30px rgb(31 73 255 / 22%);
 }
@@ -20,10 +21,7 @@ body {
   margin: 0;
   font-family: Manrope, sans-serif;
   color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgb(255 255 255 / 96%), transparent 34%),
-    radial-gradient(circle at 85% 30%, rgb(31 73 255 / 8%), transparent 24%),
-    linear-gradient(180deg, #fbfbf8 0%, #f4f3ef 100%);
+  background: var(--page-bg);
 }
 
 a {
