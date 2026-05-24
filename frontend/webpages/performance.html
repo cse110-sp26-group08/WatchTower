@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="stylesheet" href="../styling/performance.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+        <title>Performance</title>
+    </head>
+
+    <body>
+        <header class = "page-header"> 
+            <div class="header-content">
+                <h1>Performance</h1>
+                <p>Monitor latency, response times, and system performance</p>
+            </div>
+            <form class="filters">
+                <label for="date-range">Date Range:</label>
+                <input id="date-range" class="date-range-input" type="text" placeholder="Select date range">
+
+                <label for="select-app">Application:</label>
+                <select id="select-app">
+                    <option value="service-a">Application A</option>
+                    <option value="service-b">Application B</option>
+                </select>
+
+                <label class="toggle-switch">
+                    <span class="toggle-label">Auto-refresh</span>
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </form>
+        </header>
+        
+        <main>
+        <section class="kpi-grid">
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <h3>Average Response Time</h3>
+                    <div class = "kpi-icon response-icon"><img src="../assets/response-time-icon.png" alt="Response Time Icon"></img></div>
+                </div>
+                <p id="avg-response-time" class="kpi-value">124 ms</p>
+                <p id="avg-response-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
+                <p class="kpi-period">vs May 7 – May 13</p>
+                <div class="sparkline-placeholder"></div>
+                <!-- <canvas id="avg-response-sparkline"></canvas> -->
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <h3>P95 Latency</h3>
+                    <div class = "kpi-icon latency-icon"><img src="../assets/latency-icon.png" alt="Latency Icon"></img></div>
+                </div>
+                <p id="p95-latency" class="kpi-value">420 ms</p>
+                <p id="p95-latency-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
+                <p class="kpi-period">vs May 7 – May 13</p>
+                <div class="sparkline-placeholder"></div>
+                <!-- <canvas id="p95-latency-sparkline"></canvas> -->
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <h3>Slowest Endpoint</h3>
+                    <div class = "kpi-icon slowest-endpoint-icon"><img src="../assets/slowest-endpoint-icon.png" alt="Slowest Endpoint Icon"></img></div>
+                </div>
+                <p id="slowest-endpoint" class="kpi-value">/api/events</p>
+                <p id="slowest-endpoint-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
+                <p class="kpi-period">vs May 7 – May 13</p>
+                <div class="sparkline-placeholder"></div>
+                <!-- <canvas id="slowest-endpoint-sparkline"></canvas> -->
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <h3>Average Page Load Time</h3>
+                    <div class = "kpi-icon avg-page-load-icon"><img src="../assets/avg-page-load-icon.png" alt="Average Page Load Icon"></img></div>
+                </div>
+                <p id="avg-page-load-time" class="kpi-value">1500 ms</p>
+                <p id="avg-page-load-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
+                <p class="kpi-period">vs May 7 – May 13</p>
+                <div class="sparkline-placeholder"></div>
+                <!-- <canvas id="avg-page-load-sparkline"></canvas> -->
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <h3>Average Memory Usage</h3>
+                    <div class="kpi-icon memory-icon"><img src="../assets/memory-icon.png" alt="Memory Icon"></img></div>
+                </div>
+                <p id="avg-memory-usage" class="kpi-value">256 MB</p>
+                <p id="avg-memory-change" class="kpi-change positive">↓ 18 MB (6.5%)</p>
+                <p class="kpi-period">vs May 7 – May 13</p>
+                <div class="sparkline-placeholder"></div>
+                <!-- <canvas id="avg-memory-sparkline"></canvas> -->
+            </div>
+        </section>
+
+        <section class="chart-grid">
+            
+            <div class="chart-card"> 
+                <div class="chart-header">
+                    <h3>Latency Over Time</h3>
+                    <select id="line-toggle">
+                        <option value="all">All Endpoints</option>
+                        <option value="avg-latency">Average Latency</option>
+                        <option value="p95-latency">P95 Latency</option>
+                        <option value="avg-page-load-time">Average Page Load Time</option>
+                    </select>
+                </div>
+                <div class="chart-placeholder line-chart-placeholder"></div>
+                <!-- <canvas id="latency-chart"></canvas> -->
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Endpoint Performance</h3>
+                    <select id="endpoint-select">
+                        <option value="all">All Endpoints</option>
+                        <option value="/api/events">/api/events</option>
+                        <option value="/api/users">/api/users</option>
+                    </select>
+                </div>
+                <div class="chart-placeholder bar-chart-placeholder"></div>
+                <!-- <canvas id="endpoint-performance-chart"></canvas> -->
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Bottleneck Insights</h3>
+                </div>
+                <div class="insight-list">
+                    <div class="insight-item">
+                        <div>
+                            <p class="insight-label">Slowest Endpoint</p>
+                            <p id="slowest-endpoint-insight" class="insight-value">/api/events</p>
+                        </div>
+                        <p id="slowest-endpoint-latency" class="insight-metric negative">820 ms avg</p>
+                    </div>
+
+                    <div class="insight-item">
+                        <div>
+                            <p class="insight-label">Highest TTFB</p>
+                            <p id="highest-ttfb-endpoint" class="insight-value">/api/auth/login</p>
+                        </div>
+
+                        <p id="highest-ttfb-value" class="insight-metric warning">600 ms avg</p>
+                    </div>
+
+                    <div class="insight-item">
+                        <div>
+                            <p class="insight-label">Most Frequent Slow Request</p>
+                            <p id="most-frequent-slow-endpoint" class="insight-value">/api/events</p>
+                        </div>
+
+                        <p id="slow-request-count" class="insight-metric">342 slow requests</p>
+                    </div>
+
+                    <div class="insight-item">
+                        <div>
+                            <p class="insight-label">Biggest Latency Increase</p>
+                            <p id="largest-latency-increase-endpoint" class="insight-value">/api/metrics</p>
+                        </div>
+
+                        <p id="largest-latency-increase" class="insight-metric negative">↑ 45%</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="slow-requests-section">
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Slow Requests</h3>
+                    <input 
+                        type="text" 
+                        id="slow-request-search" 
+                        placeholder="Search endpoints..."
+                    >
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Endpoint</th>
+                            <th>Latency</th>
+                            <th>Load Time</th>
+                            <th>TTFB</th>
+                            <th>Memory</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="slow-requests-body">
+                        <tr>
+                            <td>May 21, 2025 2:41 PM</td>
+                            <td>/api/events</td>
+                            <td>1842 ms</td>
+                            <td>2341 ms</td>
+                            <td>1200 ms</td>
+                            <td>256 MB</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="/frontend/js/perfromances.js"></script>
+    </body>
+</html>
