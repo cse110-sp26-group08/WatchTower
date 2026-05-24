@@ -1,6 +1,7 @@
 /* eslint-env node */
 
 import bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import {
   insertUser,
   selectUserById,
@@ -13,6 +14,25 @@ import { withToObject } from '../util/toObject.js';
 
 const ALLOWED_UPDATE_FIELDS = ['username', 'email'];
 const SALT_ROUNDS = 10;
+
+function toSafeUser(user) {
+  if (!user) return null;
+  const safeUser = user.toObject ? user.toObject() : { ...user };
+  delete safeUser.passwordHash;
+  return safeUser;
+}
+
+function normalizeOAuthUsername(username, email) {
+  const source = username || email.split('@')[0];
+  const normalized = source
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 32);
+
+  return normalized || `google-user-${randomBytes(3).toString('hex')}`;
+}
 
 /**
  * Create a new user.
@@ -62,9 +82,48 @@ async function checkLoginCredentials(email, password) {
   const passwordMatches = await bcrypt.compare(password, user.passwordHash);
   if (!passwordMatches) return null;
 
-  const safeUser = { ...user };
-  delete safeUser.passwordHash;
-  return safeUser;
+  return toSafeUser(user);
+}
+
+/**
+ * Find an existing user by OAuth email, or create one with a generated password.
+ * @param {{username?: string, email: string}} profile
+ * @returns {Promise<object>}
+ */
+async function findOrCreateOAuthUser({ username, email }) {
+  if (!email || typeof email !== 'string' || !email.trim()) {
+    throw new Error('email is required and must be a non-empty string');
+  }
+
+  const existingUser = await selectUserByEmail(email.trim().toLowerCase());
+  if (existingUser) {
+    return toSafeUser(existingUser);
+  }
+
+  const baseUsername = normalizeOAuthUsername(username, email);
+  let lastError;
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const suffix = attempt === 0 ? '' : `-${randomBytes(3).toString('hex')}`;
+    const candidateUsername = `${baseUsername.slice(0, 32 - suffix.length)}${suffix}`;
+
+    try {
+      const user = await createUser({
+        username: candidateUsername,
+        email,
+        password: randomBytes(32).toString('hex'),
+      });
+      return toSafeUser(user);
+    } catch (error) {
+      const racedUser = await selectUserByEmail(email.trim().toLowerCase());
+      if (racedUser) {
+        return toSafeUser(racedUser);
+      }
+      lastError = error;
+    }
+  }
+
+  throw lastError;
 }
 
 /**
@@ -101,6 +160,7 @@ export {
   createUser,
   getUserById,
   checkLoginCredentials,
+  findOrCreateOAuthUser,
   editUser,
   deleteUserById,
 };
