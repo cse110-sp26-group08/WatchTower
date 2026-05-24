@@ -5,7 +5,69 @@ This document describes the utility modules located in `backend/util/`.
 ---
 
 ## Index
+- [emailService.js](#emailservicejs)
 - [DowntimeNotificationEnsurer.js](#downtimenotificationensurerjs)
+
+---
+
+## emailService.js
+
+**Location:** `backend/util/emailService.js`
+
+Provides email sending functionality for the application. Currently a placeholder using console logging, designed to be replaced with a real email transport (e.g., nodemailer, SendGrid, AWS SES).
+
+### Exported Functions
+
+#### `sendEmail(to, subject, body)`
+
+Sends a plain-text email to a recipient.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `to` | string | Recipient email address. |
+| `subject` | string | Email subject line. |
+| `body` | string | Email body content. |
+
+**Returns:** `Promise<void>`
+
+**Note:** The body parameter currently accepts plain text. When migrating to a real email transport, this function should be updated to support HTML emails.
+
+#### `sendDownEmail(email)`
+
+Sends a formatted HTML email alert notifying a recipient that their monitored website is down.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `email` | string | Recipient email address. |
+
+**Returns:** `Promise<void>`
+
+**Features:**
+- Professional HTML-formatted email with styling
+- Prominent ⚠️ warning icon and visual alert indicators
+- Includes WatchTower Dashboard link for quick access
+- Clear call-to-action button directing users to the monitoring dashboard
+- Responsive design with footer attribution
+- Action items to guide the user on what to do
+
+**Example:**
+
+```js
+import { sendDownEmail } from './emailService.js';
+
+// Send a downtime alert to an app owner
+await sendDownEmail('appowner@example.com');
+```
+
+**Email Contents:**
+- Header with warning alert styling
+- Alert message indicating website is down
+- Recommended actions (check status, review logs, take corrective action)
+- Button linking to `https://watchtower-monitoring.com` dashboard
+- Professional footer with copyright
+
+**Integration Note:**
+When the email service is upgraded to use a real transport, ensure that HTML emails are properly configured to render the styled content. The current implementation passes HTML as the body parameter.
 
 ---
 
