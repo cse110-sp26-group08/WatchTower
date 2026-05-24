@@ -21,6 +21,7 @@
 }
 
 body {
+  height: auto;
   margin: 0;
   font-family: Manrope, sans-serif; /* match homepage */
   color: var(--text);
@@ -30,10 +31,6 @@ body {
     radial-gradient(circle at top left, rgb(255 255 255 / 96%), transparent 34%),
     radial-gradient(circle at 85% 30%, rgb(31 73 255 / 8%), transparent 24%),
     linear-gradient(180deg, #fbfbf8 0%, #f4f3ef 100%);
-}
-
-.container {
-  min-height: 100vh;
 }
 
 /* Overwrite normal "link" look for navbar */
@@ -136,27 +133,30 @@ body {
 
 /* aligns nav bar and main dash side-by-side */
 .dashboard-shell {
-  display: inline-flex;
-  align-content:start;
+  display: flex;
+  width: 100%;
+  gap: 24px;
+  padding-top: 1rem;
+  height:100%;
 }
 
 /* Ki: altered side nav-panel to accommodate top navbar */
 .nav-panel {
-  position: sticky;             /* makes nav panel follow user scroll */
-  top: .5em;                    /* gap between top of navbar and top of website on scroll */
-  flex-basis: 240px;            /* makes nav-panel static size in flexbox */
-  flex-grow: 0;                 /* makes nav-panel static size in flexbox */
-  flex-shrink: 0;               /* makes nav-panel static size in flexbox */
-  height: 100vh;
-  margin-top: 1.8em;            /* creates space for site nav bar above */
+  position: sticky;               /* makes nav panel follow user scroll */
+  top: 0.5rem;                    /* gap between top of navbar and top of website on scroll */
+  align-self: flex-start;         /* makes panel sticky work */
+
+  /* flex: flex-grow | flex-shrink | flex-basis */
+  flex: 0 0 240px;                /* makes nav-panel width static size in flexbox */
   padding: 18px 20px;
+  min-height: 100vh;              /* makes nav-panel flush with bottom of page */
   background: #0f172a;
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
   color: #f8fafc;
-  display: flex;                 /* aligns nav buttons within navbar */
+  display: flex;                  /* aligns nav buttons within navbar */
   flex-direction: column;
-  border-radius: 20px 20px 0 0;  /* rounded corners */
+  border-radius: 20px 20px 0 0;   /* rounded corners */
 }
 
 .nav-option {
@@ -189,13 +189,8 @@ body {
 }
 
 .main-dash {
-  padding: 1.8em;
   display: grid;
   gap: 24px;
-  width: 100%;
-}
-
-.dashboard-shell {
   width: 100%;
 }
 
@@ -478,17 +473,6 @@ body {
 }
 
 @media (width <= 900px) {
-  .nav-panel {
-    position: static;
-    width: 100%;
-    height: auto;
-  }
-
-  .main-dash {
-    margin-left: 0;
-    padding: 18px;
-  }
-
   .graph-card-header {
     flex-direction: column;
   }
