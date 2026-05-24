@@ -131,13 +131,13 @@ function createApp() {
     }
   });
 
-  app.get('/app-selection', (req, res) => {
+  app.get('/apps', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
   });
 
-  app.get('/app_selection.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
-  }); 
+  app.get(['/app-selection', '/app_selection.html'], (req, res) => {
+    res.redirect(302, '/apps');
+  });
 
   app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/dashboard.html'));

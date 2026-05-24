@@ -67,7 +67,6 @@ body {
   gap: 24px;
 }
 
-.project-selector,
 .status-container,
 .dashboard-filters,
 .logs-container,
@@ -81,7 +80,6 @@ body {
   box-shadow: var(--shadow);
 }
 
-.project-selector,
 .dashboard-filters,
 .status-container,
 .logs-container {
@@ -128,7 +126,6 @@ body {
   gap: 20px;
 }
 
-.project-selector,
 .dashboard-filters {
   display: flex;
   align-items: center;
@@ -136,7 +133,6 @@ body {
   flex-wrap: wrap;
 }
 
-.project-selector select,
 .dashboard-filters select,
 .dashboard-filters button {
   min-height: 42px;
@@ -169,19 +165,18 @@ body {
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
-  background: rgb(31 73 255 / 12%);
+  background: #ecfdf3;
   width: fit-content;
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
 }
 
 .status-symbol,
 .status-text {
-  color: var(--blue);
+  color: var(--green);
   font-weight: 700;
 }
 
-/* Yusuf - Make current status easier to notice */
 .status-container {
   display: grid;
   grid-template-columns: 420px 1fr;
@@ -189,7 +184,7 @@ body {
   align-items: center;
   padding: 24px;
   background: var(--panel);
-  border-left: 5px solid rgb(31 73 255 / 22%);
+  border-left: 5px solid var(--green);
 }
 
 .status-main {
@@ -204,7 +199,7 @@ body {
 
 .health-bar-row {
   display: grid;
-  grid-template-columns: 120px 1fr 40px;
+  grid-template-columns: 120px 1fr 48px;
   align-items: center;
   gap: 14px;
 }
@@ -225,6 +220,7 @@ body {
   height: 100%;
   width: 0%;
   border-radius: 999px;
+  transition: width 0.2s ease;
 }
 
 .health-blue {
@@ -233,10 +229,6 @@ body {
 
 .health-green {
   background: var(--green);
-}
-
-.health-orange {
-  background: #f59e0b;
 }
 
 .status-container.status-down {
@@ -252,20 +244,35 @@ body {
   color: #b42318;
 }
 
-.metric-container {
+.status-container.status-warn {
+  border-left-color: #f79009;
+}
+
+.status-container.status-warn .status-indicator {
+  background: #fffaeb;
+}
+
+.status-container.status-warn .status-symbol,
+.status-container.status-warn .status-text {
+  color: #b54708;
+}
+
+.metric-container,
+.details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
 }
 
-.metric {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 180px;
+.detail-card {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel-alt);
 }
 
+.detail-label,
+.detail-value,
 .metric-name,
 .metric-val,
 .compare-yesterday p,
@@ -274,16 +281,30 @@ body {
   margin: 0;
 }
 
+.detail-label,
 .metric-name {
   color: var(--muted);
-  font-size: 0.94rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.detail-value {
+  margin-top: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.metric {
+  padding: 20px;
 }
 
 .metric-val {
-  margin-top: 16px;
-  font-size: 2rem;
+  margin-top: 10px;
+  font-size: 1.9rem;
   line-height: 1.05;
   color: var(--text);
 }
@@ -292,17 +313,9 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 16px;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.compare-yesterday {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin-top: 12px;
   color: var(--muted);
+  font-size: 0.95rem;
 }
 
 .compare-yesterday img {
@@ -319,7 +332,6 @@ body {
   padding: 16px;
 }
 
-/* Yusuf - Improved graph option button styling */
 .graph-setting {
   display: flex;
   align-items: center;
@@ -350,7 +362,6 @@ body {
   border-radius: 6px;
 }
 
-/* Yusuf - Hide placeholder icons until real assets are added */
 .nav-img,
 .compare-yesterday img,
 .graph-setting img {
@@ -358,9 +369,11 @@ body {
 }
 
 .graph-card {
-  padding: 24px;
+  padding: 20px;
   width: 100%;
-  min-height: auto;
+  max-width: 760px;
+  min-height: 340px;
+  margin: 0 auto;
   border-radius: 24px;
   border: 1px solid rgb(15 23 42 / 6%);
   box-shadow: 0 18px 40px rgb(15 23 42 / 8%);
@@ -372,48 +385,6 @@ body {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
-}
-
-.dashboard-body-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.9fr) minmax(260px, 1fr);
-  gap: 24px;
-  align-items: stretch;
-}
-
-.top-issues-card {
-  padding: 24px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-}
-
-.top-issues-list {
-  flex: 1;
-  margin: 20px 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 14px;
-}
-
-.top-issues-header h2 {
-  margin: 0;
-  font-size: 1.25rem;
-}
-
-
-
-.top-issues-item {
-  padding: 12px 16px;
-  border-radius: 18px;
-  background: var(--panel-alt);
-  border: 1px solid rgb(31 73 255 / 10%);
-  color: var(--text);
-  font-weight: 600;
 }
 
 .graph-eyebrow {
@@ -428,15 +399,17 @@ body {
   color: var(--muted);
 }
 
-/* Yusuf - Better graph section spacing/layout */
 .graph {
   min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 12px 0;
 }
 
 #dashboard-chart {
   width: 100% !important;
-  height: 220px !important;
+  height: 230px !important;
 }
 
 .chart-table-shell {
@@ -472,14 +445,12 @@ body {
     padding: 18px;
   }
 
+  .status-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
   .graph-card-header {
     flex-direction: column;
   }
-
-.dashboard-body-grid {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 24px;
-  align-items: stretch;
-}
 }
