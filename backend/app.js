@@ -147,6 +147,22 @@ function createApp() {
     res.sendFile(path.join(__dirname, '../frontend/webpages/dashboard.html'));
   });
 
+  app.get('/advanced_performance_metrics.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/advanced_performance_metrics.html'));
+  });
+
+  app.get('/advanced-performance-metrics', (req, res) => {
+    res.redirect(302, '/advanced_performance_metrics.html');
+  });
+
+  app.get('/advanced_error_metrics.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/advanced_error_metrics.html'));
+  });
+
+  app.get('/advanced-error-metrics', (req, res) => {
+    res.redirect(302, '/advanced_error_metrics.html');
+  });
+
   // API ENDPOINTS
   // Error Endpoints
   app.options('/api/events/error', telemetryCors);
