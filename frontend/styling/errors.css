@@ -84,17 +84,30 @@
   padding: 20px;
 }
 
+.errors-list-card {
+  display: grid;
+  gap: 16px;
+}
+
 .table-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
 }
 
 .table-header h2 {
   margin: 0;
+}
+
+.errors-table-shell {
+  overflow-x: auto;
+}
+
+.errors-table {
+  table-layout: fixed;
+  width: 100%;
 }
 
 .type-filter-row {
@@ -135,8 +148,11 @@
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 16px 20px;
+  padding: 16px 20px 0;   /* 0 bottom so color bar sits flush */
   box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;        /* clips bar to border-radius */
 }
 
 .breakdown-label {
@@ -155,11 +171,20 @@
   line-height: 1;
 }
 
-.breakdown-card.critical { border-left: 4px solid #f04438; border-radius: 0 16px 16px 0; }
-.breakdown-card.high     { border-left: 4px solid #f79009; border-radius: 0 16px 16px 0; }
-.breakdown-card.medium   { border-left: 4px solid #eab308; border-radius: 0 16px 16px 0; }
-.breakdown-card.low      { border-left: 4px solid #16a34a; border-radius: 0 16px 16px 0; }
-.breakdown-card.total    { border-left: 4px solid var(--blue); border-radius: 0 16px 16px 0; }
+/* color bar sits at the bottom of each card */
+.breakdown-card::after {
+  content: '';
+  display: block;
+  height: 5px;
+  margin-top: auto;
+  border-radius: 0 0 16px 16px;
+}
+
+.breakdown-card.critical::after { background: #f04438; }
+.breakdown-card.high::after     { background: #f79009; }
+.breakdown-card.medium::after   { background: #eab308; }
+.breakdown-card.low::after      { background: #16a34a; }
+.breakdown-card.total::after    { background: var(--blue); }
 
 .breakdown-card.critical .breakdown-val { color: #b42318; }
 .breakdown-card.high     .breakdown-val { color: #b54708; }
