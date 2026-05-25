@@ -11,15 +11,6 @@ function isStaticFrontendPreview() {
     return window.location.pathname.includes('/frontend/');
 }
 
-function resolveBackendPath(path) {
-    if (!isStaticFrontendPreview()) {
-        return path;
-    }
-
-    const authOrigin = window.WATCHTOWER_AUTH_ORIGIN || 'http://localhost:3000';
-    return `${authOrigin}${path}`;
-}
-
 function configurePageLinks() {
     const homeLink = document.querySelector('[data-home-link]');
     if (homeLink) {
@@ -30,10 +21,6 @@ function configurePageLinks() {
     if (signupLink) {
         signupLink.href = isStaticFrontendPreview() ? 'signup.html' : '/signup';
     }
-
-    document.querySelectorAll('[data-auth-path]').forEach((authLink) => {
-        authLink.href = resolveBackendPath(authLink.dataset.authPath);
-    });
 }
 
 function getFieldError(input) {

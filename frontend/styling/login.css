@@ -121,6 +121,7 @@ a {
   padding: 0 12px;
   border: 0;
   border-radius: 6px;
+  appearance: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -142,6 +143,18 @@ a {
   color: var(--blue);
   background: rgb(10 194 163 / 10%);
   transform: translateY(-1px);
+}
+
+.social-button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.social-button:disabled:hover,
+.social-button:disabled:focus-visible {
+  color: var(--text);
+  background: rgb(33 31 36 / 5%);
+  transform: none;
 }
 
 .social-button img {

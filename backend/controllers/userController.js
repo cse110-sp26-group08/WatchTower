@@ -1,7 +1,6 @@
 /* eslint-env node */
 
 import bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
 import {
   insertUser,
   selectUserById,
@@ -20,18 +19,6 @@ function toSafeUser(user) {
   const safeUser = user.toObject ? user.toObject() : { ...user };
   delete safeUser.passwordHash;
   return safeUser;
-}
-
-function normalizeOAuthUsername(username, email) {
-  const source = username || email.split('@')[0];
-  const normalized = source
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 32);
-
-  return normalized || `google-user-${randomBytes(3).toString('hex')}`;
 }
 
 /**
@@ -86,47 +73,6 @@ async function checkLoginCredentials(email, password) {
 }
 
 /**
- * Find an existing user by OAuth email, or create one with a generated password.
- * @param {{username?: string, email: string}} profile
- * @returns {Promise<object>}
- */
-async function findOrCreateOAuthUser({ username, email }) {
-  if (!email || typeof email !== 'string' || !email.trim()) {
-    throw new Error('email is required and must be a non-empty string');
-  }
-
-  const existingUser = await selectUserByEmail(email.trim().toLowerCase());
-  if (existingUser) {
-    return toSafeUser(existingUser);
-  }
-
-  const baseUsername = normalizeOAuthUsername(username, email);
-  let lastError;
-
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const suffix = attempt === 0 ? '' : `-${randomBytes(3).toString('hex')}`;
-    const candidateUsername = `${baseUsername.slice(0, 32 - suffix.length)}${suffix}`;
-
-    try {
-      const user = await createUser({
-        username: candidateUsername,
-        email,
-        password: randomBytes(32).toString('hex'),
-      });
-      return toSafeUser(user);
-    } catch (error) {
-      const racedUser = await selectUserByEmail(email.trim().toLowerCase());
-      if (racedUser) {
-        return toSafeUser(racedUser);
-      }
-      lastError = error;
-    }
-  }
-
-  throw lastError;
-}
-
-/**
  * Update a user by its UUID. Only whitelisted fields (username, email) are applied.
  * Returns updated user without passwordHash.
  * @param {string} id
@@ -160,7 +106,6 @@ export {
   createUser,
   getUserById,
   checkLoginCredentials,
-  findOrCreateOAuthUser,
   editUser,
   deleteUserById,
 };
