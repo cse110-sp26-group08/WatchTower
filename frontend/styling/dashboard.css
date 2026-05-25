@@ -239,6 +239,7 @@ body {
 .health-ring {
   --score-angle: 0deg;
   --score-color: #b42318;
+  
   width: min(230px, 86%);
   aspect-ratio: 1;
   position: relative;
@@ -303,7 +304,7 @@ body {
   width: 24px;
   height: 24px;
   fill: none;
-  stroke: currentColor;
+  stroke: currentcolor;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2;
