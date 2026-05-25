@@ -314,8 +314,35 @@ function renderHealthBars(filteredErrors, filteredPerformance) {
 
 function setHealthBar(prefix, value) {
     const safeValue = Math.max(0, Math.min(100, Math.round(value)));
-    document.getElementById(`${prefix}-bar-fill`).style.width = `${safeValue}%`;
-    document.getElementById(`${prefix}-bar-value`).textContent = `${safeValue}%`;
+    const scoreRing = document.getElementById(`${prefix}-bar-fill`);
+    const scoreValue = document.getElementById(`${prefix}-bar-value`);
+    const scoreLabel = document.getElementById(`${prefix}-score-label`);
+    const scoreCard = scoreRing.closest('.health-score');
+    const scoreMeta = getHealthScoreMeta(safeValue);
+
+    scoreRing.style.setProperty('--score-angle', `${safeValue * 3.6}deg`);
+    scoreRing.classList.remove('score-blue', 'score-orange', 'score-red');
+    scoreRing.classList.add(scoreMeta.className);
+    scoreCard.classList.remove('score-blue', 'score-orange', 'score-red');
+    scoreCard.classList.add(scoreMeta.className);
+    scoreValue.textContent = String(safeValue);
+    scoreLabel.textContent = scoreMeta.label;
+}
+
+function getHealthScoreMeta(score) {
+    if (score >= 80) {
+        return { label: 'Excellent', className: 'score-blue' };
+    }
+
+    if (score >= 60) {
+        return { label: 'Good', className: 'score-blue' };
+    }
+
+    if (score >= 40) {
+        return { label: 'Warning', className: 'score-orange' };
+    }
+
+    return { label: 'Poor', className: 'score-red' };
 }
 
 function renderGraph(filteredErrors, filteredPerformance) {

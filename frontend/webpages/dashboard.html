@@ -34,7 +34,7 @@
 
     <div class="main-dash">
         <div class="status-container">
-            <div class="status-main">
+            <div class="status-card status-main">
                 <p class="status-eyebrow">System Performance Diagnosis</p>
                 <h2>Current Site Status</h2>
                 <p class="status-project" id="status-project">Loading project...</p>
@@ -47,21 +47,39 @@
                 <p id="status-description">Loading recent service health...</p>
             </div>
 
-            <div class="health-bars">
-                <div class="health-bar-row">
-                    <span>Performance</span>
-                    <div class="health-bar">
-                        <div class="health-bar-fill health-blue" id="performance-bar-fill"></div>
+            <div class="health-score">
+                <span class="health-score-title">Performance</span>
+                <div class="health-ring score-red" id="performance-bar-fill" aria-label="Performance score">
+                    <div class="health-score-center">
+                        <strong class="health-score-value" id="performance-bar-value">0</strong>
+                        <span class="health-score-label" id="performance-score-label">Poor</span>
                     </div>
-                    <strong id="performance-bar-value">0%</strong>
                 </div>
+                <div class="score-support-row">
+                    <span class="support-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M3 12h4l2-7 4 14 2-7h6"></path>
+                        </svg>
+                    </span>
+                    <span>Performance is within normal range.</span>
+                </div>
+            </div>
 
-                <div class="health-bar-row">
-                    <span>Reliability</span>
-                    <div class="health-bar">
-                        <div class="health-bar-fill health-green" id="reliability-bar-fill"></div>
+            <div class="health-score">
+                <span class="health-score-title">Reliability</span>
+                <div class="health-ring score-red" id="reliability-bar-fill" aria-label="Reliability score">
+                    <div class="health-score-center">
+                        <strong class="health-score-value" id="reliability-bar-value">0</strong>
+                        <span class="health-score-label" id="reliability-score-label">Poor</span>
                     </div>
-                    <strong id="reliability-bar-value">0%</strong>
+                </div>
+                <div class="score-support-row">
+                    <span class="support-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M12 3l7 3v5c0 4.4-2.8 8.4-7 10-4.2-1.6-7-5.6-7-10V6l7-3z"></path>
+                        </svg>
+                    </span>
+                    <span>Low error rate and stable system health.</span>
                 </div>
             </div>
         </div>
