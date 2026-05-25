@@ -134,10 +134,6 @@ a {
   gap: 16px;
 }
 
-.nav-actions .button {
-  transform: translateY(3px);
-}
-
 .nav-login {
   font-family: var(--font-family-nav);
   font-size: var(--font-size-md);
@@ -241,6 +237,10 @@ a {
     box-shadow 180ms ease,
     background-color 180ms ease,
     filter 180ms ease;
+}
+
+.nav-actions .button {
+  transform: translateY(3px);
 }
 
 .button:hover {
