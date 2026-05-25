@@ -45,7 +45,7 @@
                 <p id="avg-response-time" class="kpi-value">124 ms</p>
                 <p id="avg-response-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
                 <p class="kpi-period">vs May 7 – May 13</p>
-                <div class="sparkline-placeholder"></div>
+                <canvas id="avg-response-sparkline" class="sparkline-canvas"></canvas>
                 <!-- <canvas id="avg-response-sparkline"></canvas> -->
             </div>
 
@@ -57,7 +57,7 @@
                 <p id="p95-latency" class="kpi-value">420 ms</p>
                 <p id="p95-latency-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
                 <p class="kpi-period">vs May 7 – May 13</p>
-                <div class="sparkline-placeholder"></div>
+                <canvas id="p95-latency-sparkline" class="sparkline-canvas"></canvas>
                 <!-- <canvas id="p95-latency-sparkline"></canvas> -->
             </div>
 
@@ -69,7 +69,7 @@
                 <p id="slowest-endpoint" class="kpi-value">/api/events</p>
                 <p id="slowest-endpoint-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
                 <p class="kpi-period">vs May 7 – May 13</p>
-                <div class="sparkline-placeholder"></div>
+                <canvas id="slowest-endpoint-sparkline" class="sparkline-canvas"></canvas>
                 <!-- <canvas id="slowest-endpoint-sparkline"></canvas> -->
             </div>
 
@@ -81,7 +81,7 @@
                 <p id="avg-page-load-time" class="kpi-value">1500 ms</p>
                 <p id="avg-page-load-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
                 <p class="kpi-period">vs May 7 – May 13</p>
-                <div class="sparkline-placeholder"></div>
+                <canvas id="avg-page-load-sparkline" class="sparkline-canvas"></canvas>
                 <!-- <canvas id="avg-page-load-sparkline"></canvas> -->
             </div>
 
@@ -93,7 +93,7 @@
                 <p id="avg-memory-usage" class="kpi-value">256 MB</p>
                 <p id="avg-memory-change" class="kpi-change positive">↓ 18 MB (6.5%)</p>
                 <p class="kpi-period">vs May 7 – May 13</p>
-                <div class="sparkline-placeholder"></div>
+                <canvas id="avg-memory-sparkline" class="sparkline-canvas"></canvas>
                 <!-- <canvas id="avg-memory-sparkline"></canvas> -->
             </div>
         </section>
@@ -110,8 +110,9 @@
                         <option value="avg-page-load-time">Average Page Load Time</option>
                     </select>
                 </div>
-                <div class="chart-placeholder line-chart-placeholder"></div>
-                <!-- <canvas id="latency-chart"></canvas> -->
+                <div class="chart-canvas-wrapper">
+                    <canvas id="latency-chart"></canvas>
+                </div>
             </div>
 
             <div class="chart-card">
@@ -123,8 +124,9 @@
                         <option value="/api/users">/api/users</option>
                     </select>
                 </div>
-                <div class="chart-placeholder bar-chart-placeholder"></div>
-                <!-- <canvas id="endpoint-performance-chart"></canvas> -->
+                <div class="chart-canvas-wrapper">
+                    <canvas id="endpoint-performance-chart"></canvas>
+                </div>
             </div>
 
             <div class="chart-card">
@@ -207,6 +209,7 @@
             </div>
         </section>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="/frontend/js/perfromances.js"></script>
     </body>
