@@ -177,6 +177,10 @@
   padding-left: 28px !important;
 }
 
+.url-column {
+  padding-left: 44px !important;
+}
+
 .stack-column {
   padding-left: 2px !important;
   padding-right: 4px !important;
@@ -184,6 +188,7 @@
 
 .url-cell {
   max-width: 360px;
+  padding-left: 44px !important;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
