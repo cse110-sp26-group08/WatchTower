@@ -8,27 +8,21 @@ const AUTO_REFRESH_MS = 5000;
 let latencyChart = null;
 let endpointChart = null;
 
-// wait until the HTML is fully loaded before initializing the page
 document.addEventListener('DOMContentLoaded', () => {
     initPerformancePage();
 });
 
-// Initialize the performance dashboard page
 async function initPerformancePage() {
-    // Check for stored user session
     const user = getStoredUser();
 
-    // If no valid user session, redirect to login page
     if (!user?.id) {
         window.location.href = '/login';
         return;
     }
 
-    // Initialize date picker, bind event listeners, and load apps for the user
     initDatePicker();
     bindControls();
 
-    // Load apps and performance data for the user
     await loadApps(user.id);
 }
 

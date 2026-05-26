@@ -102,6 +102,21 @@ header p {
   opacity: 0.95;
 }
 
+select,
+button,
+input {
+  font: inherit;
+}
+
+select,
+input[type="text"] {
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgb(33 31 36 / 12%);
+  background: #fff;
+}
+
 .filter-card input,
 .filter-card select {
   height: 36px;
@@ -172,21 +187,6 @@ header p {
 
 .toggle-switch input:checked + .toggle-slider::before {
   transform: translateX(18px);
-}
-
-select,
-button,
-input {
-  font: inherit;
-}
-
-select,
-input[type="text"] {
-  min-height: 36px;
-  padding: 0 10px;
-  border-radius: 8px;
-  border: 1px solid rgb(33 31 36 / 12%);
-  background: #fff;
 }
 
 .date-range-input {
