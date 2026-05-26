@@ -156,6 +156,7 @@
 .errors-table {
   table-layout: fixed;
   width: 100%;
+  min-width: 860px;
 }
 
 .time-column {
@@ -174,11 +175,14 @@
 }
 
 .message-column {
-  padding-left: 28px !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .url-column {
-  padding-left: 44px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .stack-column {
@@ -187,8 +191,6 @@
 }
 
 .url-cell {
-  max-width: 360px;
-  padding-left: 44px !important;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
