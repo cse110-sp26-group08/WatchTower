@@ -1,3 +1,5 @@
+/* global dashboardState, createOrUpdateChart, escapeHtml, filterErrors, formatTimestamp */
+
 const typeFilter = document.getElementById('type-filter');
 let lastDashboardStateRef = null;
 
@@ -43,7 +45,6 @@ if (typeFilter) {
 
 window.renderGraph = function renderGraph(filteredErrors) {
   const range = document.getElementById('time-range')?.value || '24h';
-  const bucketSize = range === '24h' ? 'hour' : 'day';
   const chartCanvas = document.getElementById('chart-canvas-shell');
   const graphTitle = document.getElementById('graph-title');
   const graphSummary = document.getElementById('graph-summary');
@@ -62,10 +63,10 @@ window.renderGraph = function renderGraph(filteredErrors) {
 
   graphTitle.textContent = 'Error volume by severity';
   graphSummary.textContent = `${filteredErrors.length} error${filteredErrors.length === 1 ? '' : 's'} in the selected range.`;
-  renderSeverityLineChart(filteredErrors, bucketSize);
+  renderSeverityLineChart(filteredErrors, range);
 };
 
-function renderSeverityLineChart(filteredErrors, bucketSize) {
+function renderSeverityLineChart(filteredErrors, range) {
   const severities = ['critical', 'high', 'medium', 'low'];
   const colors = {
     critical: '#f04438',
@@ -74,22 +75,16 @@ function renderSeverityLineChart(filteredErrors, bucketSize) {
     low: '#16a34a',
   };
 
-  const allBuckets = bucketErrors(filteredErrors, bucketSize);
+  const allBuckets = createErrorIntervalBuckets(range);
 
   const datasets = severities.map((severityLevel) => {
     const severityErrors = filteredErrors.filter((event) => {
       return normalizeSeverity(event.metadata?.severity) === severityLevel;
     });
-    const severityBuckets = bucketErrors(severityErrors, bucketSize);
-
-    const data = allBuckets.labels.map((label) => {
-      const labelIndex = severityBuckets.labels.indexOf(label);
-      return labelIndex === -1 ? 0 : severityBuckets.values[labelIndex];
-    });
 
     return {
       label: severityLevel.charAt(0).toUpperCase() + severityLevel.slice(1),
-      data,
+      data: countErrorsInBuckets(severityErrors, allBuckets),
       borderColor: colors[severityLevel],
       backgroundColor: `${colors[severityLevel]}22`,
       tension: 0.3,
@@ -102,6 +97,67 @@ function renderSeverityLineChart(filteredErrors, bucketSize) {
     labels: allBuckets.labels,
     datasets,
   });
+}
+
+function createErrorIntervalBuckets(range) {
+  const intervals = {
+    '24h': 15 * 60 * 1000,
+    '7d': 6 * 60 * 60 * 1000,
+    '30d': 12 * 60 * 60 * 1000,
+  };
+  const ranges = {
+    '24h': 24 * 60 * 60 * 1000,
+    '7d': 7 * 24 * 60 * 60 * 1000,
+    '30d': 30 * 24 * 60 * 60 * 1000,
+  };
+
+  const intervalMs = intervals[range] || intervals['24h'];
+  const rangeMs = ranges[range] || ranges['24h'];
+  const endTime = Date.now();
+  const startTime = endTime - rangeMs;
+  const firstBucketStart = Math.floor(startTime / intervalMs) * intervalMs;
+  const buckets = [];
+
+  for (let bucketStart = firstBucketStart; bucketStart <= endTime; bucketStart += intervalMs) {
+    buckets.push({
+      key: String(bucketStart),
+      label: formatBucketLabel(bucketStart, range),
+    });
+  }
+
+  return {
+    intervalMs,
+    startTime,
+    endTime,
+    labels: buckets.map((bucket) => bucket.label),
+    keys: buckets.map((bucket) => bucket.key),
+  };
+}
+
+function countErrorsInBuckets(errors, bucketSet) {
+  const countsByKey = new Map(bucketSet.keys.map((key) => [key, 0]));
+
+  errors.forEach((event) => {
+    const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
+
+    if (!Number.isFinite(timestamp) || timestamp < bucketSet.startTime || timestamp > bucketSet.endTime) {
+      return;
+    }
+
+    const bucketKey = String(Math.floor(timestamp / bucketSet.intervalMs) * bucketSet.intervalMs);
+    countsByKey.set(bucketKey, (countsByKey.get(bucketKey) || 0) + 1);
+  });
+
+  return bucketSet.keys.map((key) => countsByKey.get(key) || 0);
+}
+
+function formatBucketLabel(bucketStart, range) {
+  const date = new Date(bucketStart);
+  const options = range === '24h'
+    ? { hour: 'numeric', minute: '2-digit' }
+    : { month: 'short', day: 'numeric', hour: 'numeric' };
+
+  return date.toLocaleString(undefined, options);
 }
 
 function renderSeverityBreakdown(filteredErrors) {
