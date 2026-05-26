@@ -1,25 +1,10 @@
-# dependencies
 node_modules/
-
-# macOS / Windows artifacts
 .DS_Store
 Thumbs.db
-
-# editor config
 .vscode/
-
-# build output
 coverage/
 dist/
 
-# environment files — only .env.example is tracked
 .env
 .env.*
 !.env.example
-
-# drizzle-kit introspection output (migration SQL files in backend/migrations/ are tracked)
-drizzle/
-
-# ai generated files
-.claude/
-.bob/

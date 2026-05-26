@@ -1,14 +1,13 @@
-/* eslint-env node */
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import mongoose from 'mongoose';
+const { isValid, createFromHexString } = mongoose.Types.ObjectId;
 
 /**
- * Validate that a value is a valid UUID v4.
- * @param {unknown} id
+ * Validate that a value is a valid MongoDB ObjectId.
+ * @param {string | import('mongoose').Types.ObjectId} id
  * @returns {boolean}
  */
 function isValidId(id) {
-  return typeof id === 'string' && UUID_REGEX.test(id);
+  return isValid(id) && createFromHexString(id.toString()).toString() === id.toString();
 }
 
 export { isValidId };

@@ -33,7 +33,7 @@ function addSignupFormListener() {
         
             if (response.ok) {
                 localStorage.setItem('watchtowerUser', JSON.stringify(data.user));
-                window.location.href = '/apps';
+                window.location.href = '/app_selection.html';
             } else {
                 alert(`Signup failed: ${data.message}`);
             }

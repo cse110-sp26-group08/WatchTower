@@ -3,7 +3,7 @@
 import bcrypt from 'bcrypt';
 import request from 'supertest';
 import { createApp } from '../app.js';
-import { insertUser, selectUserById, selectUserByEmail } from '../schema/userModel.js';
+import { User } from '../schema/userModel.js';
 
 describe('User endpoints', () => {
   const app = createApp();
@@ -22,7 +22,7 @@ describe('User endpoints', () => {
     expect(response.body.user.email).toBe('anaya@example.com');
     expect(response.body.user.passwordHash).toBeUndefined();
 
-    const savedUser = await selectUserById(response.body.user.id);
+    const savedUser = await User.findById(response.body.user._id).exec();
     expect(savedUser).not.toBeNull();
     expect(savedUser.passwordHash).not.toBe('plain-password');
     await expect(bcrypt.compare('plain-password', savedUser.passwordHash)).resolves.toBe(true);
@@ -38,27 +38,27 @@ describe('User endpoints', () => {
   });
 
   test('GET /api/users/:id returns a saved user', async () => {
-    const user = await insertUser({
+    const user = await User.create({
       username: 'owner',
       email: 'owner@example.com',
       passwordHash: 'hashed-password',
     });
 
-    const getResponse = await request(app).get(`/api/users/${user.id}`);
+    const getResponse = await request(app).get(`/api/users/${user._id}`);
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.body.user.username).toBe('owner');
     expect(getResponse.body.user.passwordHash).toBeUndefined();
   });
 
   test('PATCH /api/users/:id updates a saved user', async () => {
-    const user = await insertUser({
+    const user = await User.create({
       username: 'owner',
       email: 'owner@example.com',
       passwordHash: 'hashed-password',
     });
 
     const patchResponse = await request(app)
-      .patch(`/api/users/${user.id}`)
+      .patch(`/api/users/${user._id}`)
       .send({ username: 'updated-owner', role: 'admin' });
 
     expect(patchResponse.statusCode).toBe(200);
@@ -66,28 +66,28 @@ describe('User endpoints', () => {
     expect(patchResponse.body.user.role).toBeUndefined();
     expect(patchResponse.body.user.passwordHash).toBeUndefined();
 
-    const savedUser = await selectUserById(user.id);
+    const savedUser = await User.findById(user._id).exec();
     expect(savedUser.username).toBe('updated-owner');
     expect(savedUser.role).toBeUndefined();
   });
 
   test('DELETE /api/users/:id deletes a saved user', async () => {
-    const user = await insertUser({
+    const user = await User.create({
       username: 'owner',
       email: 'owner@example.com',
       passwordHash: 'hashed-password',
     });
 
-    const deleteResponse = await request(app).delete(`/api/users/${user.id}`);
+    const deleteResponse = await request(app).delete(`/api/users/${user._id}`);
 
     expect(deleteResponse.statusCode).toBe(200);
-    expect(deleteResponse.body.user.id).toBe(user.id);
-    await expect(selectUserById(user.id)).resolves.toBeNull();
+    expect(deleteResponse.body.user._id).toBe(user._id.toString());
+    await expect(User.findById(user._id).exec()).resolves.toBeNull();
   });
 
   test('POST /login saves safe user data in the session on successful login', async () => {
     const passwordHash = await bcrypt.hash('correct-password', 10);
-    await insertUser({
+    await User.create({
       username: 'loginendpoint',
       email: 'loginendpoint@example.com',
       passwordHash,
@@ -108,7 +108,7 @@ describe('User endpoints', () => {
 
   test('POST /login returns 401 for invalid credentials', async () => {
     const passwordHash = await bcrypt.hash('correct-password', 10);
-    await insertUser({
+    await User.create({
       username: 'failedlogin',
       email: 'failedlogin@example.com',
       passwordHash,
@@ -142,7 +142,7 @@ describe('User endpoints', () => {
     expect(response.body.user.passwordHash).toBeUndefined();
     expect(response.headers['set-cookie']).toBeDefined();
 
-    const savedUser = await selectUserById(response.body.user.id);
+    const savedUser = await User.findById(response.body.user._id).exec();
     expect(savedUser).not.toBeNull();
     expect(savedUser.passwordHash).not.toBe('plain-password');
     await expect(bcrypt.compare('plain-password', savedUser.passwordHash)).resolves.toBe(true);
@@ -162,13 +162,14 @@ describe('User endpoints', () => {
     expect(response.body.message).toBe('Passwords do not match');
     expect(response.headers['set-cookie']).toBeUndefined();
 
-    const savedUser = await selectUserByEmail('mismatchuser@example.com');
+    const savedUser = await User.findOne({ email: 'mismatchuser@example.com' }).exec();
     expect(savedUser).toBeNull();
   });
 
   test('GET /api/users/:id returns 404 for unknown users', async () => {
-    const response = await request(app).get('/api/users/00000000-0000-0000-0000-000000000000');
+    const response = await request(app).get('/api/users/000000000000000000000000');
 
     expect(response.statusCode).toBe(404);
   });
+
 });

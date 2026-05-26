@@ -10,6 +10,4 @@ jobs: # the things being executed
       - name: Install Dependencies
         run: cd backend && npm install
       - name: Unit Test
-        run: cd backend && npm test # the actual testing line
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+        run: npm test # the actual testing line

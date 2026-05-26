@@ -13,7 +13,22 @@
   <link rel="stylesheet" href="../styling/signup.css">
 </head>
 <body class="signup-page">
-  <watchtower-navbar></watchtower-navbar>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <div class="brand-mark">
+        <a href="./" class="brand-link">WatchTower</a>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="#docs">Docs</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="./login" class="nav-login">Log in</a>
+        <a href="./signup" class="button button-primary">Get started</a>
+      </div>
+    </nav>
+  </header>
 
   <main class="signup-shell">
     <section class="signup-layout" aria-label="Sign up page content">
@@ -83,9 +98,6 @@
     </section>
   </main>
 
-  <watchtower-footer></watchtower-footer>
-  <script src="../js/navbar.js"></script>
-  <script src="../js/footer.js"></script>
   <script src="../js/signup.js"></script>
 </body>
 </html>

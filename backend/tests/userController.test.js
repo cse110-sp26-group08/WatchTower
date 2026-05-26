@@ -8,7 +8,7 @@ import {
   editUser,
   getUserById,
 } from '../controllers/userController.js';
-import { insertUser, selectUserById } from '../schema/userModel.js';
+import { User } from '../schema/userModel.js';
 
 describe('userController', () => {
   test('createUser saves a valid user', async () => {
@@ -18,13 +18,13 @@ describe('userController', () => {
       password: 'plain-password',
     });
 
-    expect(user.id).toBeDefined();
+    expect(user._id).toBeDefined();
     expect(user.username).toBe('anaya');
     expect(user.email).toBe('anaya@example.com');
     expect(user.passwordHash).not.toBe('plain-password');
     await expect(bcrypt.compare('plain-password', user.passwordHash)).resolves.toBe(true);
 
-    const savedUser = await selectUserById(user.id);
+    const savedUser = await User.findById(user._id).exec();
     expect(savedUser).not.toBeNull();
     expect(savedUser.username).toBe('anaya');
   });
@@ -41,7 +41,7 @@ describe('userController', () => {
 
   test('checkLoginCredentials returns a safe user for valid credentials', async () => {
     const passwordHash = await bcrypt.hash('correct-password', 10);
-    await insertUser({
+    await User.create({
       username: 'loginuser',
       email: 'loginuser@example.com',
       passwordHash,
@@ -64,9 +64,9 @@ describe('userController', () => {
       password: 'plain-password',
     });
 
-    const foundUser = await getUserById(user.id);
+    const foundUser = await getUserById(user._id);
 
-    expect(foundUser.id).toBe(user.id);
+    expect(foundUser._id.toString()).toBe(user._id.toString());
     expect(foundUser.username).toBe('owner');
   });
 
@@ -77,7 +77,7 @@ describe('userController', () => {
       password: 'plain-password',
     });
 
-    const updatedUser = await editUser(user.id, {
+    const updatedUser = await editUser(user._id, {
       username: 'updated-owner',
       role: 'admin',
     });
@@ -85,7 +85,7 @@ describe('userController', () => {
     expect(updatedUser.role).toBeUndefined();
     expect(updatedUser.passwordHash).toBeUndefined();
 
-    const savedUser = await selectUserById(user.id);
+    const savedUser = await User.findById(user._id).exec();
     expect(savedUser.username).toBe('updated-owner');
     expect(savedUser.role).toBeUndefined();
   });
@@ -97,10 +97,10 @@ describe('userController', () => {
       password: 'plain-password',
     });
 
-    const deletedUser = await deleteUserById(user.id);
+    const deletedUser = await deleteUserById(user._id);
 
-    expect(deletedUser.id).toBe(user.id);
-    await expect(getUserById(user.id)).resolves.toBeNull();
-    await expect(selectUserById(user.id)).resolves.toBeNull();
+    expect(deletedUser._id.toString()).toBe(user._id.toString());
+    await expect(getUserById(user._id)).resolves.toBeNull();
+    await expect(User.findById(user._id).exec()).resolves.toBeNull();
   });
 });

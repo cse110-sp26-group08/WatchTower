@@ -7,144 +7,39 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet"
   >
   <link rel="stylesheet" href="styling/homepage.css">
 </head>
 <body class="homepage">
-  <watchtower-navbar
-    home-href="index.html"
-    login-href="webpages/login.html"
-    signup-href="webpages/signup.html"
-  ></watchtower-navbar>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <div class="brand-mark">
+        <a href="/" class="brand-link">WatchTower</a>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="#docs">Docs</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="webpages/login.html" class="nav-login">Log in</a>
+        <a href="webpages/signup.html" class="button button-primary">Get started</a>
+      </div>
+    </nav>
+  </header>
 
   <main class="hero-shell">
     <section class="hero" aria-label="Hero">
       <div class="hero-copy">
-        <h1>Know when your app goes down!</h1>
+        <p class="eyebrow">Watch smarter</p>
+        <h1>Catch all your errors in real-time!</h1>
         <p class="hero-description">
-          Monitor availability and response time, then get alerted when your app or
-          API is slow or unavailable.
+          catches errors, bugs, and notifies you when they happen
         </p>
       </div>
-
-      <div class="hero-diagram" id="product" aria-label="Collector script plus configuration equals health dashboard">
-        <article class="collector-card" aria-label="collector.js">
-          <img src="assets/collector-js.png" alt="">
-          <span class="collector-label">collector</span>
-        </article>
-
-        <span class="operator" aria-hidden="true">+</span>
-
-        <article class="code-card" id="docs" aria-label="WatchTower configuration code">
-          <div class="code-title">YourProject.html</div>
-          <div class="code-window">
-            <div class="code-line"><span>1</span><code><span class="syntax-tag">&lt;script&gt;</span></code></div>
-            <div class="code-line"><span>2</span><code>    const WATCHTOWER_CONFIG = {</code></div>
-            <div class="code-line"><span>3</span><code>        apiKey: <span class="syntax-value">"Your_API_Key"</span>,</code></div>
-            <div class="code-line"><span>4</span><code>        release: <span class="syntax-value">"1.0.0"</span>,</code></div>
-            <div class="code-line"><span>5</span><code>        forceFetchFallback: <span class="syntax-value">true</span>,</code></div>
-            <div class="code-line"><span>6</span><code>    };</code></div>
-            <div class="code-line"><span>7</span><code><span class="syntax-tag">&lt;/script&gt;</span></code></div>
-          </div>
-        </article>
-
-        <span class="operator" aria-hidden="true">=</span>
-
-        <article class="health-card" aria-label="Application health score">
-          <h2>Overall Health</h2>
-          <div class="health-content">
-            <div class="gauge" aria-hidden="true">
-              <div class="gauge-core">
-                <strong>85</strong>
-                <span>Good</span>
-              </div>
-            </div>
-            <div class="health-copy">
-              <h3>Your system is performing well</h3>
-              <p>You're all clear right now.</p>
-              <span class="dashboard-button">Dashboard</span>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section class="alert-flow" aria-label="Critical health alert workflow">
-      <article class="critical-card" aria-label="Critical health warning">
-        <h2>Overall Health</h2>
-        <div class="critical-content">
-          <div class="critical-gauge" aria-hidden="true">
-            <div class="critical-gauge-core">
-              <strong>0</strong>
-              <span>Down</span>
-            </div>
-          </div>
-          <div class="critical-copy">
-            <h3>Your system needs attention</h3>
-            <p>Your app is currently unavailable.</p>
-            <span class="critical-button">Dashboard</span>
-          </div>
-        </div>
-      </article>
-
-      <span class="flow-operator" aria-hidden="true">
-        <svg class="flow-arrow" viewBox="0 0 48 48" focusable="false">
-          <path d="M12 24h24M27 15l9 9-9 9"></path>
-        </svg>
-      </span>
-
-      <article class="email-card" aria-label="Email alert">
-        <div class="email-icon" aria-hidden="true">
-          <img class="email-icon-image" src="assets/email-alert.png" alt="">
-        </div>
-        <div class="email-copy">
-          <div class="email-title-row">
-            <h2>Email Alert</h2>
-            <span class="sent-pill">New</span>
-          </div>
-          <p><strong>From:</strong> alert@watchtower.com</p>
-          <p><strong>Subject:</strong> Critical downtime detected</p>
-          <p>Your app is currently unavailable. Please check the dashboard now.</p>
-        </div>
-      </article>
-    </section>
-
-    <section class="insight-strip" aria-label="WatchTower alert benefits">
-      <article class="insight-item">
-        <span class="insight-icon" aria-hidden="true">
-          <img src="assets/bell.png" alt="">
-        </span>
-        <div>
-          <h2>Instant alerts</h2>
-          <p>Get notified immediately when health drops to critical.</p>
-        </div>
-      </article>
-
-      <article class="insight-item">
-        <span class="insight-icon" aria-hidden="true">
-          <img src="assets/email.png" alt="">
-        </span>
-        <div>
-          <h2>Right in your inbox</h2>
-          <p>No logins needed; alerts come directly to you.</p>
-        </div>
-      </article>
-
-      <article class="insight-item">
-        <span class="insight-icon" aria-hidden="true">
-          <img src="assets/shield.png" alt="">
-        </span>
-        <div>
-          <h2>Actionable insights</h2>
-          <p>Clear details help you act fast and minimize downtime.</p>
-        </div>
-      </article>
     </section>
   </main>
-  <watchtower-footer home-href="index.html"></watchtower-footer>
-  <script src="js/navbar.js"></script>
-  <script src="js/footer.js"></script>
 </body>
 </html>

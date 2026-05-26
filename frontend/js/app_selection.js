@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function init() {
     const user = getStoredUser();
 
-    if (!user?.id) {
+    if (!user?._id) {
         window.location.href = '/login';
         return;
     }
@@ -16,7 +16,7 @@ function init() {
     addLogoutListener();
     bindProjectDialogControls();
     window.watchtowerOpenCreateProject = openCreateProjectDialog;
-    loadApps(user.id);
+    loadApps(user._id);
 }
 
 function getStoredUser() {
@@ -69,7 +69,7 @@ function renderApps(apps, ownerId) {
         const card = document.createElement('button');
         card.type = 'button';
         card.className = 'app-card';
-        const appUrl = app.url || storedUrls[app.id] || '';
+        const appUrl = storedUrls[app._id] || '';
 
         card.innerHTML = `
             <div class="app-card-top">
@@ -90,7 +90,7 @@ function renderApps(apps, ownerId) {
                 ...app,
                 url: appUrl || undefined,
             }));
-            window.location.href = `/dashboard?appId=${encodeURIComponent(app.id)}`;
+            window.location.href = `/dashboard?appId=${encodeURIComponent(app._id)}`;
         });
 
         appsList.appendChild(card);
@@ -112,7 +112,7 @@ function createAddProjectCard(ownerId) {
         </div>
     `;
     card.addEventListener('click', () => {
-        if (!currentUser?.id || currentUser.id !== ownerId) {
+        if (!currentUser?._id || currentUser._id !== ownerId) {
             window.location.href = '/login';
             return;
         }
@@ -187,9 +187,8 @@ async function createProjectFromDialog() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                ownerId: user.id,
+                ownerId: user._id,
                 name,
-                url,
             }),
         });
 
@@ -200,9 +199,13 @@ async function createProjectFromDialog() {
             return;
         }
 
+        if (data.app?._id) {
+            saveAppUrl(data.app._id, url);
+        }
+
         updateMessage(message, 'Project card created.', 'success');
         dialog.close();
-        await loadApps(user.id);
+        await loadApps(user._id);
     } catch (error) {
         console.error('Error creating app:', error);
         updateMessage(message, 'Could not create project right now.', 'error');

@@ -1,21 +1,26 @@
 /* eslint-env node */
 
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import mongoose from 'mongoose';
 
 /**
- * Live-binding reference to the Drizzle db instance.
- * Starts undefined — call initDb() before making any queries.
- * @type {import('drizzle-orm/neon-http').NeonHttpDatabase | undefined}
+ * Connect Mongoose to MongoDB.
+ * @param {string | undefined} uri - MongoDB connection string.
+ * @returns {Promise<typeof mongoose>}
  */
-export let db;
+async function connectDatabase(uri = process.env.MONGODB_URI) {
+  if (!uri) {
+    throw new Error('MONGODB_URI is required to connect to MongoDB');
+  }
 
-/**
- * Initialize the Drizzle client with a Neon HTTP connection.
- * Must be called after dotenv is loaded (so DATABASE_URL is available).
- * @param {string} [url]
- */
-export function initDb(url = process.env.DATABASE_URL) {
-  if (!url) throw new Error('DATABASE_URL is required');
-  db = drizzle(neon(url));
+  return mongoose.connect(uri);
 }
+
+/**
+ * Disconnect Mongoose from MongoDB.
+ * @returns {Promise<void>}
+ */
+async function disconnectDatabase() {
+  await mongoose.disconnect();
+}
+
+export { connectDatabase, disconnectDatabase };

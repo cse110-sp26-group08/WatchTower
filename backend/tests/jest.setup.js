@@ -1,27 +1,32 @@
 /* eslint-env jest, node */
 
-import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { initDb, db } from '../util/database.js';
-import { events } from '../schema/eventModel.js';
-import { apps } from '../schema/appModel.js';
-import { users } from '../schema/userModel.js';
+import { connectDatabase, disconnectDatabase } from '../util/database.js';
 
+let mongoServer;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load test env vars before initDb() is called.
-// Create a .env.test file with DATABASE_URL pointing to your test database.
-dotenv.config({ path: path.join(__dirname, '../.env.test') });
+process.env.MONGOMS_DOWNLOAD_DIR = path.join(__dirname, '../node_modules/.cache/mongodb-memory-server');
 
-beforeAll(() => {
-  initDb();
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await connectDatabase(mongoServer.getUri());
 });
 
 afterEach(async () => {
-  // Truncate in FK-safe order: events → apps → users
-  await db.delete(events);
-  await db.delete(apps);
-  await db.delete(users);
+  if (!mongoose.connection.db) return;
+
+  const collections = await mongoose.connection.db.collections();
+  await Promise.all(collections.map((collection) => collection.deleteMany({})));
+});
+
+afterAll(async () => {
+  await disconnectDatabase();
+  if (mongoServer) {
+    await mongoServer.stop();
+  }
 });
