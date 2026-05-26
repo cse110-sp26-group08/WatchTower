@@ -79,6 +79,7 @@ function createApp() {
   // Serve static assets for the frontend
   app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
   app.use('/js', express.static(path.join(__dirname, '../frontend/js')));
+  app.use('/sw.js', express.static(path.join(__dirname, '../frontend/sw.js')));
 
   // Serve Pages
   app.get('/', (req, res) => {
@@ -86,6 +87,10 @@ function createApp() {
   });
 
   app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/login.html'));
+  });
+
+  app.get('/login.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/login.html'));
   });
 
@@ -108,6 +113,10 @@ function createApp() {
   });
 
   app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/signup.html'));
+  });
+
+  app.get('/signup.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/signup.html'));
   });
 
@@ -136,7 +145,15 @@ function createApp() {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
   });
 
+  app.get('/app_selection.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
+  });
+
   app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/dashboard.html'));
+  });
+
+  app.get('/dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/dashboard.html'));
   });
 
