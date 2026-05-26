@@ -1,4 +1,75 @@
-/* ── Severity badges ──────────────────────────────────────────────────── */
+.errors-overview {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: grid;
+  gap: 20px;
+}
+
+.errors-overview-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.errors-overview-title,
+.errors-overview-status,
+.errors-overview-detail,
+.errors-overview-project,
+.errors-overview-updated {
+  margin: 0;
+}
+
+.errors-overview-title {
+  font-size: 1.5rem;
+}
+
+.errors-overview-status {
+  margin-top: 10px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.errors-overview-detail,
+.errors-overview-project,
+.errors-overview-updated,
+.errors-section-summary {
+  color: var(--muted);
+}
+
+.errors-overview-detail,
+.errors-overview-updated {
+  margin-top: 6px;
+}
+
+.errors-overview-project {
+  font-weight: 700;
+  text-align: right;
+}
+
+.sev-val-critical {
+  color: #b42318;
+}
+
+.sev-val-high {
+  color: #b54708;
+}
+
+.sev-val-medium {
+  color: #854d0e;
+}
+
+.sev-val-low {
+  color: #166534;
+}
+
+.sev-val-total {
+  color: var(--blue);
+}
+
 .severity-badge {
   display: inline-block;
   padding: 3px 10px;
@@ -9,12 +80,26 @@
   letter-spacing: 0.05em;
 }
 
-.sev-critical { background: #fef3f2; color: #b42318; }
-.sev-high     { background: #fef6ee; color: #b54708; }
-.sev-medium   { background: #fefce8; color: #854d0e; }
-.sev-low      { background: #f0fdf4; color: #166534; }
+.sev-critical {
+  background: #fef3f2;
+  color: #b42318;
+}
 
-/* ── Error type badge ─────────────────────────────────────────────────── */
+.sev-high {
+  background: #fef6ee;
+  color: #b54708;
+}
+
+.sev-medium {
+  background: #fefce8;
+  color: #854d0e;
+}
+
+.sev-low {
+  background: #f0fdf4;
+  color: #166534;
+}
+
 .error-type-badge {
   display: inline-block;
   padding: 3px 10px;
@@ -25,7 +110,6 @@
   font-weight: 600;
 }
 
-/* ── Stack trace toggle + display ────────────────────────────────────── */
 .stack-toggle {
   background: none;
   border: 1px solid var(--line);
@@ -60,45 +144,9 @@
   display: block;
 }
 
-/* ── Errors table ─────────────────────────────────────────────────────── */
 .error-row td {
   vertical-align: top;
-  padding: 16px 10px;
-}
-
-.url-cell {
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--muted);
-  font-size: 0.85rem;
-  cursor: help;
-}
-
-.errors-table-card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  box-shadow: var(--shadow);
-  padding: 20px;
-}
-
-.errors-list-card {
-  display: grid;
-  gap: 16px;
-}
-
-.table-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.table-header h2 {
-  margin: 0;
+  padding: 14px 10px;
 }
 
 .errors-table-shell {
@@ -110,24 +158,38 @@
   width: 100%;
 }
 
-.type-filter-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+.time-column {
+  white-space: normal !important;
+  line-height: 1.25;
 }
 
-.type-filter-row label {
+.severity-column {
+  padding-left: 0 !important;
+  padding-right: 2px !important;
+}
+
+.compact-left-column {
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+.message-column {
+  padding-left: 28px !important;
+}
+
+.stack-column {
+  padding-left: 2px !important;
+  padding-right: 4px !important;
+}
+
+.url-cell {
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.type-filter-row select {
-  min-height: 38px;
-  padding: 0 14px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--panel-alt);
+  font-size: 0.85rem;
+  cursor: help;
 }
 
 .empty-state {
@@ -137,89 +199,17 @@
   font-size: 0.9rem;
 }
 
-/* ── Severity breakdown cards ─────────────────────────────────────────── */
-.breakdown-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 14px;
+.nav-link-active {
+  background: rgb(255 255 255 / 10%);
+  border: 1px solid rgb(255 255 255 / 12%);
 }
 
-.breakdown-card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 16px 20px 0;   /* 0 bottom so color bar sits flush */
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;        /* clips bar to border-radius */
-}
+@media (width <= 900px) {
+  .errors-overview-header {
+    flex-direction: column;
+  }
 
-.breakdown-label {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin: 0 0 6px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.breakdown-val {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  line-height: 1;
-}
-
-/* color bar sits at the bottom of each card */
-.breakdown-card::after {
-  content: '';
-  display: block;
-  height: 5px;
-  margin-top: auto;
-  border-radius: 0 0 16px 16px;
-}
-
-.breakdown-card.critical::after { background: #f04438; }
-.breakdown-card.high::after     { background: #f79009; }
-.breakdown-card.medium::after   { background: #eab308; }
-.breakdown-card.low::after      { background: #16a34a; }
-.breakdown-card.total::after    { background: var(--blue); }
-
-.breakdown-card.critical .breakdown-val { color: #b42318; }
-.breakdown-card.high     .breakdown-val { color: #b54708; }
-.breakdown-card.medium   .breakdown-val { color: #854d0e; }
-.breakdown-card.low      .breakdown-val { color: #166534; }
-.breakdown-card.total    .breakdown-val { color: var(--blue); }
-
-/* ── Page header ──────────────────────────────────────────────────────── */
-.page-header {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  box-shadow: var(--shadow);
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.page-title {
-  margin: 0 0 4px;
-  font-size: 1.3rem;
-  font-weight: 700;
-}
-
-.page-subtitle {
-  color: var(--muted);
-  margin: 0;
-  font-size: 0.88rem;
-}
-
-/* ── Active nav item ──────────────────────────────────────────────────── */
-.nav-option.active {
-  background: rgb(255 255 255 / 12%);
-  border: 1px solid rgb(255 255 255 / 10%);
+  .errors-overview-project {
+    text-align: left;
+  }
 }
