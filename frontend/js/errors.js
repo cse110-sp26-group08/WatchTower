@@ -87,7 +87,7 @@ function renderSeverityLineChart(filteredErrors, range) {
       data: countErrorsInBuckets(severityErrors, allBuckets),
       borderColor: colors[severityLevel],
       backgroundColor: `${colors[severityLevel]}22`,
-      tension: 0.3,
+      tension: 0,
       fill: false,
       pointRadius: 3,
     };
@@ -101,9 +101,9 @@ function renderSeverityLineChart(filteredErrors, range) {
 
 function createErrorIntervalBuckets(range) {
   const intervals = {
-    '24h': 15 * 60 * 1000,
-    '7d': 6 * 60 * 60 * 1000,
-    '30d': 12 * 60 * 60 * 1000,
+    '24h': 60 * 60 * 1000,
+    '7d': 24 * 60 * 60 * 1000,
+    '30d': 2 * 24 * 60 * 60 * 1000,
   };
   const ranges = {
     '24h': 24 * 60 * 60 * 1000,
