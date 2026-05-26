@@ -1,7 +1,6 @@
-console.log('performance.js loaded');
+/* global flatpickr, Chart */
 
-// temp[orary] API base URL - in production, this should be set via environment variable or config
-const API_BASE_URL = 'http://localhost:3000';
+console.log('performance.js loaded');
 
 let refreshIntervalId = null;
 const AUTO_REFRESH_MS = 5000;
@@ -81,8 +80,7 @@ async function loadApps(ownerId) {
     const selectApp = document.querySelector('#select-app');
 
     try {
-        //temporary direct API call - in production, this should be done via a backend endpoint to avoid CORS issues and to secure the API key
-        const response = await fetch(`${API_BASE_URL}/api/apps/users/${ownerId}`);
+        const response = await fetch(`/api/apps/users/${ownerId}`);
         const data = await response.json();
         const apps = Array.isArray(data.apps) ? data.apps : [];
 
@@ -123,8 +121,7 @@ async function loadSelectedAppPerformance() {
 
 async function loadPerformanceData(appId) {
     try {
-      //temporary direct API call - in production, this should be done via a backend endpoint to avoid CORS issues and to secure the API key
-        const response = await fetch(`${API_BASE_URL}/api/events/performance/apps/${appId}`, {
+        const response = await fetch(`/api/events/performance/apps/${appId}`, {
             cache: 'no-store'
         });
 
