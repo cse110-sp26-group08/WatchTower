@@ -85,30 +85,32 @@
       <details>
         <summary>What does WatchTower do?</summary>
         <p>
-          WatchTower helps developers a way to monitor their web apps.  It helps teams see whether an app is reachable, review
-          metrics, and get notified when the app is unreacable, allowing developers to respond to crashes quickly. 
+          WatchTower helps developers a way to monitor their web apps. It helps teams see whether an app is reachable,
+          review
+          metrics, and get notified when the app is unreacable, allowing developers to respond to crashes quickly.
         </p>
       </details>
       <details>
         <summary>What data does the collector send to WatchTower?</summary>
         <p>
           The collector sends information about unhandled JavaScript exceptions,
-    unhandled promise rejections, page load performance, DOM content loaded time,
-    time to first byte, JavaScript memory usage, and the latency of fetch API
-    requests.
+          unhandled promise rejections, page load performance, DOM content loaded time,
+          time to first byte, JavaScript memory usage, and the latency of fetch API
+          requests.
         </p>
       </details>
       <details>
         <summary>Can I monitor more than one app?</summary>
         <p>
           Yes. Each registered app gets its own API key, so you can track multiple
-          projects separately in WatchTower. 
+          projects separately in WatchTower.
         </p>
       </details>
       <details>
         <summary>Does WatchTower affect my apps performance?</summary>
         <p>
-          Not significantly. A small browser script reports errors and timing in the background without changing your server or build.
+          Not significantly. A small browser script reports errors and timing in the background without changing your
+          server or build.
           Heavy work stays on WatchTower’s side, so normal use should not slow your app down.
         </p>
       </details>
@@ -116,7 +118,8 @@
         <summary>Can I use WatchTower during local development?</summary>
         <p>
           Yes. WatchTower can be used locally while running the server on
-          <code>http://localhost:3000</code>. If your WatchTower instance is hosted elsewhere, open collector.js and modfify baseUrl
+          <code>http://localhost:3000</code>. If your WatchTower instance is hosted elsewhere, open collector.js and
+          modfify baseUrl
         </p>
         <pre><code>const baseUrl = "https://your-watchtower-host.com";</code></pre>
       </details>

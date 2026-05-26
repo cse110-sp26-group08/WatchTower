@@ -18,9 +18,6 @@ body {
   margin: 0;
   font-family: Manrope, Arial, sans-serif;
   color: var(--text);
-  background:
-    /* linear-gradient(118deg, #fff 0%, #fbfbff 42%, #f0eef5 100%),
-    radial-gradient(ellipse at 82% 32%, rgb(77 84 151 / 12%), transparent 42%); */
 }
 
 a {
@@ -43,10 +40,6 @@ a {
   z-index: 0;
   pointer-events: none;
   background:
-    /* linear-gradient(145deg, rgb(255 255 255 / 88%) 0%, rgb(255 255 255 / 18%) 34%, transparent 70%),
-    radial-gradient(ellipse at 28% 25%, rgb(255 255 255 / 72%), transparent 38%),
-    radial-gradient(ellipse at 88% 46%, rgb(164 159 183 / 22%), transparent 44%); */
-  filter: blur(0.3px);
 }
 
 .docs-shell {
@@ -91,7 +84,7 @@ a {
   color: #486bea;
 }
 
-@media (width <= 980px) {
+@media (width <=980px) {
   .docs-shell {
     width: min(100% - 28px, 760px);
     padding-top: 1rem;
@@ -102,7 +95,7 @@ a {
   }
 }
 
-@media (width <= 620px) {
+@media (width <=620px) {
   .docs-shell {
     padding-top: 1rem;
   }
@@ -111,7 +104,6 @@ a {
     min-height: 360px;
   }
 }
-
 
 .docs-foldout {
   width: 100%;
@@ -128,7 +120,6 @@ a {
   color: var(--text);
   user-select: none;
   list-style: none;
-  /* background:#f7f5ef;*/
 }
 
 .docs-summary::-webkit-details-marker {
@@ -183,28 +174,28 @@ a {
 }
 
 .docs-layout .hero {
-    min-height: auto;
-    padding: 0;
+  min-height: auto;
+  padding: 0;
 }
 
 .hero {
-    animation: page-fade 700ms ease-out both;
+  animation: page-fade 700ms ease-out both;
 }
 
 .docs-main h2 {
-    text-align: center;
-    margin: 0;
-    font-size: clamp(1.8rem, 3vw, 2.4rem);
+  text-align: center;
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
 }
 
 .docs-main h3 {
-    padding-left: 3em;
-    padding-top: 1em;
+  padding-left: 3em;
+  padding-top: 1em;
 }
 
 .docs-faq h2 {
-    margin: 0;
-    font-size: clamp(1.8rem, 3vw, 2.4rem);
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
 }
 
 .docs-faq {
@@ -213,33 +204,31 @@ a {
   padding: 0 15px 2rem;
 }
 
-
 @media (width <=980px) {
-    .docs-layout {
-        grid-template-columns: 1fr;
-        gap: 40px;
-        min-height: auto;
-        padding: 25px 5px 40px;
-    }
+  .docs-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    min-height: auto;
+    padding: 25px 5px 40px;
+  }
 }
 
-
 .docs-faq details {
-    padding: 18px 0;
-    border-top: 1px solid var(--line);
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
 }
 
 .docs-faq summary {
-    cursor: pointer;
-    font-weight: 700;
+  cursor: pointer;
+  font-weight: 700;
 }
 
 .docs-faq summary:hover {
-    color: var(--blue);
+  color: var(--blue);
 }
 
 .docs-faq details p {
-    color: var(--muted);
+  color: var(--muted);
 }
 
 
@@ -248,14 +237,13 @@ a {
     opacity: 0;
     transform: translateY(18px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.hero-description{
+.hero-description {
   max-width: 380px;
   margin: 18px 0 0;
   font-size: clamp(0.95rem, 1.35vw, 1.12rem);
@@ -263,7 +251,6 @@ a {
   color: var(--muted);
   text-align: left;
 }
-
 
 .docs-tooltip {
   position: relative;
@@ -298,7 +285,7 @@ a {
   padding: 10px 14px;
   border-radius: 8px;
   background: var(--text);
-  color:white;
+  color: white;
   font-weight: 800;
   margin: 0 auto;
   display: block;
@@ -308,4 +295,3 @@ a {
 .docs-download:hover {
   background: color-mix(in srgb, var(--text) 80%, white);
 }
-
