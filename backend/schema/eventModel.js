@@ -1,54 +1,58 @@
-import mongoose from 'mongoose';
+/* eslint-env node */
 
-const { Schema } = mongoose;
+import { pgTable, pgEnum, text, uuid, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { eq } from 'drizzle-orm';
+import { db } from '../util/database.js';
+
+export const eventTypeEnum = pgEnum('event_type', ['error', 'performance', 'feedback', 'release']);
+
+export const events = pgTable('events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  appId: uuid('app_id').notNull(),
+  type: eventTypeEnum('type').notNull(),
+  timestamp: timestamp('timestamp').notNull(),
+  url: text('url'),
+  metadata: jsonb('metadata').default({}),
+  receivedAt: timestamp('received_at').notNull(),
+});
 
 /**
- * Mongoose schema for app events.
- * @type {import('mongoose').Schema}
- * @property {import('mongoose').Types.ObjectId} appId - reference to associated App
- * @property {string} type - event category (error, performance, feedback, release)
- * @property {Date} timestamp - event occurrence time
- * @property {string} [url] - URL where the event occurred
- * @property {Object} metadata - arbitrary event metadata
- * @property {Date} receivedAt - ingestion timestamp
+ * Insert a new event row.
+ * @param {{ appId: string, type: string, timestamp: Date, url?: string, metadata?: object, receivedAt: Date }} data
+ * @returns {Promise<object>}
  */
-const EventSchema = new Schema(
-  {
-    appId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      ref: 'App',
-      index: true,
-    },
-    type: {
-      type: String,
-      required: true,
-      enum: ['error', 'performance', 'feedback', 'release'],
-    },
-    timestamp: {
-      type: Date,
-      required: true,
-      default: Date.now,
-    },
-    url: {
-      type: String,
-      trim: true,
-    },
-    metadata: {
-      type: Schema.Types.Mixed,
-      default: {},
-    },
-    receivedAt: {
-      type: Date,
-      required: true,
-      default: Date.now,
-    },
-  },
-  {
-    timestamps: false,
-  }
-);
+async function insertEvent(data) {
+  const [event] = await db.insert(events).values(data).returning();
+  return event;
+}
 
-const Event = mongoose.model('Event', EventSchema);
+/**
+ * Select an event by primary key.
+ * @param {string} id
+ * @returns {Promise<object|null>}
+ */
+async function selectEventById(id) {
+  const [event] = await db.select().from(events).where(eq(events.id, id));
+  return event ?? null;
+}
 
-export { EventSchema, Event };
+/**
+ * Select all events belonging to an app.
+ * @param {string} appId
+ * @returns {Promise<object[]>}
+ */
+async function selectEventsByAppId(appId) {
+  return db.select().from(events).where(eq(events.appId, appId));
+}
+
+/**
+ * Delete an event by primary key. Returns the deleted row.
+ * @param {string} id
+ * @returns {Promise<object|null>}
+ */
+async function removeEvent(id) {
+  const [event] = await db.delete(events).where(eq(events.id, id)).returning();
+  return event ?? null;
+}
+
+export { insertEvent, selectEventById, selectEventsByAppId, removeEvent };

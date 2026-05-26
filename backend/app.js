@@ -27,6 +27,7 @@ import {
 import {
   createAppEndpoint,
   deleteAppEndpoint,
+  forceStatusEndpoint,
   getAppEndpoint,
   getAppsByOwnerEndpoint,
 } from './endpoints/apps.js';
@@ -37,7 +38,7 @@ import {
   updateUserEndpoint,
 } from './endpoints/users.js';
 import { checkLoginCredentials, createUser } from './controllers/userController.js';
-import { connectDatabase } from './util/database.js';
+import { initDb } from './util/database.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,6 +79,7 @@ function createApp() {
   // Serve static assets for the frontend
   app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
   app.use('/js', express.static(path.join(__dirname, '../frontend/js')));
+  app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
 
   // Serve Pages
   app.get('/', (req, res) => {
@@ -110,6 +112,10 @@ function createApp() {
     res.sendFile(path.join(__dirname, '../frontend/webpages/signup.html'));
   });
 
+  app.get('/docs', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/docs.html'));
+  });
+
   app.post('/signup', async (req, res) => {
     try {
       const { username, email, password, confirmPassword } = req.fields || req.body;
@@ -131,7 +137,7 @@ function createApp() {
     }
   });
 
-  app.get('/app-selection', (req, res) => {
+  app.get('/apps', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
   });
 
@@ -162,6 +168,7 @@ function createApp() {
 
   // App Endpoints
   app.post('/api/apps', createAppEndpoint);
+  app.post('/api/apps/:id/forceStatus', forceStatusEndpoint);
   app.get('/api/apps/:id', getAppEndpoint);
   app.delete('/api/apps/:id', deleteAppEndpoint);
   app.get('/api/apps/users/:ownerId', getAppsByOwnerEndpoint);
@@ -173,21 +180,11 @@ const app = createApp();
 const port = process.env.PORT || 3000;
 
 if (process.env.NODE_ENV !== 'test') {
-  connectDatabase()
-    .then(() => {
-      // eslint-disable-next-line no-console
-      console.log('Connected to MongoDB');
-
-      app.listen(port, () => {
-        // eslint-disable-next-line no-console
-        console.log(`WatchTower backend listening on http://localhost:${port}`);
-      });
-    })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to connect to MongoDB:', error.message);
-      process.exit(1);
-    });
+  initDb();
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`WatchTower backend listening on http://localhost:${port}`);
+  });
 }
 
 export { createApp };
