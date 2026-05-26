@@ -142,12 +142,12 @@ a {
   transition: background 150ms ease, color 150ms ease;
 }
 
-.docs-foldout[open] .docs-summary::after {
-  content: "−";
-}
-
 .docs-summary:hover::after {
   background: rgb(72 107 234 / 22%);
+}
+
+.docs-foldout[open] .docs-summary::after {
+  content: "−";
 }
 
 .docs-foldout iframe {
@@ -173,13 +173,13 @@ a {
   padding: 28px 15px 0;
 }
 
+.hero {
+  animation: page-fade 700ms ease-out both;
+}
+
 .docs-layout .hero {
   min-height: auto;
   padding: 0;
-}
-
-.hero {
-  animation: page-fade 700ms ease-out both;
 }
 
 .docs-main h2 {
@@ -237,6 +237,7 @@ a {
     opacity: 0;
     transform: translateY(18px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
