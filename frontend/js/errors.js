@@ -45,7 +45,6 @@ window.renderGraph = function renderGraph(filteredErrors) {
   const range = document.getElementById('time-range')?.value || '24h';
   const bucketSize = range === '24h' ? 'hour' : 'day';
   const chartCanvas = document.getElementById('chart-canvas-shell');
-  const chartTable = document.getElementById('chart-table-shell');
   const graphTitle = document.getElementById('graph-title');
   const graphSummary = document.getElementById('graph-summary');
 
@@ -55,36 +54,11 @@ window.renderGraph = function renderGraph(filteredErrors) {
     lastDashboardStateRef = dashboardState;
   }
 
-  if (!graphTitle || !graphSummary || !chartCanvas || !chartTable) {
-    return;
-  }
-
-  if (selectedChartView === 'table') {
-    graphTitle.textContent = 'Recent error table';
-    graphSummary.textContent = `${filteredErrors.length} matching errors shown in tabular form.`;
-    chartCanvas.hidden = true;
-    chartTable.hidden = false;
-    renderChartTable(filteredErrors);
-    destroyChart();
+  if (!graphTitle || !graphSummary || !chartCanvas) {
     return;
   }
 
   chartCanvas.hidden = false;
-  chartTable.hidden = true;
-
-  if (selectedChartView === 'pie') {
-    graphTitle.textContent = 'Error severity breakdown';
-    graphSummary.textContent = 'Distribution of matching errors by severity.';
-    renderPieChart(filteredErrors);
-    return;
-  }
-
-  if (selectedChartView === 'bar') {
-    graphTitle.textContent = 'Errors by type';
-    graphSummary.textContent = 'Error count grouped by error type.';
-    renderErrorTypeBarChart(filteredErrors);
-    return;
-  }
 
   graphTitle.textContent = 'Error volume by severity';
   graphSummary.textContent = `${filteredErrors.length} error${filteredErrors.length === 1 ? '' : 's'} in the selected range.`;
@@ -127,28 +101,6 @@ function renderSeverityLineChart(filteredErrors, bucketSize) {
   createOrUpdateChart('line', {
     labels: allBuckets.labels,
     datasets,
-  });
-}
-
-function renderErrorTypeBarChart(filteredErrors) {
-  const countsByType = {};
-
-  filteredErrors.forEach((event) => {
-    const errorType = normalizeErrorType(event.metadata?.errorType);
-    countsByType[errorType] = (countsByType[errorType] || 0) + 1;
-  });
-
-  const entries = Object.entries(countsByType).sort(([, leftCount], [, rightCount]) => {
-    return rightCount - leftCount;
-  });
-
-  createOrUpdateChart('bar', {
-    labels: entries.map(([errorType]) => errorType),
-    datasets: [{
-      label: 'Count',
-      data: entries.map(([, count]) => count),
-      backgroundColor: entries.map(([errorType]) => getTypeColor(errorType)),
-    }],
   });
 }
 
@@ -326,18 +278,6 @@ function normalizeSeverity(value) {
 function normalizeErrorType(value) {
   const trimmedValue = String(value || '').trim();
   return trimmedValue || 'Error';
-}
-
-function getTypeColor(errorType) {
-  const colorMap = {
-    TypeError: '#f04438',
-    ReferenceError: '#f79009',
-    SyntaxError: '#eab308',
-    RangeError: '#16a34a',
-    Error: '#1f49ff',
-  };
-
-  return colorMap[errorType] || '#1f49ff';
 }
 
 function toggleStack(index) {
