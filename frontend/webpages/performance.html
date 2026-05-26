@@ -17,20 +17,42 @@
                 <p>Monitor latency, response times, and system performance</p>
             </div>
             <form class="filters">
-                <label for="date-range">Date Range:</label>
-                <input id="date-range" class="date-range-input" type="text" placeholder="Select date range">
 
-                <label for="select-app">Application:</label>
-                <select id="select-app">
-                    <option value="service-a">Application A</option>
-                    <option value="service-b">Application B</option>
-                </select>
+                <div class="filter-card">
+                    <div class="filter-icon">
+                        <img src="../assets/calendar-icon.svg" alt="Calendar Icon">
+                    </div>
 
-                <label class="toggle-switch">
-                    <span class="toggle-label">Auto-refresh</span>
-                    <input type="checkbox" checked>
-                    <span class="toggle-slider"></span>
-                </label>
+                    <input
+                        id="date-range"
+                        class="date-range-input"
+                        type="text"
+                        placeholder="Select date range"
+                    >
+                </div>
+
+                <div class="filter-card">
+                    <div class="filter-icon">
+                        <img src="../assets/application-icon.svg" alt="Application Icon">
+                    </div>
+
+                    <select id="select-app">
+                        <option value="service-a">Project A</option>
+                        <option value="service-b">Project B</option>
+                    </select>
+                </div>
+
+                <div class="filter-card toggle-card">
+                    <span class="refresh-icon" aria-hidden="true">↻</span>
+                    <span class="toggle-label">Auto Refresh</span>
+
+                    <label class="toggle-switch">
+                        <span class="toggle-status">ON</span>
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
             </form>
         </header>
         
@@ -43,20 +65,20 @@
                     <div class = "kpi-icon response-icon"><img src="../assets/response-time-icon.png" alt="Response Time Icon"></div>
                 </div>
                 <p id="avg-response-time" class="kpi-value">124 ms</p>
-                <p id="avg-response-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
-                <p class="kpi-period">vs May 7 – May 13</p>
+                <p id="avg-response-change" class="kpi-change">Loading...</p>
+                <p class="kpi-period">Selected date range</p>
                 <canvas id="avg-response-sparkline" class="sparkline-canvas"></canvas>
                 <!-- <canvas id="avg-response-sparkline"></canvas> -->
             </div>
 
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <h3>P95 Latency</h3>
+                    <h3>    Slowest 5% Response Time</h3>
                     <div class = "kpi-icon latency-icon"><img src="../assets/latency-icon.png" alt="Latency Icon"></div>
                 </div>
                 <p id="p95-latency" class="kpi-value">420 ms</p>
-                <p id="p95-latency-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
-                <p class="kpi-period">vs May 7 – May 13</p>
+                <p id="p95-latency-change" class="kpi-change">Loading...</p>
+                <p class="kpi-period">Selected date range</p>
                 <canvas id="p95-latency-sparkline" class="sparkline-canvas"></canvas>
                 <!-- <canvas id="p95-latency-sparkline"></canvas> -->
             </div>
@@ -67,8 +89,8 @@
                     <div class = "kpi-icon slowest-endpoint-icon"><img src="../assets/slowest-endpoint-icon.png" alt="Slowest Endpoint Icon"></div>
                 </div>
                 <p id="slowest-endpoint" class="kpi-value">/api/events</p>
-                <p id="slowest-endpoint-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
-                <p class="kpi-period">vs May 7 – May 13</p>
+                <p id="slowest-endpoint-change" class="kpi-change">Loading...</p>
+                <p class="kpi-period">Selected date range</p>
                 <canvas id="slowest-endpoint-sparkline" class="sparkline-canvas"></canvas>
                 <!-- <canvas id="slowest-endpoint-sparkline"></canvas> -->
             </div>
@@ -79,8 +101,8 @@
                     <div class = "kpi-icon avg-page-load-icon"><img src="../assets/avg-page-load-icon.png" alt="Average Page Load Icon"></div>
                 </div>
                 <p id="avg-page-load-time" class="kpi-value">1500 ms</p>
-                <p id="avg-page-load-change" class="kpi-change positive">↓ 12 ms (8.8%)</p>
-                <p class="kpi-period">vs May 7 – May 13</p>
+                <p id="avg-page-load-change" class="kpi-change">Loading...</p>
+                <p class="kpi-period">Selected date range</p>
                 <canvas id="avg-page-load-sparkline" class="sparkline-canvas"></canvas>
                 <!-- <canvas id="avg-page-load-sparkline"></canvas> -->
             </div>
@@ -91,8 +113,8 @@
                     <div class="kpi-icon memory-icon"><img src="../assets/memory-icon.png" alt="Memory Icon"></div>
                 </div>
                 <p id="avg-memory-usage" class="kpi-value">256 MB</p>
-                <p id="avg-memory-change" class="kpi-change positive">↓ 18 MB (6.5%)</p>
-                <p class="kpi-period">vs May 7 – May 13</p>
+                <p id="avg-memory-change" class="kpi-change">Loading...</p>
+                <p class="kpi-period">Selected date range</p>
                 <canvas id="avg-memory-sparkline" class="sparkline-canvas"></canvas>
                 <!-- <canvas id="avg-memory-sparkline"></canvas> -->
             </div>
@@ -118,11 +140,6 @@
             <div class="chart-card">
                 <div class="chart-header">
                     <h3>Endpoint Performance</h3>
-                    <select id="endpoint-select">
-                        <option value="all">All Endpoints</option>
-                        <option value="/api/events">/api/events</option>
-                        <option value="/api/users">/api/users</option>
-                    </select>
                 </div>
                 <div class="chart-canvas-wrapper">
                     <canvas id="endpoint-performance-chart"></canvas>
@@ -133,43 +150,41 @@
                 <div class="chart-header">
                     <h3>Bottleneck Insights</h3>
                 </div>
+
                 <div class="insight-list">
-                    <div class="insight-item">
-                        <div>
-                            <p class="insight-label">Slowest Endpoint</p>
-                            <p id="slowest-endpoint-insight" class="insight-value">/api/events</p>
-                        </div>
-                        <p id="slowest-endpoint-latency" class="insight-metric negative">820 ms avg</p>
+                    <div class="insight-item" id="slowest-endpoint-card">
+                    <div>
+                        <p class="insight-label">Slowest Endpoint</p>
+                        <p id="slowest-endpoint-insight" class="insight-value">N/A</p>
+                    </div>
+                    <p id="slowest-endpoint-latency" class="insight-metric">No data</p>
                     </div>
 
-                    <div class="insight-item">
-                        <div>
-                            <p class="insight-label">Highest TTFB</p>
-                            <p id="highest-ttfb-endpoint" class="insight-value">/api/auth/login</p>
-                        </div>
-
-                        <p id="highest-ttfb-value" class="insight-metric warning">600 ms avg</p>
+                    <div class="insight-item" id="highest-ttfb-card">
+                    <div>
+                        <p class="insight-label">Highest TTFB</p>
+                        <p id="highest-ttfb-endpoint" class="insight-value">N/A</p>
+                    </div>
+                    <p id="highest-ttfb-value" class="insight-metric">No data</p>
                     </div>
 
-                    <div class="insight-item">
-                        <div>
-                            <p class="insight-label">Most Frequent Slow Request</p>
-                            <p id="most-frequent-slow-endpoint" class="insight-value">/api/events</p>
-                        </div>
-
-                        <p id="slow-request-count" class="insight-metric">342 slow requests</p>
+                    <div class="insight-item" id="slow-request-card">
+                    <div>
+                        <p class="insight-label">Frequent Slow Requests</p>
+                        <p id="most-frequent-slow-endpoint" class="insight-value">N/A</p>
+                    </div>
+                    <p id="slow-request-count" class="insight-metric">No data</p>
                     </div>
 
-                    <div class="insight-item">
-                        <div>
-                            <p class="insight-label">Biggest Latency Increase</p>
-                            <p id="largest-latency-increase-endpoint" class="insight-value">/api/metrics</p>
-                        </div>
-
-                        <p id="largest-latency-increase" class="insight-metric negative">↑ 45%</p>
+                    <div class="insight-item" id="latency-increase-card">
+                    <div>
+                        <p class="insight-label">Largest Latency Spike</p>
+                        <p id="largest-latency-increase-endpoint" class="insight-value">N/A</p>
+                    </div>
+                    <p id="largest-latency-increase" class="insight-metric">No data</p>
                     </div>
                 </div>
-            </div>
+                </div>
         </section>
 
         <section class="slow-requests-section">
@@ -195,22 +210,13 @@
                         </tr>
                     </thead>
 
-                    <tbody id="slow-requests-body">
-                        <tr>
-                            <td>May 21, 2025 2:41 PM</td>
-                            <td>/api/events</td>
-                            <td>1842 ms</td>
-                            <td>2341 ms</td>
-                            <td>1200 ms</td>
-                            <td>256 MB</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="slow-requests-body"></tbody>
                 </table>
             </div>
         </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="/frontend/js/perfromances.js"></script>
+    <script src="/frontend/js/performance.js"></script>
     </body>
 </html>

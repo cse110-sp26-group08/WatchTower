@@ -54,18 +54,27 @@ function initDatePicker() {
             new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             new Date()
         ],
-        onChange: () => loadSelectedAppPerformance()
+        onReady: () => updateKpiPeriods(),
+        onChange: () => {
+            updateKpiPeriods();
+            loadSelectedAppPerformance();
+        }
     });
 }
 
 function bindControls() {
     document.querySelector('#select-app').addEventListener('change', loadSelectedAppPerformance);
     document.querySelector('#line-toggle').addEventListener('change', loadSelectedAppPerformance);
-    document.querySelector('#endpoint-select').addEventListener('change', loadSelectedAppPerformance);
 
     const autoRefreshToggle = document.querySelector('.toggle-switch input');
 
+    const toggleStatus = document.querySelector('.toggle-status');
+    toggleStatus.textContent = autoRefreshToggle.checked ? 'ON' : 'OFF';
     autoRefreshToggle.addEventListener('change', () => {
+
+        toggleStatus.textContent =
+            autoRefreshToggle.checked ? 'ON' : 'OFF';
+
         if (autoRefreshToggle.checked) {
             startAutoRefresh();
         } else {
@@ -102,7 +111,7 @@ async function loadApps(ownerId) {
         startAutoRefresh();
     } catch (error) {
         console.error('Failed to load apps:', error);
-        selectApp.innerHTML = '<option value="">Could not load apps</option>';
+        selectApp.innerHTML = '<option value="">Could not load projects</option>';
         clearDashboard();
     }
 }
@@ -128,12 +137,12 @@ async function loadPerformanceData(appId) {
         const data = await response.json();
         const events = Array.isArray(data.events) ? data.events : [];
         const filteredEvents = filterEventsByDateRange(events);
-
-        renderKpis(filteredEvents);
-        renderSparklines(filteredEvents);
+        
+        updateKpiPeriods();
+        renderKpis(filteredEvents, events);
+        renderSparklines(filteredEvents, events);
         renderBottleneckInsights(filteredEvents);
         renderSlowRequestsTable(filteredEvents);
-        populateEndpointDropdown(filteredEvents);
         renderLatencyChart(filteredEvents);
         renderEndpointPerformanceChart(filteredEvents);
     } catch (error) {
@@ -141,6 +150,7 @@ async function loadPerformanceData(appId) {
         clearDashboard();
     }
 }
+
 
 function filterEventsByDateRange(events) {
     const dateRangeValue = document.querySelector('#date-range').value;
@@ -161,11 +171,20 @@ function filterEventsByDateRange(events) {
     });
 }
 
-function renderKpis(events) {
+function renderKpis(events, allEvents = events) {
+    const previousEvents = filterEventsByPreviousDateRange(allEvents);
+
     const avgResponseTime = average(getNumbers(events, 'apiLatencyMs'));
+    const previousAvgResponseTime = average(getNumbers(previousEvents, 'apiLatencyMs'));
+
     const p95Latency = percentile(getNumbers(events, 'apiLatencyMs'), 95);
+    const previousP95Latency = percentile(getNumbers(previousEvents, 'apiLatencyMs'), 95);
+
     const avgPageLoadTime = average(getNumbers(events, 'loadTimeMs'));
+    const previousAvgPageLoadTime = average(getNumbers(previousEvents, 'loadTimeMs'));
+
     const avgMemoryUsage = average(getNumbers(events, 'memoryMB'));
+    const previousAvgMemoryUsage = average(getNumbers(previousEvents, 'memoryMB'));
 
     document.querySelector('#avg-response-time').textContent =
         avgResponseTime ? `${Math.round(avgResponseTime)} ms` : 'No data';
@@ -181,6 +200,16 @@ function renderKpis(events) {
 
     document.querySelector('#slowest-endpoint').textContent =
         getSlowestEndpoint(events).endpoint;
+
+    setChangeText('#avg-response-change', avgResponseTime, previousAvgResponseTime, 'ms');
+    setChangeText('#p95-latency-change', p95Latency, previousP95Latency, 'ms');
+    setChangeText('#avg-page-load-change', avgPageLoadTime, previousAvgPageLoadTime, 'ms');
+    setChangeText('#avg-memory-change', avgMemoryUsage, previousAvgMemoryUsage, 'MB');
+
+    const slowestCurrent = getSlowestEndpoint(events).latency;
+    const slowestPrevious = getSlowestEndpoint(previousEvents).latency;
+
+    setChangeText('#slowest-endpoint-change', slowestCurrent, slowestPrevious, 'ms');
 }
 
 function renderBottleneckInsights(events) {
@@ -189,6 +218,7 @@ function renderBottleneckInsights(events) {
     const mostFrequentSlow = getMostFrequentSlowEndpoint(events);
     const largestIncrease = getLargestLatencyIncrease(events);
 
+    updateInsightCardColors(slowest, highestTtfb, mostFrequentSlow, largestIncrease);
     document.querySelector('#slowest-endpoint-insight').textContent = slowest.endpoint;
     document.querySelector('#slowest-endpoint-latency').textContent =
         slowest.latency ? `${Math.round(slowest.latency)} ms avg` : 'No data';
@@ -199,11 +229,100 @@ function renderBottleneckInsights(events) {
 
     document.querySelector('#most-frequent-slow-endpoint').textContent = mostFrequentSlow.endpoint;
     document.querySelector('#slow-request-count').textContent =
-        mostFrequentSlow.count ? `${mostFrequentSlow.count} slow requests` : 'No data';
 
+        mostFrequentSlow.count ? `${mostFrequentSlow.count} slow requests` : 'No data';
     document.querySelector('#largest-latency-increase-endpoint').textContent = largestIncrease.endpoint;
     document.querySelector('#largest-latency-increase').textContent =
         largestIncrease.percent ? `↑ ${largestIncrease.percent}%` : 'No data';
+}
+
+function updateInsightCardColors(slowest, highestTtfb, mostFrequentSlow, largestIncrease) {
+    applySeverity(
+        'slowest-endpoint-card',
+        'slowest-endpoint-latency',
+        getLatencySeverity(slowest.latency)
+    );
+
+    applySeverity(
+        'highest-ttfb-card',
+        'highest-ttfb-value',
+        getTtfbSeverity(highestTtfb.value)
+    );
+
+    applySeverity(
+        'slow-request-card',
+        'slow-request-count',
+        getSlowRequestSeverity(mostFrequentSlow.count)
+    );
+
+    applySeverity(
+        'latency-increase-card',
+        'largest-latency-increase',
+        getIncreaseSeverity(largestIncrease.percent)
+    );
+}
+
+function applySeverity(cardId, metricId, severity) {
+    const card = document.getElementById(cardId);
+
+    if (!card) return;
+
+    card.classList.remove(
+        'critical',
+        'warning',
+        'healthy',
+        'neutral'
+    );
+
+    card.classList.add(severity);
+}
+
+function getLatencySeverity(value) {
+
+    if (!value) return 'neutral';
+
+    if (value > 800) return 'critical';
+
+    if (value > 300) return 'warning';
+
+    return 'healthy';
+
+}
+
+function getTtfbSeverity(value) {
+
+    if (!value) return 'neutral';
+
+    if (value > 500) return 'critical';
+
+    if (value > 200) return 'warning';
+
+    return 'healthy';
+
+}
+
+function getSlowRequestSeverity(value) {
+
+    if (!value) return 'neutral';
+
+    if (value > 100) return 'critical';
+
+    if (value > 20) return 'warning';
+
+    return 'healthy';
+
+}
+
+function getIncreaseSeverity(value) {
+
+    if (!value) return 'neutral';
+
+    if (value > 30) return 'critical';
+
+    if (value > 10) return 'warning';
+
+    return 'healthy';
+
 }
 
 function renderSlowRequestsTable(events) {
@@ -382,15 +501,53 @@ function stopAutoRefresh() {
     }
 }
 
-function renderSparklines(events) {
-    renderSparkline('avg-response-sparkline', getNumbers(events, 'apiLatencyMs'));
-    renderSparkline('p95-latency-sparkline', getNumbers(events, 'apiLatencyMs'));
-    renderSparkline('slowest-endpoint-sparkline', getNumbers(events, 'apiLatencyMs'));
-    renderSparkline('avg-page-load-sparkline', getNumbers(events, 'loadTimeMs'));
-    renderSparkline('avg-memory-sparkline', getNumbers(events, 'memoryMB'));
+function renderSparklines(events, allEvents = events) {
+    const previousEvents = filterEventsByPreviousDateRange(allEvents);
+
+    renderSparkline(
+        'avg-response-sparkline',
+        getNumbers(events, 'apiLatencyMs'),
+        getComparisonColor(
+            average(getNumbers(events, 'apiLatencyMs')),
+            average(getNumbers(previousEvents, 'apiLatencyMs'))
+        )
+    );
+
+    renderSparkline(
+        'p95-latency-sparkline',
+        getNumbers(events, 'apiLatencyMs'),
+        getComparisonColor(
+            percentile(getNumbers(events, 'apiLatencyMs'), 95),
+            percentile(getNumbers(previousEvents, 'apiLatencyMs'), 95)
+        )
+    );
+
+    renderSparkline(
+        'slowest-endpoint-sparkline',
+        getNumbers(events, 'apiLatencyMs'),
+        '#c86468'
+    );
+
+    renderSparkline(
+        'avg-page-load-sparkline',
+        getNumbers(events, 'loadTimeMs'),
+        getComparisonColor(
+            average(getNumbers(events, 'loadTimeMs')),
+            average(getNumbers(previousEvents, 'loadTimeMs'))
+        )
+    );
+
+    renderSparkline(
+        'avg-memory-sparkline',
+        getNumbers(events, 'memoryMB'),
+        getComparisonColor(
+            average(getNumbers(events, 'memoryMB')),
+            average(getNumbers(previousEvents, 'memoryMB'))
+        )
+    );
 }
 
-function renderSparkline(canvasId, values) {
+function renderSparkline(canvasId, values, color = '#8b5cf6') {
     const canvas = document.getElementById(canvasId);
 
     if (!canvas) return;
@@ -433,7 +590,7 @@ function renderSparkline(canvasId, values) {
     });
 
     ctx.lineWidth = 3;
-    ctx.strokeStyle = '#8b5cf6';
+    ctx.strokeStyle = color;
     ctx.lineCap = 'round';
     ctx.stroke();
 }
@@ -510,6 +667,24 @@ function renderLatencyChart(events) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    position: 'top',
+                    align: 'start',
+
+                    labels: {
+                        boxWidth: 12,
+                        boxHeight: 12,
+                        padding: 20,
+                        font: {
+                            size: 13,
+                            weight: '600'
+                        }
+                    }
+                }
+            },
+
             scales: {
                 y: {
                     beginAtZero: true,
@@ -524,42 +699,35 @@ function renderLatencyChart(events) {
 
 function renderEndpointPerformanceChart(events) {
     const canvas = document.getElementById('endpoint-performance-chart');
-    const selectedEndpoint = document.getElementById('endpoint-select').value;
 
     if (!canvas || !window.Chart) return;
 
     if (!events.length) {
-    const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d');
 
-    canvas.width = canvas.clientWidth || 600;
-    canvas.height = canvas.clientHeight || 260;
+        canvas.width = canvas.clientWidth || 600;
+        canvas.height = canvas.clientHeight || 260;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '16px sans-serif';
+        ctx.fillStyle = '#9ca3af';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
 
-    ctx.font = '16px sans-serif';
-    ctx.fillStyle = '#9ca3af';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+        ctx.fillText(
+            'No endpoint performance data available',
+            canvas.width / 2,
+            canvas.height / 2
+        );
 
-    ctx.fillText(
-        'No endpoint performance data available',
-        canvas.width / 2,
-        canvas.height / 2
-    );
-
-    return;
+        return;
     }
 
-    const endpointStats = groupEventsByEndpoint(events);
+    const endpointStats = groupEventsByEndpoint(events)
+        .sort((a, b) => b.avgLatency - a.avgLatency);
 
     let labels = endpointStats.map((item) => item.endpoint);
     let values = endpointStats.map((item) => item.avgLatency);
-
-    if (selectedEndpoint !== 'all') {
-        const selected = endpointStats.find((item) => item.endpoint === selectedEndpoint);
-        labels = selected ? [selected.endpoint] : [];
-        values = selected ? [selected.avgLatency] : [];
-    }
 
     if (endpointChart) {
         endpointChart.destroy();
@@ -572,22 +740,43 @@ function renderEndpointPerformanceChart(events) {
             datasets: [{
                 label: 'Average Latency',
                 data: values,
-                borderWidth: 1
+                borderRadius: 5,
+                backgroundColor: values.map((value) => getEndpointBarColor(value))
             }]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+
             scales: {
-                y: {
+                x: {
                     beginAtZero: true,
                     ticks: {
                         callback: (value) => `${value} ms`
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
                     }
                 }
             }
         }
     });
+}
+
+function getEndpointBarColor(value) {
+    if (value >= 700) return '#c86468';
+    if (value >= 400) return '#f97316';
+    if (value >= 250) return '#f5ce60';
+    return '#0ac2a3';
 }
 
 function groupEventsByDate(events) {
@@ -664,36 +853,24 @@ function groupEventsByEndpoint(events) {
     }));
 }
 
-function populateEndpointDropdown(events) {
-    const endpointSelect = document.getElementById('endpoint-select');
-    const currentValue = endpointSelect.value;
-
-    const endpoints = [...new Set(
-        events
-            .map((event) => event.metadata?.apiEndpoint || event.url)
-            .filter(Boolean)
-    )];
-
-    endpointSelect.innerHTML = '<option value="all">All Endpoints</option>';
-
-    endpoints.forEach((endpoint) => {
-        const option = document.createElement('option');
-        option.value = endpoint;
-        option.textContent = endpoint;
-        endpointSelect.appendChild(option);
-    });
-
-    if (currentValue === 'all' || endpoints.includes(currentValue)) {
-        endpointSelect.value = currentValue;
-    }
-}
-
 function clearDashboard() {
     document.querySelector('#avg-response-time').textContent = 'No data';
     document.querySelector('#p95-latency').textContent = 'No data';
     document.querySelector('#slowest-endpoint').textContent = 'N/A';
     document.querySelector('#avg-page-load-time').textContent = 'No data';
     document.querySelector('#avg-memory-usage').textContent = 'No data';
+
+    applySeverity('slowest-endpoint-card', 'slowest-endpoint-latency', 'neutral');
+    applySeverity('highest-ttfb-card', 'highest-ttfb-value', 'neutral');
+    applySeverity('slow-request-card', 'slow-request-count', 'neutral');
+    applySeverity('latency-increase-card', 'largest-latency-increase', 'neutral');
+
+    document.querySelector('#highest-ttfb-endpoint').textContent = 'N/A';
+    document.querySelector('#highest-ttfb-value').textContent = 'No data';
+    document.querySelector('#most-frequent-slow-endpoint').textContent = 'N/A';
+    document.querySelector('#slow-request-count').textContent = 'No data';
+    document.querySelector('#largest-latency-increase-endpoint').textContent = 'N/A';
+    document.querySelector('#largest-latency-increase').textContent = 'No data';
 
     renderSparklines([]);
     renderLatencyChart([]);
@@ -734,4 +911,101 @@ function escapeHtml(value) {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#39;');
+}
+
+function updateKpiPeriods() {
+    const dateRangeValue = document.querySelector('#date-range').value;
+    const periods = document.querySelectorAll('.kpi-period');
+
+    periods.forEach((period) => {
+        period.textContent = dateRangeValue || 'Selected date range';
+    });
+}
+
+function getPreviousDateRange() {
+    const dateRangeValue = document.querySelector('#date-range').value;
+
+    if (!dateRangeValue || !dateRangeValue.includes(' to ')) {
+        return null;
+    }
+
+    const [startValue, endValue] = dateRangeValue.split(' to ');
+    const startDate = new Date(startValue);
+    const endDate = new Date(endValue);
+
+    const rangeMs = endDate - startDate;
+
+    const previousEndDate = new Date(startDate);
+    previousEndDate.setDate(previousEndDate.getDate() - 1);
+
+    const previousStartDate = new Date(previousEndDate);
+    previousStartDate.setTime(previousEndDate.getTime() - rangeMs);
+
+    previousEndDate.setHours(23, 59, 59, 999);
+
+    return { previousStartDate, previousEndDate };
+}
+
+function filterEventsByPreviousDateRange(events) {
+    const previousRange = getPreviousDateRange();
+
+    if (!previousRange) return [];
+
+    return events.filter((event) => {
+        const eventDate = new Date(event.timestamp || event.receivedAt);
+
+        return (
+            eventDate >= previousRange.previousStartDate &&
+            eventDate <= previousRange.previousEndDate
+        );
+    });
+}
+
+function formatChange(currentValue, previousValue, unit) {
+    if (!currentValue || !previousValue) return 'No previous data';
+
+    const difference = currentValue - previousValue;
+    const percent = Math.abs((difference / previousValue) * 100).toFixed(1);
+
+    const arrow = difference <= 0 ? '↓' : '↑';
+    const absoluteDifference = Math.abs(Math.round(difference));
+
+    return `${arrow} ${absoluteDifference} ${unit} (${percent}%)`;
+}
+
+function setChangeText(elementId, currentValue, previousValue, unit) {
+    const element = document.querySelector(elementId);
+    const difference = currentValue - previousValue;
+
+    element.textContent = formatChange(currentValue, previousValue, unit);
+
+    element.classList.remove('positive', 'negative');
+
+    if (!currentValue || !previousValue) {
+        return;
+    }
+
+    if (difference <= 0) {
+        element.classList.add('positive');
+    } else {
+        element.classList.add('negative');
+    }
+}
+
+function getComparisonColor(currentValue, previousValue) {
+    if (!currentValue || !previousValue) {
+        return '#8b5cf6';
+    }
+
+    // lower is better
+    if (currentValue < previousValue) {
+        return '#0ac2a3';
+    }
+
+    // higher is worse
+    if (currentValue > previousValue) {
+        return '#c86468';
+    }
+
+    return '#8b5cf6';
 }
