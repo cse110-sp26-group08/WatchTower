@@ -55,13 +55,15 @@ function renderApps(apps, ownerId) {
     const appsList = document.getElementById('apps-list');
     const storedUrls = getStoredAppUrls();
     appsList.innerHTML = '';
-    appsList.appendChild(createAddProjectCard(ownerId));
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(createAddProjectCard(ownerId));
 
     if (!apps.length) {
         const emptyState = document.createElement('div');
         emptyState.className = 'empty-state';
         emptyState.textContent = 'No project cards yet. Add your first project to get started.';
-        appsList.appendChild(emptyState);
+        fragment.appendChild(emptyState);
+        appsList.appendChild(fragment);
         return;
     }
 
@@ -93,8 +95,10 @@ function renderApps(apps, ownerId) {
             window.location.href = `/dashboard?appId=${encodeURIComponent(app.id)}`;
         });
 
-        appsList.appendChild(card);
+        fragment.appendChild(card);
     });
+
+    appsList.appendChild(fragment);
 }
 
 function createAddProjectCard(ownerId) {

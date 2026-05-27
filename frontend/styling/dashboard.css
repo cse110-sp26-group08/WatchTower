@@ -254,8 +254,9 @@ body {
   border-radius: 14px;
   background: var(--panel-alt);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease;
   font-weight: 600;
+  will-change: transform;
 }
 
 .graph-setting:hover {
@@ -331,6 +332,7 @@ body {
 .logs-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .logs-table th,
@@ -359,5 +361,16 @@ body {
 
   .graph-card-header {
     flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

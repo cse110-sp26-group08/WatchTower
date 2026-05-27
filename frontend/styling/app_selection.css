@@ -148,6 +148,8 @@ body {
   background: linear-gradient(180deg, #fff 0%, #f8fbff 100%);
   text-align: left;
   cursor: pointer;
+  contain: layout paint;
+  will-change: transform;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
@@ -368,5 +370,23 @@ body {
 
   .project-dialog-header {
     flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (width <= 700px) {
+  .site-nav,
+  .project-dialog::backdrop {
+    backdrop-filter: none;
   }
 }

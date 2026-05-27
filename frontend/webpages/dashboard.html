@@ -8,6 +8,9 @@
 
     <title>Dashboard</title>
 
+    <!-- Preconnect to external chart CDN before loading Chart.js -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
     <!--Link css stylesheet-->
     <link rel="stylesheet" href="../styling/dashboard.css">
 
@@ -16,6 +19,13 @@
     <link rel="icon" type="image/x-icon" href="assets/favicon-here.ico">
 </head>
 
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js');
+    });
+  }
+</script>
 <body class="container">
     <!--Navigation panel-->
     <div class="nav-panel">
@@ -212,8 +222,8 @@
             </div>
         </details>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="../js/graphs.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="../js/graphs.js" defer></script>
 </body>
 
 </html>

@@ -105,6 +105,7 @@ a {
   border-radius: 11px;
   font-size: 0.9rem;
   font-weight: 700;
+  will-change: transform;
   transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
 
@@ -304,5 +305,26 @@ a {
 
   .signup-card-header h2 {
     font-size: 1.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (width <= 700px) {
+  .site-nav,
+  .signup-card {
+    backdrop-filter: none;
   }
 }

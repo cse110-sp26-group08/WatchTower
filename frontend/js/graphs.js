@@ -15,8 +15,8 @@ let dashboardChart = null;
 let selectedChartView = 'line';
 let dashboardState = null;
 let refreshIntervalId = null;
-let isRefreshing = false;
-const AUTO_REFRESH_MS = 5000;
+let refreshAbortController = null;
+const AUTO_REFRESH_MS = 15000;
 
 async function initDashboard() {
     const selectedApp = await resolveSelectedApp();
@@ -29,7 +29,7 @@ async function initDashboard() {
 
     setProjectName(selectedApp.name || 'Selected project');
     bindDashboardControls();
-    await refreshDashboard(selectedApp);
+    await refreshDashboard(selectedApp, { force: true });
     startAutoRefresh();
 }
 
@@ -60,7 +60,7 @@ function bindDashboardControls() {
     document.getElementById('refresh-dashboard').addEventListener('click', async () => {
         const selectedApp = readJsonStorage('watchtowerSelectedApp');
         if (selectedApp?.id) {
-            await refreshDashboard(selectedApp);
+            await refreshDashboard(selectedApp, { force: true });
         }
     });
 
@@ -78,12 +78,13 @@ function bindDashboardControls() {
 
     document.addEventListener('visibilitychange', async () => {
         if (document.hidden) {
+            abortActiveRefresh();
             return;
         }
 
         const selectedApp = readJsonStorage('watchtowerSelectedApp');
         if (selectedApp?.id) {
-            await refreshDashboard(selectedApp);
+            await refreshDashboard(selectedApp, { force: true });
         }
     });
 
@@ -92,22 +93,33 @@ function bindDashboardControls() {
     });
 }
 
-async function refreshDashboard(selectedApp) {
-    if (isRefreshing) {
+async function refreshDashboard(selectedApp, options = {}) {
+    if (!selectedApp?.id || document.hidden) {
         return;
     }
 
-    isRefreshing = true;
+    if (refreshAbortController) {
+        if (!options.force) {
+            return;
+        }
+        refreshAbortController.abort();
+    }
+
+    refreshAbortController = new AbortController();
+    const { signal } = refreshAbortController;
+
     setStatus('UP', `Checking ${selectedApp.name || 'project'}...`, 'Refreshing dashboard statistics from recent events.');
 
     try {
         const [errorResponse, performanceResponse] = await Promise.all([
-            fetch(`/api/events/error/apps/${selectedApp.id}`, { cache: 'no-store' }),
-            fetch(`/api/events/performance/apps/${selectedApp.id}`, { cache: 'no-store' }),
+            fetch(`/api/events/error/apps/${selectedApp.id}`, { cache: 'no-store', signal }),
+            fetch(`/api/events/performance/apps/${selectedApp.id}`, { cache: 'no-store', signal }),
         ]);
 
-        const errorData = await errorResponse.json();
-        const performanceData = await performanceResponse.json();
+        const [errorData, performanceData] = await Promise.all([
+            errorResponse.json(),
+            performanceResponse.json(),
+        ]);
 
         const errors = Array.isArray(errorData.events) ? errorData.events : [];
         const performanceEvents = Array.isArray(performanceData.events) ? performanceData.events : [];
@@ -119,21 +131,16 @@ async function refreshDashboard(selectedApp) {
         };
 
         redrawFromState();
-    } finally {
-        isRefreshing = false;
-    }
-}
-
-function startAutoRefresh() {
-    stopAutoRefresh();
-    refreshIntervalId = window.setInterval(async () => {
-        const selectedApp = readJsonStorage('watchtowerSelectedApp');
-        if (!selectedApp?.id || document.hidden) {
-            return;
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Error refreshing dashboard:', error);
+            setStatus('DOWN', 'Could not refresh dashboard.', 'The latest monitoring events could not be loaded.');
         }
-
-        await refreshDashboard(selectedApp);
-    }, AUTO_REFRESH_MS);
+    } finally {
+        if (refreshAbortController?.signal === signal) {
+            refreshAbortController = null;
+        }
+    }
 }
 
 function stopAutoRefresh() {
@@ -141,7 +148,17 @@ function stopAutoRefresh() {
         window.clearInterval(refreshIntervalId);
         refreshIntervalId = null;
     }
+
+    abortActiveRefresh();
 }
+
+function abortActiveRefresh() {
+    if (refreshAbortController) {
+        refreshAbortController.abort();
+        refreshAbortController = null;
+    }
+}
+
 
 function redrawFromState() {
     if (!dashboardState) {
@@ -335,47 +352,70 @@ function renderLogs(app, filteredErrors, filteredPerformance) {
         return;
     }
 
-    logsBody.innerHTML = recentRows.map((row) => `
-        <tr>
-            <td>${escapeHtml(formatTimestamp(row.time))}</td>
-            <td>${escapeHtml(row.project)}</td>
-            <td>${escapeHtml(row.status)}</td>
-            <td>${escapeHtml(row.message)}</td>
-        </tr>
-    `).join('');
+    const fragment = document.createDocumentFragment();
+
+    recentRows.forEach((row) => {
+        const tableRow = document.createElement('tr');
+
+        [formatTimestamp(row.time), row.project, row.status, row.message].forEach((value) => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            tableRow.appendChild(cell);
+        });
+
+        fragment.appendChild(tableRow);
+    });
+
+    logsBody.replaceChildren(fragment);
 }
 
 function renderEmptyLogs(message) {
-    document.getElementById('logs-table-body').innerHTML = `
-        <tr>
-            <td colspan="4">${escapeHtml(message)}</td>
-        </tr>
-    `;
+    const logsBody = document.getElementById('logs-table-body');
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+
+    cell.colSpan = 4;
+    cell.textContent = message;
+    row.appendChild(cell);
+    logsBody.replaceChildren(row);
 }
 
 function renderChartTable(filteredErrors) {
     const tableBody = document.getElementById('chart-table-body');
 
     if (!filteredErrors.length) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="4">No matching error events in the selected range.</td>
-            </tr>
-        `;
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+
+        cell.colSpan = 4;
+        cell.textContent = 'No matching error events in the selected range.';
+        row.appendChild(cell);
+        tableBody.replaceChildren(row);
         return;
     }
 
-    tableBody.innerHTML = filteredErrors
-        .sort((left, right) => Date.parse(right.timestamp || 0) - Date.parse(left.timestamp || 0))
-        .map((event) => `
-            <tr>
-                <td>${escapeHtml(formatTimestamp(event.timestamp || event.receivedAt))}</td>
-                <td>${escapeHtml(normalizeSeverity(event.metadata?.severity))}</td>
-                <td>${escapeHtml(event.metadata?.message || 'Error event')}</td>
-                <td>${escapeHtml(event.url || 'N/A')}</td>
-            </tr>
-        `)
-        .join('');
+    const fragment = document.createDocumentFragment();
+    const sortedErrors = [...filteredErrors]
+        .sort((left, right) => Date.parse(right.timestamp || 0) - Date.parse(left.timestamp || 0));
+
+    sortedErrors.forEach((event) => {
+        const row = document.createElement('tr');
+
+        [
+            formatTimestamp(event.timestamp || event.receivedAt),
+            normalizeSeverity(event.metadata?.severity),
+            event.metadata?.message || 'Error event',
+            event.url || 'N/A',
+        ].forEach((value) => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        fragment.appendChild(row);
+    });
+
+    tableBody.replaceChildren(fragment);
 }
 
 function renderLineChart(filteredErrors) {
