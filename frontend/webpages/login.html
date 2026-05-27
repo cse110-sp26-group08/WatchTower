@@ -7,70 +7,74 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap"
     rel="stylesheet"
   >
   <link rel="stylesheet" href="../styling/login.css">
 </head>
 <body class="login-page">
-  <header class="site-header">
-    <nav class="site-nav" aria-label="Main navigation">
-      <div class="brand-mark">
-        <a href="./" class="brand-link">WatchTower</a>
-      </div>
-
-      <ul class="nav-links">
-        <li><a href="#docs">Docs</a></li>
-      </ul>
-
-      <div class="nav-actions">
-        <a href="./login" class="nav-login">Log in</a>
-        <a href="./signup" class="button button-primary">Get started</a>
-      </div>
-    </nav>
+  <header class="auth-header">
+    <a href="../index.html" class="brand-link" data-home-link aria-label="WatchTower home">
+      <img src="../assets/watchtower-logo.png" alt="WatchTower">
+    </a>
   </header>
 
   <main class="login-shell">
-    <section class="login-layout" aria-label="Login page content">
-      <div class="login-copy">
-        <h1>Welcome back</h1>
-        <p class="login-description">Log in to your Watch Tower workspace.</p>
+    <section class="login-card" aria-label="Sign in form">
+      <div class="login-card-header">
+        <h1>Sign in to WatchTower</h1>
+        <p>Don't have an account? <a href="signup.html" data-signup-link>Get started</a></p>
       </div>
 
-      <section class="login-card" aria-label="Login form">
-        <div class="login-card-header">
-          <p class="login-card-brand">WatchTower</p>
-          <h2>Log in to Watch Tower</h2>
+      <div class="social-auth" aria-label="Social sign in options">
+        <button class="social-button" type="button" disabled>
+          <img class="google-icon" src="../assets/google-g.svg" alt="" aria-hidden="true">
+          <span>Google</span>
+        </button>
+        <button class="social-button" type="button" disabled>
+          <img src="../assets/github-icon-default.svg" alt="" aria-hidden="true">
+          <span>GitHub</span>
+        </button>
+      </div>
+
+      <p class="form-divider">or using email and password</p>
+
+      <form class="login-form" id="login-form" novalidate>
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="me@mywebsite.com"
+            aria-describedby="email-error"
+            required
+          >
+          <p class="field-error" id="email-error"></p>
         </div>
 
-        <form class="login-form" id="login-form">
-          <div class="form-field">
-            <label for="work-email">Email</label>
-            <input
-              id="work-email"
-              name="email"
-              type="email"
-              autocomplete="email"
-              required
-            >
-          </div>
+        <div class="form-field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="********"
+            aria-describedby="password-error"
+            required
+          >
+          <p class="field-error" id="password-error"></p>
+        </div>
 
-          <div class="form-field">
-            <label for="password">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autocomplete="current-password"
-              required
-            >
-          </div>
-
-          <button type="submit" class="button button-primary login-submit">Log in</button>
-        </form>
-
-        <p class="login-signup">Don't have an account? <a href="./signup">Sign up</a></p>
-      </section>
+        <button type="submit" class="button button-primary login-submit">
+          <span>Sign in</span>
+          <svg class="button-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M4 10h10M10.5 6.5 14 10l-3.5 3.5"></path>
+          </svg>
+        </button>
+      </form>
     </section>
   </main>
 

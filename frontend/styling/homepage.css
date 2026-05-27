@@ -76,15 +76,31 @@ a {
   font-weight: 600;
 }
 
-.nav-links a,
-.nav-login {
-  color: var(--text);
-  transition: opacity 180ms ease, color 180ms ease;
+.code-card {
+  width: 28.8rem;
+  overflow: hidden;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 80% 20%, rgb(83 34 84 / 28%), transparent 38%),
+    linear-gradient(145deg, #27172b 0%, #120817 100%);
+  box-shadow: var(--shadow-card);
 }
 
-.nav-links a:hover,
-.nav-login:hover {
-  opacity: 0.66;
+.code-title {
+  min-height: 29px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255 255 255 / 42%);
+  background: rgb(255 255 255 / 6%);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.code-window {
+  padding: 18px 21px;
+  display: grid;
+  gap: 7px;
 }
 
 .nav-actions {
@@ -237,6 +253,74 @@ a {
   }
 
   .hero-description {
-    font-size: 0.92rem;
+    font-size: var(--font-size-md);
+    line-height: 1.38;
+  }
+
+  .collector-card {
+    width: 9rem;
+    flex-basis: 9rem;
+    margin-right: 0;
+  }
+
+  .collector-label {
+    font-size: var(--font-size-lg);
+  }
+
+  .code-window {
+    padding: 16px 14px;
+  }
+
+  .code-line {
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 10px;
+    font-size: var(--font-size-xs);
+  }
+
+  .health-card {
+    padding: 19px 18px 21px;
+  }
+
+  .health-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 18px;
+  }
+
+  .health-card h2 {
+    text-align: center;
+  }
+
+  .critical-card,
+  .email-card {
+    padding: 20px 18px 22px;
+  }
+
+  .email-card {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .critical-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 18px;
+  }
+
+  .email-title-row {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .insight-item {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .insight-icon {
+    width: 48px;
+    height: 48px;
   }
 }

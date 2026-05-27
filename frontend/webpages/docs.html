@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WatchTower Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styling/docs.css">
+</head>
+
+<body class="docs-page">
+  <watchtower-navbar></watchtower-navbar>
+
+  <main class="docs-shell">
+    <div class="docs-layout">
+      <section class="hero" aria-label="Docs">
+        <div class="hero-copy">
+          <p class="eyebrow"></p>
+          <h1>Documentation</h1>
+          <p class="hero-description">
+            Learn how to connect WatchTower to your projects and start tracking errors in real time.
+          </p>
+        </div>
+      </section>
+      <section class="docs-main">
+        <h2>Getting started</h2>
+        <h3>1. Register your app in WatchTower</h3>
+        <p>
+          Once you have created an account, register the app you want to monitor through the App Selection page. <strong
+            class="docs-tooltip">
+            You can optionally add a URL to monitor for uptime.
+            <span class="docs-tooltip-text">
+              WatchTower automatically polls your app's URL every 5 minutes to check if it is reachable and will alert
+              you by email if it goes down.
+            </span>
+          </strong> After the app is created,
+          WatchTower will generate a unique API key for it. Copy this API key because
+          you will need it when adding the collector script to your project.
+        </p>
+        <h3>2. Adding <code>collector.js</code></h3>
+        <p>
+          The WatchTower collector is a single JavaScript file that you add to your own web app. It tracks JavaScript
+          errors, page performance, and API latency automatically.
+
+        </p>
+        <p>
+          <a class="docs-download" href="../../collector.js" download="collector.js">
+            Download collector.js
+          </a>
+        </p>
+        <h3>3. Add the collector script to your HTML</h3>
+        <p>
+          Add the following script tag to the <code>&lt;head&gt;</code> or near the end
+          of the <code>&lt;body&gt;</code> in each HTML page you want WatchTower to
+          monitor. Set <code>data-apikey</code> with the unique API key that was generated for
+          your app. Set <code>data-release</code> to a version number or a git commit SHA so performance data is
+          connected to a specific release.
+        </p>
+
+
+        <pre><code>&lt;script
+    id="collector-script"
+    src="/scripts/collector.js"
+    data-apikey="YOUR_API_KEY"
+    data-release="1.0.0"&gt;
+  &lt;/script&gt;</code></pre>
+      </section>
+    </div>
+
+    <section class="docs-viewer" aria-label="Backend architecture documentation">
+      <details class="docs-foldout">
+        <summary class="docs-summary">Backend architecture PDF</summary>
+        <iframe src="../assets/docs/architecture_backend.pdf#view=FitH" title="Backend architecture PDF"></iframe>
+        <p class="docs-fallback">
+          <a href="../assets/docs/architecture_backend.pdf">Open backend architecture PDF</a>
+        </p>
+      </details>
+    </section>
+
+    <section class="docs-faq">
+      <h2>FAQs</h2>
+      <details>
+        <summary>What does WatchTower do?</summary>
+        <p>
+          WatchTower helps developers a way to monitor their web apps. It helps teams see whether an app is reachable,
+          review
+          metrics, and get notified when the app is unreacable, allowing developers to respond to crashes quickly.
+        </p>
+      </details>
+      <details>
+        <summary>What data does the collector send to WatchTower?</summary>
+        <p>
+          The collector sends information about unhandled JavaScript exceptions,
+          unhandled promise rejections, page load performance, DOM content loaded time,
+          time to first byte, JavaScript memory usage, and the latency of fetch API
+          requests.
+        </p>
+      </details>
+      <details>
+        <summary>Can I monitor more than one app?</summary>
+        <p>
+          Yes. Each registered app gets its own API key, so you can track multiple
+          projects separately in WatchTower.
+        </p>
+      </details>
+      <details>
+        <summary>Does WatchTower affect my apps performance?</summary>
+        <p>
+          Not significantly. A small browser script reports errors and timing in the background without changing your
+          server or build.
+          Heavy work stays on WatchTower’s side, so normal use should not slow your app down.
+        </p>
+      </details>
+      <details>
+        <summary>Can I use WatchTower during local development?</summary>
+        <p>
+          Yes. WatchTower can be used locally while running the server on
+          <code>http://localhost:3000</code>. If your WatchTower instance is hosted elsewhere, open collector.js and
+          modfify baseUrl
+        </p>
+        <pre><code>const baseUrl = "https://your-watchtower-host.com";</code></pre>
+      </details>
+    </section>
+  </main>
+
+  <watchtower-footer></watchtower-footer>
+  <script src="../js/navbar.js"></script>
+  <script src="../js/footer.js"></script>
+</body>
+
+</html>
