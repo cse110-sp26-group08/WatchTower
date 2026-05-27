@@ -1,14 +1,23 @@
+/* eslint-env node */
+
 import bcrypt from 'bcrypt';
-import { User } from '../schema/userModel.js';
+import {
+  insertUser,
+  selectUserById,
+  selectUserByEmail,
+  updateUser,
+  removeUser,
+} from '../schema/userModel.js';
 import { isValidId } from '../util/idValidator.js';
+import { withToObject } from '../util/toObject.js';
 
 const ALLOWED_UPDATE_FIELDS = ['username', 'email'];
 const SALT_ROUNDS = 10;
 
 /**
- * Create a new user document.
+ * Create a new user.
  * @param {{username:string, email:string, password:string}} userData
- * @returns {Promise<import('mongoose').Document>}
+ * @returns {Promise<object>}
  * @throws {Error} if any required field is missing or invalid
  */
 async function createUser({ username, email, password }) {
@@ -23,73 +32,69 @@ async function createUser({ username, email, password }) {
   }
 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  return User.create({ username: username.trim(), email: email.trim(), passwordHash });
+  const user = await insertUser({ username: username.trim(), email: email.trim(), passwordHash });
+  return withToObject(user);
 }
 
 /**
- * Find a user by its ObjectId.
- * @param {string|import('mongoose').Types.ObjectId} id
- * @returns {Promise<import('mongoose').Document|null>}
+ * Find a user by its UUID.
+ * @param {string} id
+ * @returns {Promise<object|null>}
  */
 async function getUserById(id) {
   if (!isValidId(id)) return null;
-  return User.findById(id).exec();
+  return withToObject(await selectUserById(id));
 }
 
 /**
  * Check whether login credentials match a saved user.
  * @param {string} email
- * @param {string} password - plain-text password to verify
- * @returns {Promise<object|null>} safe user object when login succeeds, otherwise null
+ * @param {string} password
+ * @returns {Promise<object|null>} safe user object (no passwordHash) when login succeeds
  */
 async function checkLoginCredentials(email, password) {
   if (!email || typeof email !== 'string' || !email.trim()) return null;
   if (!password || typeof password !== 'string') return null;
 
-  const user = await User.findOne({ email: email.trim().toLowerCase() }).exec();
+  const user = await selectUserByEmail(email.trim().toLowerCase());
   if (!user) return null;
 
   const passwordMatches = await bcrypt.compare(password, user.passwordHash);
   if (!passwordMatches) return null;
 
-  const safeUser = user.toObject();
+  const safeUser = { ...user };
   delete safeUser.passwordHash;
-
   return safeUser;
 }
- 
+
 /**
- * Update a user document by its ObjectId.
- * Only whitelisted fields (username, email) are applied.
- * @param {string|import('mongoose').Types.ObjectId} id
+ * Update a user by its UUID. Only whitelisted fields (username, email) are applied.
+ * Returns updated user without passwordHash.
+ * @param {string} id
  * @param {Partial<{username:string, email:string}>} updateData
- * @returns {Promise<import('mongoose').Document|null>}
+ * @returns {Promise<object|null>}
  */
 async function editUser(id, updateData) {
   if (!isValidId(id)) return null;
   if (!updateData || typeof updateData !== 'object') return null;
- 
-  // Strip any fields not in the allowed list so callers can't patch arbitrary fields
+
   const safeUpdate = Object.fromEntries(
     Object.entries(updateData).filter(([key]) => ALLOWED_UPDATE_FIELDS.includes(key))
   );
- 
+
   if (Object.keys(safeUpdate).length === 0) return null;
- 
-  return User.findByIdAndUpdate(id, safeUpdate, {
-    new: true,
-    runValidators: true,
-  }).select('-passwordHash').exec();
+
+  return withToObject(await updateUser(id, safeUpdate));
 }
 
 /**
- * Delete a user by its ObjectId.
- * @param {string|import('mongoose').Types.ObjectId} id
- * @returns {Promise<import('mongoose').Document|null>}
+ * Delete a user by its UUID.
+ * @param {string} id
+ * @returns {Promise<object|null>}
  */
 async function deleteUserById(id) {
   if (!isValidId(id)) return null;
-  return User.findByIdAndDelete(id).exec();
+  return withToObject(await removeUser(id));
 }
 
 export {
