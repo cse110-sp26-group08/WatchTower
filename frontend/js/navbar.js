@@ -22,12 +22,23 @@ const defaultDocsHref = isProjectRootStaticServer
 const defaultProductHref = 'https://github.com/cse110-sp26-group08/WatchTower/blob/main/documentation/rest-api.md';
 
 class WatchTowerNavbar extends HTMLElement {
+    constructor() {
+        super();
+        this.updateScrolledState = this.updateScrolledState.bind(this);
+    }
+
     connectedCallback() {
         if (!this.shadowRoot) {
             this.attachShadow({ mode: 'open' });
         }
 
         this.render();
+        window.addEventListener('scroll', this.updateScrolledState, { passive: true });
+        this.updateScrolledState();
+    }
+
+    disconnectedCallback() {
+        window.removeEventListener('scroll', this.updateScrolledState);
     }
 
     getOption(name, fallback) {
@@ -89,6 +100,13 @@ class WatchTowerNavbar extends HTMLElement {
             brandLink.addEventListener('click', (event) => {
                 this.handleBrandClick(event, homeHref);
             });
+        }
+    }
+
+    updateScrolledState() {
+        const header = this.shadowRoot ? this.shadowRoot.querySelector('.site-header') : null;
+        if (header) {
+            header.classList.toggle('is-scrolled', window.scrollY > 2);
         }
     }
 
