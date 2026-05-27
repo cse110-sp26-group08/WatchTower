@@ -112,9 +112,10 @@ async function refreshDashboard(selectedApp) {
 
     try {
         const [appResponse, errorResponse, performanceResponse] = await Promise.all([
-            fetch(`/api/apps/${selectedApp._id}`, { cache: 'no-store' }),
-            fetch(`/api/events/error/apps/${selectedApp._id}`, { cache: 'no-store' }),
-            fetch(`/api/events/performance/apps/${selectedApp._id}`, { cache: 'no-store' }),
+            fetch(`/api/apps/${selectedApp.id}`, { cache: 'no-store' }),
+            fetch(`/api/events/error/apps/${selectedApp.id}`, { cache: 'no-store' }),
+            fetch(`/api/events/performance/apps/${selectedApp.id}`, { cache: 'no-store' }),
+        ]);
 
 
         const appData = await appResponse.json();
