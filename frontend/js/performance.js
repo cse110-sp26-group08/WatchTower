@@ -6,6 +6,7 @@ let refreshIntervalId = null;
 const AUTO_REFRESH_MS = 5000;
 let latencyChart = null;
 let endpointChart = null;
+let currentAppId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     initPerformancePage();
@@ -19,10 +20,20 @@ async function initPerformancePage() {
         return;
     }
 
+    const selectedApp = getStoredSelectedApp();
+
+    if (!selectedApp?.id) {
+        clearDashboard();
+        return;
+    }
+
+    currentAppId = selectedApp.id;
+
     initDatePicker();
     bindControls();
 
-    await loadApps(user.id);
+    await loadSelectedAppPerformance();
+    startAutoRefresh();
 }
 
 function getStoredUser() {
@@ -35,6 +46,19 @@ function getStoredUser() {
     } catch (error) {
         console.error('Failed to parse stored user:', error);
         localStorage.removeItem('watchtowerUser');
+        return null;
+    }
+}
+
+function getStoredSelectedApp() {
+    const raw = localStorage.getItem('watchTowerSelectedApp');
+
+    if (!raw) return null;
+
+    try {
+        return JSON.parse(raw);
+    } catch (error) {
+        console.error('Failed to parse stored selected app:', error);
         return null;
     }
 }
@@ -56,7 +80,6 @@ function initDatePicker() {
 }
 
 function bindControls() {
-    document.querySelector('#select-app').addEventListener('change', loadSelectedAppPerformance);
     document.querySelector('#line-toggle').addEventListener('change', loadSelectedAppPerformance);
 
     const autoRefreshToggle = document.querySelector('.toggle-switch input');
@@ -76,40 +99,9 @@ function bindControls() {
     });
 }
 
-async function loadApps(ownerId) {
-    const selectApp = document.querySelector('#select-app');
-
-    try {
-        const response = await fetch(`/api/apps/users/${ownerId}`);
-        const data = await response.json();
-        const apps = Array.isArray(data.apps) ? data.apps : [];
-
-        selectApp.innerHTML = '';
-
-        if (!apps.length) {
-            selectApp.innerHTML = '<option value="">No apps found</option>';
-            clearDashboard();
-            return;
-        }
-
-        apps.forEach((app) => {
-            const option = document.createElement('option');
-            option.value = app.id;
-            option.textContent = app.name;
-            selectApp.appendChild(option);
-        });
-
-        await loadSelectedAppPerformance();
-        startAutoRefresh();
-    } catch (error) {
-        console.error('Failed to load apps:', error);
-        selectApp.innerHTML = '<option value="">Could not load projects</option>';
-        clearDashboard();
-    }
-}
 
 async function loadSelectedAppPerformance() {
-    const appId = document.querySelector('#select-app').value;
+    const appId = currentAppId;
 
     if (!appId) {
         clearDashboard();
