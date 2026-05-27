@@ -185,6 +185,8 @@ a {
   background: linear-gradient(180deg, #fff 0%, #f8fbff 100%);
   text-align: left;
   cursor: pointer;
+  contain: layout paint;
+  will-change: transform;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 

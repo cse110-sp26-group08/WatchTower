@@ -12,6 +12,13 @@
   >
   <link rel="stylesheet" href="../styling/signup.css">
 </head>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js');
+    });
+  }
+</script>
 <body class="signup-page">
   <header class="auth-header">
     <a href="../index.html" class="brand-link" data-home-link aria-label="WatchTower home">
@@ -98,6 +105,6 @@
     </section>
   </main>
 
-  <script src="../js/signup.js"></script>
+  <script src="../js/signup.js" defer></script>
 </body>
 </html>

@@ -79,6 +79,7 @@ function createApp() {
   // Serve static assets for the frontend
   app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
   app.use('/js', express.static(path.join(__dirname, '../frontend/js')));
+  app.use('/sw.js', express.static(path.join(__dirname, '../frontend/sw.js')));
   app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
 
   // Serve Pages
@@ -87,6 +88,10 @@ function createApp() {
   });
 
   app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/login.html'));
+  });
+
+  app.get('/login.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/login.html'));
   });
 
@@ -138,6 +143,10 @@ function createApp() {
   });
 
   app.get('/apps', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
+  });
+
+  app.get('/app_selection.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
   });
 

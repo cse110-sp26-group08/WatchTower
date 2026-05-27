@@ -12,6 +12,13 @@
   >
   <link rel="stylesheet" href="/styling/app_selection.css">
 </head>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js');
+    });
+  }
+</script>
 <body class="app-selection-page">
   <header class="site-header">
     <nav class="site-nav" aria-label="Main navigation">
@@ -75,6 +82,6 @@
     </form>
   </dialog>
 
-  <script src="/js/app_selection.js"></script>
+  <script src="/js/app_selection.js" defer></script>
 </body>
 </html>
