@@ -25,6 +25,13 @@ function mockFetchForUrl(appUrl, statusOrError) {
 describe('App endpoints', () => {
   const app = createApp();
 
+  test('GET /apps serves the app selection page', async () => {
+    const response = await request(app).get('/apps');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toContain('Select a current project or create a new one!');
+  });
+
   test('POST /api/apps creates an app for an owner', async () => {
     const user = await insertUser({
       username: 'owner',

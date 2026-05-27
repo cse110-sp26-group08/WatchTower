@@ -14,6 +14,13 @@ import { withToObject } from '../util/toObject.js';
 const ALLOWED_UPDATE_FIELDS = ['username', 'email'];
 const SALT_ROUNDS = 10;
 
+function toSafeUser(user) {
+  if (!user) return null;
+  const safeUser = user.toObject ? user.toObject() : { ...user };
+  delete safeUser.passwordHash;
+  return safeUser;
+}
+
 /**
  * Create a new user.
  * @param {{username:string, email:string, password:string}} userData
@@ -62,9 +69,7 @@ async function checkLoginCredentials(email, password) {
   const passwordMatches = await bcrypt.compare(password, user.passwordHash);
   if (!passwordMatches) return null;
 
-  const safeUser = { ...user };
-  delete safeUser.passwordHash;
-  return safeUser;
+  return toSafeUser(user);
 }
 
 /**

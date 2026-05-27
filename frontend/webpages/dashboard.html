@@ -2,10 +2,8 @@
 <html lang="en">
 
 <head class="container">
-    <!--Add any metadata here-->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Dashboard</title>
 
     <!-- Preconnect to external chart CDN before loading Chart.js -->
@@ -13,9 +11,6 @@
 
     <!--Link css stylesheet-->
     <link rel="stylesheet" href="../styling/dashboard.css">
-
-    <!--Link js file-->
-    <!--Link favicon-->
     <link rel="icon" type="image/x-icon" href="assets/favicon-here.ico">
 </head>
 
@@ -27,51 +22,80 @@
   }
 </script>
 <body class="container">
-    <!--Navigation panel-->
     <div class="nav-panel">
-        <!--projects nav button-->
-        <div class="nav-option option2">
-            <!--Option icon here-->
+        <a class="nav-option nav-link nav-link-active option1" href="/dashboard">
+            <img src="assets/nav-icon1-here.png" class="nav-img" alt="home">
+            <h3>Home</h3>
+        </a>
+
+        <a class="nav-option nav-link option2" href="./apps">
             <img src="assets/nav-icon2-here.png" class="nav-img" alt="projects">
-
-            <!--Option name-->
             <h3>Projects</h3>
-        </div>
+        </a>
 
-        <!--alerts nav button-->
-        <div class="nav-option option3">
-            <!--Option icon here-->
+        <a class="nav-option nav-link option3" href="./advanced-error-metrics">
             <img src="assets/nav-icon3-here.png" class="nav-img" alt="alerts">
+            <h3>Advanced Error Metrics</h3>
+        </a>
 
-            <!--Option name-->
-            <h3>Alerts</h3>
-        </div>
-
-        <!--logs nav button-->
-        <div class="nav-option option4">
-            <!--Option icon here-->
+        <a class="nav-option nav-link option4" href="./advanced-performance-metrics">
             <img src="assets/nav-icon4-here.png" class="nav-img" alt="logs">
-
-            <!--Option name-->
-            <h3>Logs</h3>
-        </div>
-
+            <h3>Advanced Performance Metrics</h3>
+        </a>
     </div>
 
-    <!--Main dashboard-->
     <div class="main-dash">
-        <!--Yusuf's add-on - Main uptime status indicator-->
         <div class="status-container">
-            <h2>Current Site Status</h2>
-            <p class="status-project" id="status-project">Loading project...</p>
+            <div class="status-card status-main">
+                <p class="status-eyebrow">System Performance Diagnosis</p>
+                <h2>Current Site Status</h2>
+                <p class="status-project" id="status-project">Loading project...</p>
 
-            <div class="status-indicator">
-                <span class="status-symbol">&#9679;</span>
-                <span class="status-text" id="status-text">UP</span>
+                <div class="status-indicator">
+                    <span class="status-symbol">&#9679;</span>
+                    <span class="status-text" id="status-text">UP</span>
+                </div>
+
+                <p id="status-description">Loading recent service health...</p>
             </div>
 
-            <p id="status-description">Loading recent service health...</p>
+            <div class="health-score">
+                <span class="health-score-title">Performance</span>
+                <div class="health-ring score-red" id="performance-bar-fill" aria-label="Performance score">
+                    <div class="health-score-center">
+                        <strong class="health-score-value" id="performance-bar-value">0</strong>
+                        <span class="health-score-label" id="performance-score-label">Poor</span>
+                    </div>
+                </div>
+                <div class="score-support-row">
+                    <span class="support-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M3 12h4l2-7 4 14 2-7h6"></path>
+                        </svg>
+                    </span>
+                    <span>Performance is within normal range.</span>
+                </div>
+            </div>
+
+            <div class="health-score">
+                <span class="health-score-title">Reliability</span>
+                <div class="health-ring score-red" id="reliability-bar-fill" aria-label="Reliability score">
+                    <div class="health-score-center">
+                        <strong class="health-score-value" id="reliability-bar-value">0</strong>
+                        <span class="health-score-label" id="reliability-score-label">Poor</span>
+                    </div>
+                </div>
+                <div class="score-support-row">
+                    <span class="support-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M12 3l7 3v5c0 4.4-2.8 8.4-7 10-4.2-1.6-7-5.6-7-10V6l7-3z"></path>
+                        </svg>
+                    </span>
+                    <span>Low error rate and stable system health.</span>
+                </div>
+            </div>
         </div>
+
         <details class="more-info-widget">
             <summary class="more-info-header">
                 <h2 id="more-info-title">More Info</h2>
@@ -79,11 +103,33 @@
             </summary>
 
             <div class="more-info-content">
+                <div class="details-grid">
+                    <div class="detail-card">
+                        <p class="detail-label">Project</p>
+                        <p class="detail-value" id="detail-app-name">Loading...</p>
+                    </div>
+                    <div class="detail-card">
+                        <p class="detail-label">Owner</p>
+                        <p class="detail-value" id="detail-owner-name">Loading...</p>
+                    </div>
+                    <div class="detail-card">
+                        <p class="detail-label">Project URL</p>
+                        <p class="detail-value" id="detail-project-url">Loading...</p>
+                    </div>
+                    <div class="detail-card">
+                        <p class="detail-label">Latest Release</p>
+                        <p class="detail-value" id="detail-latest-release">Loading...</p>
+                    </div>
+                    <div class="detail-card">
+                        <p class="detail-label">Last Event Seen</p>
+                        <p class="detail-value" id="detail-last-event">Loading...</p>
+                    </div>
+                </div>
+
                 <div class="metric-container">
                     <div class="metric metric1">
                         <h2 class="metric-name">Errors Today</h2>
                         <h2 class="metric-val" id="errors-today-value">0</h2>
-
                         <div class="compare-yesterday">
                             <img src="assets/up-or-down.png" alt="up/down">
                             <p id="errors-today-compare">vs yesterday</p>
@@ -93,7 +139,6 @@
                     <div class="metric metric2">
                         <h2 class="metric-name">Avg Response Time</h2>
                         <h2 class="metric-val" id="avg-response-value">0 ms</h2>
-
                         <div class="compare-yesterday">
                             <img src="assets/up-or-down.png" alt="up/down">
                             <p id="avg-response-compare">vs previous period</p>
@@ -103,33 +148,22 @@
                     <div class="metric metric3">
                         <h2 class="metric-name">Critical Errors</h2>
                         <h2 class="metric-val" id="critical-errors-value">0</h2>
-
                         <div class="compare-yesterday">
                             <img src="assets/up-or-down.png" alt="up/down">
                             <p id="critical-errors-compare">in selected range</p>
                         </div>
                     </div>
 
-                    <div class="metric metric4">
-                        <h2 class="metric-name">Uptime</h2>
-                        <h2 class="metric-val" id="uptime-value">0%</h2>
-
-                        <div class="compare-yesterday">
-                            <img src="assets/up-or-down.png" alt="up/down">
-                            <p id="uptime-compare">based on healthy time buckets</p>
-                        </div>
-                    </div>
-
                     <div class="metric metric5">
                         <h2 class="metric-name">Active URLs</h2>
                         <h2 class="metric-val" id="active-urls-value">0</h2>
-
                         <div class="compare-yesterday">
                             <img src="assets/up-or-down.png" alt="up/down">
                             <p id="active-urls-compare">unique endpoints in range</p>
                         </div>
                     </div>
                 </div>
+
                 <div class="dashboard-filters">
                     <label for="time-range">Time Range:</label>
                     <select id="time-range" name="time-range">
@@ -141,27 +175,18 @@
                     <label for="severity-filter">Severity:</label>
                     <select id="severity-filter" name="severity-filter">
                         <option value="all">All Severities</option>
-                        <option value="critical">Critical</option>
-                        <option value="error">Error</option>
-                        <option value="warning">Warning</option>
+                        <option value="critical">Critical / High</option>
+                        <option value="error">Error / Medium</option>
+                        <option value="warning">Warning / Low</option>
                     </select>
 
                     <button type="button" id="refresh-dashboard">Refresh</button>
                 </div>
+
                 <div class="graph-setting-container">
                     <div class="graph-setting setting1 active" data-chart-view="line">
                         <img src="assets/graph-icon1.png" alt="icon1">
                         <p>Line Graph</p>
-                    </div>
-
-                    <div class="graph-setting setting2" data-chart-view="pie">
-                        <img src="assets/graph-icon2.png" alt="icon2">
-                        <p>Pie Chart</p>
-                    </div>
-
-                    <div class="graph-setting setting3" data-chart-view="bar">
-                        <img src="assets/graph-icon3.png" alt="icon3">
-                        <p>Bar Chart</p>
                     </div>
 
                     <div class="graph-setting setting4" data-chart-view="table">
@@ -201,7 +226,6 @@
 
                 <div class="logs-container">
                     <h2>Recent Logs / Outages</h2>
-
                     <table class="logs-table">
                         <thead>
                             <tr>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Error Metrics</title>
+    <link rel="stylesheet" href="../styling/dashboard.css">
+    <link rel="stylesheet" href="../styling/advanced_error_metrics.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon-here.ico">
+</head>
+
+<body class="container">
+    <div class="nav-panel">
+        <a class="nav-option nav-link nav-link-active option1" href="/dashboard">
+            <img src="assets/nav-icon1-here.png" class="nav-img" alt="home">
+            <h3>Home</h3>
+        </a>
+
+        <a class="nav-option nav-link option2" href="./apps">
+            <img src="assets/nav-icon2-here.png" class="nav-img" alt="projects">
+            <h3>Projects</h3>
+        </a>
+
+        <a class="nav-option nav-link option3" href="./advanced-error-metrics">
+            <img src="assets/nav-icon3-here.png" class="nav-img" alt="alerts">
+            <h3>Advanced Error Metrics</h3>
+        </a>
+
+        <a class="nav-option nav-link option4" href="./advanced-performance-metrics">
+            <img src="assets/nav-icon4-here.png" class="nav-img" alt="logs">
+            <h3>Advanced Performance Metrics</h3>
+        </a>
+    </div>
+
+    <main class="main-dash">
+    <section class="errors-overview">
+      <div class="errors-overview-header">
+        <div>
+          <h1 class="errors-overview-title">Advanced Error Metrics</h1>
+          <p class="errors-overview-status" id="errors-page-status">Loading event data for the selected app.</p>
+          <p class="errors-overview-detail" id="errors-page-detail">Waiting for recent error data.</p>
+        </div>
+        <div class="errors-overview-meta">
+          <p class="errors-overview-project" id="errors-project-name">Loading project...</p>
+          <p class="errors-overview-updated" id="errors-last-updated">Not refreshed yet</p>
+        </div>
+      </div>
+
+      <div class="metric-container">
+        <div class="metric metric-critical">
+          <h2 class="metric-name">Critical</h2>
+          <h2 class="metric-val sev-val-critical" id="sev-critical">0</h2>
+          <div class="compare-yesterday">
+            <p>TypeError &amp; ReferenceError</p>
+          </div>
+        </div>
+        <div class="metric metric-high">
+          <h2 class="metric-name">High</h2>
+          <h2 class="metric-val sev-val-high" id="sev-high">0</h2>
+          <div class="compare-yesterday">
+            <p>SyntaxError &amp; Network failures</p>
+          </div>
+        </div>
+        <div class="metric metric-medium">
+          <h2 class="metric-name">Medium</h2>
+          <h2 class="metric-val sev-val-medium" id="sev-medium">0</h2>
+          <div class="compare-yesterday">
+            <p>Timeouts &amp; RangeError</p>
+          </div>
+        </div>
+        <div class="metric metric-low">
+          <h2 class="metric-name">Low</h2>
+          <h2 class="metric-val sev-val-low" id="sev-low">0</h2>
+          <div class="compare-yesterday">
+            <p>Non-critical Errors</p>
+          </div>
+        </div>
+        <div class="metric metric-total">
+          <h2 class="metric-name">Total</h2>
+          <h2 class="metric-val sev-val-total" id="sev-total">0</h2>
+          <div class="compare-yesterday">
+            <p>Total errors in the selected range</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="dashboard-filters">
+      <label for="time-range">Time Range:</label>
+      <select id="time-range" name="time-range">
+        <option value="24h">Last 24 Hours</option>
+        <option value="7d">Last 7 Days</option>
+        <option value="30d">Last 30 Days</option>
+      </select>
+
+      <label for="severity-filter">Severity:</label>
+      <select id="severity-filter" name="severity-filter">
+        <option value="all">All Severities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+
+      <label for="type-filter">Type:</label>
+      <select id="type-filter">
+        <option value="all">All Types</option>
+      </select>
+
+      <button type="button" id="refresh-dashboard">Refresh</button>
+    </div>
+
+    <details class="more-info-widget" open>
+      <summary class="more-info-header">
+        <h2>Graphs</h2>
+        <span class="more-info-toggle" aria-hidden="true"></span>
+      </summary>
+
+      <div class="more-info-content">
+        <div class="graph-setting-container">
+          <div class="graph-setting setting1 active" data-chart-view="line">
+            <img src="assets/graph-icon1.png" alt="icon1">
+            <p>Line Graph</p>
+          </div>
+        </div>
+
+        <div class="graph">
+          <div class="graph-card">
+            <div class="graph-card-header">
+              <div>
+                <p class="graph-eyebrow">Error telemetry</p>
+                <h2 id="graph-title">Error volume over time</h2>
+              </div>
+              <p class="graph-summary" id="graph-summary">Loading event data for the selected app.</p>
+            </div>
+            <div id="chart-canvas-shell">
+              <canvas id="dashboard-chart" aria-label="Error chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <details class="more-info-widget" open>
+      <summary class="more-info-header">
+        <h2>All Errors</h2>
+        <span class="more-info-toggle" aria-hidden="true"></span>
+      </summary>
+
+      <div class="more-info-content">
+        <p class="errors-section-summary" id="errors-table-summary">Loading recent errors...</p>
+        <div class="errors-table-shell">
+          <table class="logs-table errors-table">
+            <colgroup>
+              <col style="width: 112px;">
+              <col style="width: 92px;">
+              <col style="width: 112px;">
+              <col style="width: auto;">
+              <col style="width: 260px;">
+              <col style="width: 64px;">
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="time-column">Time</th>
+                <th class="severity-column">Severity</th>
+                <th class="compact-left-column">Type</th>
+                <th class="message-column">Message</th>
+                <th class="url-column">URL</th>
+                <th class="stack-column">Stack</th>
+              </tr>
+            </thead>
+            <tbody id="errors-table-body">
+              <tr>
+                <td colspan="6" class="empty-state">Loading recent errors...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/graphs.js"></script>
+    <script src="../js/advanced_error_metrics.js"></script>
+</body>
+
+</html>

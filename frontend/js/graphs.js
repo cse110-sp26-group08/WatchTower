@@ -16,7 +16,8 @@ let selectedChartView = 'line';
 let dashboardState = null;
 let refreshIntervalId = null;
 let refreshAbortController = null;
-const AUTO_REFRESH_MS = 15000;
+const EMPTY_VALUE = 'No data';
+const WARNING_CRITICAL_THRESHOLD = 5;
 
 async function initDashboard() {
     const selectedApp = await resolveSelectedApp();
@@ -24,13 +25,20 @@ async function initDashboard() {
     if (!selectedApp?.id) {
         setStatus('DOWN', 'No selected project.', 'Return to app selection and choose a project.');
         renderEmptyLogs('No selected app.');
+        populateProjectDetails({ app: null, owner: null, errors: [], performanceEvents: [] });
+        renderHealthBars([], []);
         return;
     }
 
     setProjectName(selectedApp.name || 'Selected project');
+    populateProjectDetails({
+        app: selectedApp,
+        owner: null,
+        errors: [],
+        performanceEvents: [],
+    });
     bindDashboardControls();
     await refreshDashboard(selectedApp, { force: true });
-    startAutoRefresh();
 }
 
 async function resolveSelectedApp() {
@@ -111,21 +119,28 @@ async function refreshDashboard(selectedApp, options = {}) {
     setStatus('UP', `Checking ${selectedApp.name || 'project'}...`, 'Refreshing dashboard statistics from recent events.');
 
     try {
-        const [errorResponse, performanceResponse] = await Promise.all([
+        const [appResponse, errorResponse, performanceResponse] = await Promise.all([
+            fetch(`/api/apps/${selectedApp.id}`, { cache: 'no-store', signal }),
             fetch(`/api/events/error/apps/${selectedApp.id}`, { cache: 'no-store', signal }),
             fetch(`/api/events/performance/apps/${selectedApp.id}`, { cache: 'no-store', signal }),
         ]);
 
-        const [errorData, performanceData] = await Promise.all([
+        const [appData, errorData, performanceData] = await Promise.all([
+            appResponse.json(),
             errorResponse.json(),
             performanceResponse.json(),
         ]);
 
+        const app = appResponse.ok && appData.app
+            ? { ...appData.app, url: selectedApp.url }
+            : selectedApp;
+        const owner = await fetchOwner(app.ownerId);
         const errors = Array.isArray(errorData.events) ? errorData.events : [];
         const performanceEvents = Array.isArray(performanceData.events) ? performanceData.events : [];
 
         dashboardState = {
-            app: selectedApp,
+            app,
+            owner,
             errors,
             performanceEvents,
         };
@@ -165,7 +180,7 @@ function redrawFromState() {
         return;
     }
 
-    const { app, errors, performanceEvents } = dashboardState;
+    const { app, owner, errors, performanceEvents } = dashboardState;
     const range = document.getElementById('time-range').value;
     const severity = document.getElementById('severity-filter').value;
     const filteredErrors = filterErrors(errors, range, severity);
@@ -173,8 +188,15 @@ function redrawFromState() {
     const filteredPerformance = filterPerformance(performanceEvents, range);
     const previousPerformance = filterPerformanceForPreviousPeriod(performanceEvents, range);
 
+    populateProjectDetails({
+        app,
+        owner,
+        errors: filteredErrors,
+        performanceEvents: filteredPerformance,
+    });
     renderStatus(app, filteredErrors, filteredPerformance);
     renderMetrics(errors, filteredErrors, previousErrors, filteredPerformance, previousPerformance);
+    renderHealthBars(filteredErrors, filteredPerformance);
     renderGraph(filteredErrors, filteredPerformance);
     renderLogs(app, filteredErrors, filteredPerformance);
 }
@@ -184,7 +206,7 @@ function filterErrors(errors, range, severity) {
 
     return errors.filter((event) => {
         const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
-        const eventSeverity = String(event.metadata?.severity || '').toLowerCase();
+        const eventSeverity = normalizeSeverityBucket(event.metadata?.severity);
         const withinRange = Number.isFinite(timestamp) && timestamp >= cutoff;
         const severityMatch = severity === 'all' || eventSeverity === severity;
         return withinRange && severityMatch;
@@ -197,7 +219,7 @@ function filterErrorsForPreviousPeriod(errors, range, severity) {
 
     return errors.filter((event) => {
         const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
-        const eventSeverity = String(event.metadata?.severity || '').toLowerCase();
+        const eventSeverity = normalizeSeverityBucket(event.metadata?.severity);
         const withinRange = Number.isFinite(timestamp) && timestamp >= start && timestamp < end;
         const severityMatch = severity === 'all' || eventSeverity === severity;
         return withinRange && severityMatch;
@@ -226,10 +248,19 @@ function filterPerformanceForPreviousPeriod(events, range) {
 function renderStatus(app, filteredErrors, filteredPerformance) {
     const criticalErrors = filteredErrors.filter(isCriticalError);
 
+    if (criticalErrors.length > WARNING_CRITICAL_THRESHOLD) {
+        setStatus(
+            'WARN',
+            `${app.name || 'Project'} is up with elevated critical errors.`,
+            `${criticalErrors.length} critical errors were captured recently.`
+        );
+        return;
+    }
+
     if (criticalErrors.length > 0) {
         setStatus(
-            'DOWN',
-            `${app.name || 'Project'} has critical errors in the selected range.`,
+            'UP',
+            `${app.name || 'Project'} is up with critical issues to review.`,
             `${criticalErrors.length} critical errors were captured recently.`
         );
         return;
@@ -275,19 +306,57 @@ function renderMetrics(allErrors, filteredErrors, previousErrors, filteredPerfor
     const avgResponse = average(getResponseTimes(filteredPerformance));
     const previousAvgResponse = average(getResponseTimes(previousPerformance));
     const criticalErrors = filteredErrors.filter(isCriticalError).length;
-    const uptime = calculateUptime(filteredErrors, filteredPerformance);
     const activeUrls = countUniqueUrls(filteredErrors, filteredPerformance);
 
     document.getElementById('errors-today-value').textContent = String(todayErrors);
     document.getElementById('errors-today-compare').textContent = buildDeltaText(todayErrors, yesterdayErrors, 'from yesterday');
-    document.getElementById('avg-response-value').textContent = avgResponse ? `${Math.round(avgResponse)} ms` : 'No data';
+    document.getElementById('avg-response-value').textContent = avgResponse ? `${Math.round(avgResponse)} ms` : EMPTY_VALUE;
     document.getElementById('avg-response-compare').textContent = buildDeltaText(Math.round(avgResponse || 0), Math.round(previousAvgResponse || 0), 'from previous period');
     document.getElementById('critical-errors-value').textContent = String(criticalErrors);
     document.getElementById('critical-errors-compare').textContent = `${filteredErrors.length} total matching errors`;
-    document.getElementById('uptime-value').textContent = `${uptime}%`;
-    document.getElementById('uptime-compare').textContent = 'derived from event coverage';
     document.getElementById('active-urls-value').textContent = String(activeUrls);
     document.getElementById('active-urls-compare').textContent = activeUrls ? 'unique endpoints in range' : 'no tracked URLs';
+}
+
+function renderHealthBars(filteredErrors, filteredPerformance) {
+    const performanceScore = calculatePerformanceScore(filteredPerformance);
+    const reliabilityScore = calculateReliabilityScore(filteredErrors, filteredPerformance);
+
+    setHealthBar('performance', performanceScore);
+    setHealthBar('reliability', reliabilityScore);
+}
+
+function setHealthBar(prefix, value) {
+    const safeValue = Math.max(0, Math.min(100, Math.round(value)));
+    const scoreRing = document.getElementById(`${prefix}-bar-fill`);
+    const scoreValue = document.getElementById(`${prefix}-bar-value`);
+    const scoreLabel = document.getElementById(`${prefix}-score-label`);
+    const scoreCard = scoreRing.closest('.health-score');
+    const scoreMeta = getHealthScoreMeta(safeValue);
+
+    scoreRing.style.setProperty('--score-angle', `${safeValue * 3.6}deg`);
+    scoreRing.classList.remove('score-blue', 'score-orange', 'score-red');
+    scoreRing.classList.add(scoreMeta.className);
+    scoreCard.classList.remove('score-blue', 'score-orange', 'score-red');
+    scoreCard.classList.add(scoreMeta.className);
+    scoreValue.textContent = String(safeValue);
+    scoreLabel.textContent = scoreMeta.label;
+}
+
+function getHealthScoreMeta(score) {
+    if (score >= 80) {
+        return { label: 'Excellent', className: 'score-blue' };
+    }
+
+    if (score >= 60) {
+        return { label: 'Good', className: 'score-blue' };
+    }
+
+    if (score >= 40) {
+        return { label: 'Warning', className: 'score-orange' };
+    }
+
+    return { label: 'Poor', className: 'score-red' };
 }
 
 function renderGraph(filteredErrors, filteredPerformance) {
@@ -295,10 +364,13 @@ function renderGraph(filteredErrors, filteredPerformance) {
     const graphSummary = document.getElementById('graph-summary');
     const chartCanvasShell = document.getElementById('chart-canvas-shell');
     const chartTableShell = document.getElementById('chart-table-shell');
+    const noEvents = !filteredErrors.length && !filteredPerformance.length;
 
     if (selectedChartView === 'table') {
         graphTitle.textContent = 'Recent event table';
-        graphSummary.textContent = `${filteredErrors.length} matching errors shown in tabular form.`;
+        graphSummary.textContent = filteredErrors.length
+            ? `${filteredErrors.length} matching errors shown in tabular form.`
+            : 'No matching error events in the selected range.';
         chartCanvasShell.hidden = true;
         chartTableShell.hidden = false;
         renderChartTable(filteredErrors);
@@ -309,22 +381,10 @@ function renderGraph(filteredErrors, filteredPerformance) {
     chartCanvasShell.hidden = false;
     chartTableShell.hidden = true;
 
-    if (selectedChartView === 'pie') {
-        graphTitle.textContent = 'Error severity breakdown';
-        graphSummary.textContent = 'Distribution of matching errors by severity.';
-        renderPieChart(filteredErrors);
-        return;
-    }
-
-    if (selectedChartView === 'bar') {
-        graphTitle.textContent = 'Response time snapshot';
-        graphSummary.textContent = 'Average response times for recent performance signals.';
-        renderBarChart(filteredPerformance);
-        return;
-    }
-
     graphTitle.textContent = 'Error volume over time';
-    graphSummary.textContent = 'Recent error volume grouped by day or hour for the selected range.';
+    graphSummary.textContent = noEvents
+        ? 'No recent error or performance events were found for the selected range.'
+        : 'Recent error volume grouped by day or hour for the selected range.';
     renderLineChart(filteredErrors);
 }
 
@@ -436,51 +496,6 @@ function renderLineChart(filteredErrors) {
     });
 }
 
-function renderPieChart(filteredErrors) {
-    const counts = {
-        critical: 0,
-        error: 0,
-        warning: 0,
-        other: 0,
-    };
-
-    filteredErrors.forEach((event) => {
-        const severity = String(event.metadata?.severity || '').toLowerCase();
-        if (severity in counts) {
-            counts[severity] += 1;
-        } else {
-            counts.other += 1;
-        }
-    });
-
-    createOrUpdateChart('pie', {
-        labels: ['Critical', 'Error', 'Warning', 'Other'],
-        datasets: [{
-            data: [counts.critical, counts.error, counts.warning, counts.other],
-            backgroundColor: ['#b42318', '#f04438', '#f79009', '#98a2b3'],
-        }],
-    });
-}
-
-function renderBarChart(filteredPerformance) {
-    const responseTimes = getResponseTimes(filteredPerformance);
-    const loadTimes = filteredPerformance
-        .map((event) => Number(event.metadata?.loadTimeMs))
-        .filter((value) => Number.isFinite(value));
-
-    createOrUpdateChart('bar', {
-        labels: ['API latency', 'Load time'],
-        datasets: [{
-            label: 'Milliseconds',
-            data: [
-                Math.round(average(responseTimes) || 0),
-                Math.round(average(loadTimes) || 0),
-            ],
-            backgroundColor: ['#1f49ff', '#00a38c'],
-        }],
-    });
-}
-
 function createOrUpdateChart(type, data) {
     const context = document.getElementById('dashboard-chart');
 
@@ -536,34 +551,28 @@ function bucketErrors(errors, bucketSize) {
     };
 }
 
-function calculateUptime(filteredErrors, filteredPerformance) {
-    const range = document.getElementById('time-range').value;
-    const bucketCount = range === '24h' ? 24 : (range === '7d' ? 7 : 30);
-    const bucketSizeMs = RANGE_MS[range] / bucketCount;
-    const start = Date.now() - RANGE_MS[range];
-    let healthyBuckets = 0;
-
-    for (let index = 0; index < bucketCount; index += 1) {
-        const bucketStart = start + (index * bucketSizeMs);
-        const bucketEnd = bucketStart + bucketSizeMs;
-        const hasCritical = filteredErrors.some((event) => {
-            const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
-            return Number.isFinite(timestamp) && timestamp >= bucketStart && timestamp < bucketEnd && isCriticalError(event);
-        });
-        const hasSignal = filteredErrors.some((event) => {
-            const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
-            return Number.isFinite(timestamp) && timestamp >= bucketStart && timestamp < bucketEnd;
-        }) || filteredPerformance.some((event) => {
-            const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
-            return Number.isFinite(timestamp) && timestamp >= bucketStart && timestamp < bucketEnd;
-        });
-
-        if (hasSignal && !hasCritical) {
-            healthyBuckets += 1;
-        }
+function calculatePerformanceScore(filteredPerformance) {
+    const responseTimes = getResponseTimes(filteredPerformance);
+    if (!responseTimes.length) {
+        return 0;
     }
 
-    return Math.round((healthyBuckets / bucketCount) * 100);
+    const avgResponse = average(responseTimes);
+    const score = 100 - ((avgResponse - 200) / 8);
+    return Math.max(0, Math.min(100, score));
+}
+
+function calculateReliabilityScore(filteredErrors, filteredPerformance) {
+    const signalCount = filteredErrors.length + filteredPerformance.length;
+    if (!signalCount) {
+        return 0;
+    }
+
+    const criticalCount = filteredErrors.filter(isCriticalError).length;
+    const warningCount = filteredErrors.filter((event) => normalizeSeverityBucket(event.metadata?.severity) === 'warning').length;
+    const penalty = (criticalCount * 12) + (warningCount * 4) + ((filteredErrors.length - criticalCount - warningCount) * 6);
+    const score = 100 - (penalty / signalCount);
+    return Math.max(0, Math.min(100, score));
 }
 
 function countUniqueUrls(filteredErrors, filteredPerformance) {
@@ -572,6 +581,9 @@ function countUniqueUrls(filteredErrors, filteredPerformance) {
     [...filteredErrors, ...filteredPerformance].forEach((event) => {
         if (event.url) {
             urls.add(event.url);
+        }
+        if (event.metadata?.apiEndpoint) {
+            urls.add(event.metadata.apiEndpoint);
         }
     });
 
@@ -595,34 +607,51 @@ function setStatus(status, description, detail) {
 
     statusText.textContent = status;
     statusDescription.textContent = detail;
-    statusContainer.classList.remove('status-up', 'status-down');
-    statusContainer.classList.add(status === 'DOWN' ? 'status-down' : 'status-up');
     document.getElementById('status-project').textContent = description;
+    statusContainer.classList.remove('status-up', 'status-down', 'status-warn');
+
+    if (status === 'DOWN') {
+        statusContainer.classList.add('status-down');
+        return;
+    }
+
+    if (status === 'WARN') {
+        statusContainer.classList.add('status-warn');
+        return;
+    }
+
+    statusContainer.classList.add('status-up');
 }
 
 function isCriticalError(event) {
-    const severity = String(event.metadata?.severity || '').toLowerCase();
-    return severity === 'critical' || severity === 'high';
+    return normalizeSeverityBucket(event.metadata?.severity) === 'critical';
 }
 
 function normalizeSeverity(severity) {
-    if (!severity) {
-        return 'ERROR';
-    }
-
-    return String(severity).toUpperCase();
+    return normalizeSeverityBucket(severity).toUpperCase();
 }
 
 function buildPerformanceMessage(event) {
     const apiLatency = Number(event.metadata?.apiLatencyMs);
     const loadTime = Number(event.metadata?.loadTimeMs);
+    const domContentLoaded = Number(event.metadata?.domContentLoadedMs);
+    const ttfb = Number(event.metadata?.ttfbMs);
+    const apiEndpoint = event.metadata?.apiEndpoint;
 
     if (Number.isFinite(apiLatency)) {
-        return `API latency ${Math.round(apiLatency)} ms`;
+        return `${apiEndpoint || 'API'} latency ${Math.round(apiLatency)} ms`;
     }
 
     if (Number.isFinite(loadTime)) {
         return `Load time ${Math.round(loadTime)} ms`;
+    }
+
+    if (Number.isFinite(domContentLoaded)) {
+        return `DOM ready ${Math.round(domContentLoaded)} ms`;
+    }
+
+    if (Number.isFinite(ttfb)) {
+        return `TTFB ${Math.round(ttfb)} ms`;
     }
 
     return 'Performance event received';
@@ -661,6 +690,66 @@ function buildDeltaText(current, previous, suffix) {
     return `${direction}${delta} ${suffix}`;
 }
 
+async function fetchOwner(ownerId) {
+    if (!ownerId) {
+        return null;
+    }
+
+    try {
+        const response = await fetch(`/api/users/${ownerId}`, { cache: 'no-store' });
+        const data = await response.json();
+        return response.ok ? data.user || null : null;
+    } catch (error) {
+        console.error('Failed to fetch owner:', error);
+        return null;
+    }
+}
+
+function populateProjectDetails({ app, owner, errors, performanceEvents }) {
+    const events = [...errors, ...performanceEvents];
+    const latestEvent = events
+        .sort((left, right) => Date.parse(right.timestamp || right.receivedAt || 0)
+            - Date.parse(left.timestamp || left.receivedAt || 0))[0];
+    const latestRelease = findLatestRelease(events);
+
+    document.getElementById('more-info-title').textContent = `${app?.name || 'Project'} info`;
+    document.getElementById('detail-app-name').textContent = app?.name || EMPTY_VALUE;
+    document.getElementById('detail-owner-name').textContent = owner?.username || owner?.email || EMPTY_VALUE;
+    document.getElementById('detail-project-url').textContent = app?.url || EMPTY_VALUE;
+    document.getElementById('detail-latest-release').textContent = latestRelease || EMPTY_VALUE;
+    document.getElementById('detail-last-event').textContent = latestEvent
+        ? `${formatTimestamp(latestEvent.timestamp || latestEvent.receivedAt)} (${latestEvent.type})`
+        : EMPTY_VALUE;
+}
+
+function findLatestRelease(events) {
+    for (const event of events) {
+        if (event.metadata?.release) {
+            return String(event.metadata.release);
+        }
+    }
+
+    return '';
+}
+
+function normalizeSeverityBucket(severity) {
+    const value = String(severity || '').trim().toLowerCase();
+
+    if (!value) {
+        return 'error';
+    }
+
+    if (value === 'critical' || value === 'high') {
+        return 'critical';
+    }
+
+    if (value === 'warning' || value === 'low') {
+        return 'warning';
+    }
+
+    return 'error';
+}
+
 function readJsonStorage(key) {
     const rawValue = localStorage.getItem(key);
 
@@ -674,13 +763,4 @@ function readJsonStorage(key) {
         console.error(`Failed to parse ${key}:`, error);
         return null;
     }
-}
-
-function escapeHtml(value) {
-    return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
 }
