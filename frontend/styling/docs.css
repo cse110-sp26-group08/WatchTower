@@ -473,9 +473,6 @@
 .docs-faq details pre {
   margin: 10px 0 0;
   color: var(--muted);
-}
-
-.docs-faq details pre {
   padding: 0.75rem 1rem;
   border-radius: 8px;
   background: #1e1b22;
