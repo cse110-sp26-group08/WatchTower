@@ -19,7 +19,6 @@
   --border: rgb(255 255 255 / 72%);
   --font-family-primary: "Inter", "Open Sans", sans-serif;
   --shadow-card: 0 14px 30px rgb(33 31 36 / 7%);
-  --font-family-primary: "Inter", sans-serif;
   --font-family-display: "Bitter Pro", sans-serif;
 }
 
@@ -38,10 +37,6 @@ header,
 main {
   width: min(1240px, calc(100% - 48px));
   margin: 0 auto;
-}
-
-body {
-  font-family: var(--font-family-primary);
 }
 
 header {

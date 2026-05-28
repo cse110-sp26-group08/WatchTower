@@ -79,8 +79,7 @@ a {
     position: static;
     width: 100%;
     height: auto;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-flow: row wrap;
     padding: 12px 16px;
     border-right: none;
     border-bottom: 1px solid rgb(33 31 36 / 10%);
