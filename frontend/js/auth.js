@@ -1,3 +1,4 @@
+/* exported watchtowerLogout */
 async function watchtowerLogout(redirectHref) {
     await fetch('/logout', { method: 'POST' }).catch(() => {});
     localStorage.removeItem('watchtowerUser');
