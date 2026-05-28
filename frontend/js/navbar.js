@@ -65,6 +65,18 @@ class WatchTowerNavbar extends HTMLElement {
         const contactHref = this.getOption('contact-href', 'mailto:contact@watchtower.dev');
         const signupHref = this.getOption('signup-href', defaultSignupHref);
         const stylesheetHref = this.getStylePath('navbar.css');
+        const isLoggedIn = this.hasAttribute('logged-in');
+
+        const navActions = isLoggedIn
+            ? `<button type="button" class="button button-logout" id="navbar-logout-btn">Log out</button>`
+            : `
+                <a href="${githubHref}" class="github-link" aria-label="WatchTower on GitHub">
+                    <img class="github-icon github-icon-default" src="${this.getAssetPath('github-icon-default.svg')}" alt="">
+                    <img class="github-icon github-icon-hover" src="${this.getAssetPath('github-icon-hover.svg')}" alt="">
+                </a>
+                <a href="${loginHref}" class="nav-login">Sign In</a>
+                <a href="${signupHref}" class="button button-primary">Get Started</a>
+            `;
 
         this.shadowRoot.innerHTML = `
             <link rel="stylesheet" href="${stylesheetHref}">
@@ -84,12 +96,7 @@ class WatchTowerNavbar extends HTMLElement {
                     </ul>
 
                     <div class="nav-actions">
-                        <a href="${githubHref}" class="github-link" aria-label="WatchTower on GitHub">
-                            <img class="github-icon github-icon-default" src="${this.getAssetPath('github-icon-default.svg')}" alt="">
-                            <img class="github-icon github-icon-hover" src="${this.getAssetPath('github-icon-hover.svg')}" alt="">
-                        </a>
-                        <a href="${loginHref}" class="nav-login">Sign In</a>
-                        <a href="${signupHref}" class="button button-primary">Get Started</a>
+                        ${navActions}
                     </div>
                 </nav>
             </header>
@@ -100,6 +107,15 @@ class WatchTowerNavbar extends HTMLElement {
             brandLink.addEventListener('click', (event) => {
                 this.handleBrandClick(event, homeHref);
             });
+        }
+
+        if (isLoggedIn) {
+            const logoutBtn = this.shadowRoot.querySelector('#navbar-logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    this.dispatchEvent(new CustomEvent('watchtower-logout', { bubbles: true, composed: true }));
+                });
+            }
         }
     }
 
