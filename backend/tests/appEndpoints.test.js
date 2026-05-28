@@ -26,7 +26,15 @@ describe('App endpoints', () => {
   const app = createApp();
 
   test('GET /apps serves the app selection page', async () => {
-    const response = await request(app).get('/apps');
+    const agent = request.agent(app);
+    await agent.post('/signup').send({
+      username: 'apptestuser',
+      email: 'apptest@example.com',
+      password: 'pass123',
+      confirmPassword: 'pass123',
+    });
+
+    const response = await agent.get('/apps');
 
     expect(response.statusCode).toBe(200);
     expect(response.text).toContain('Select a current project or create a new one!');

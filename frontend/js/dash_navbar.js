@@ -1,3 +1,4 @@
+/* global watchtowerLogout */
 const dashNavScriptUrl = document.currentScript ? document.currentScript.src : '';
 const defaultDashNavAssetBase = dashNavScriptUrl
     ? new URL('../assets', dashNavScriptUrl).href
@@ -97,9 +98,7 @@ class WatchTowerDashNavbar extends HTMLElement {
         `;
 
         this.shadowRoot.querySelector('#dash-logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('watchtowerUser');
-            localStorage.removeItem('watchtowerSelectedApp');
-            window.location.href = homeHref;
+            watchtowerLogout(homeHref);
         });
     }
 

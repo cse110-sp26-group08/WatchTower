@@ -33,18 +33,6 @@
         <p>Already have an account? <a href="login.html" data-login-link>Sign in</a></p>
       </div>
 
-      <div class="social-auth" aria-label="Social sign in options">
-        <button class="social-button" type="button" disabled>
-          <img class="google-icon" src="../assets/google-g.svg" alt="" aria-hidden="true">
-          <span>Google</span>
-        </button>
-        <button class="social-button" type="button" disabled>
-          <img src="../assets/github-icon-default.svg" alt="" aria-hidden="true">
-          <span>GitHub</span>
-        </button>
-      </div>
-
-      <p class="form-divider">or using email and password</p>
 
       <form class="signup-form" id="signup-form" novalidate>
         <div class="form-field">
@@ -90,12 +78,19 @@
           <p class="field-error" id="password-error"></p>
         </div>
 
-        <button type="submit" class="button button-primary signup-submit">
-          <span>Sign up</span>
-          <svg class="button-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-            <path d="M4 10h10M10.5 6.5 14 10l-3.5 3.5"></path>
-          </svg>
-        </button>
+        <div class="form-actions">
+          <a href="/" class="button button-secondary" aria-label="Back to home">
+            <svg class="button-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <path d="M16 10H6M9.5 6.5 6 10l3.5 3.5"></path>
+            </svg>
+          </a>
+          <button type="submit" class="button button-primary signup-submit">
+            <span>Sign up</span>
+            <svg class="button-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <path d="M4 10h10M10.5 6.5 14 10l-3.5 3.5"></path>
+            </svg>
+          </button>
+        </div>
       </form>
 
       <p class="terms-copy">

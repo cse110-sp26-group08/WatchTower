@@ -13,7 +13,6 @@ function init() {
     }
 
     currentUser = user;
-    addLogoutListener();
     bindProjectDialogControls();
     window.watchtowerOpenCreateProject = openCreateProjectDialog;
     loadApps(user.id);
@@ -213,13 +212,6 @@ async function createProjectFromDialog() {
     }
 }
 
-function addLogoutListener() {
-    document.addEventListener('watchtower-logout', () => {
-        localStorage.removeItem('watchtowerUser');
-        localStorage.removeItem('watchtowerSelectedApp');
-        window.location.href = '/';
-    });
-}
 
 function updateMessage(element, text, type) {
     element.textContent = text;
