@@ -1,11 +1,6 @@
 const CACHE_NAME = 'watchtower-static-v1';
 
 const STATIC_ASSETS = [
-  '/',
-  '/login.html',
-  '/signup.html',
-  '/app_selection.html',
-  '/dashboard.html',
   '/styling/homepage.css',
   '/styling/login.css',
   '/styling/signup.css',
@@ -40,7 +35,8 @@ self.addEventListener('fetch', (event) => {
 
   if (
     event.request.method !== 'GET' ||
-    requestUrl.pathname.startsWith('/api/')
+    requestUrl.pathname.startsWith('/api/') ||
+    event.request.mode === 'navigate'
   ) {
     return;
   }

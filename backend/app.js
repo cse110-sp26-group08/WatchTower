@@ -82,16 +82,20 @@ function createApp() {
   app.use('/sw.js', express.static(path.join(__dirname, '../frontend/sw.js')));
   app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
 
+  function requireSession(req, res, next) {
+    if (req.session?.user) {
+      next();
+      return;
+    }
+    res.redirect('/login');
+  }
+
   // Serve Pages
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/index.html'));
   });
 
   app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/login.html'));
-  });
-
-  app.get('/login.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/login.html'));
   });
 
@@ -142,23 +146,30 @@ function createApp() {
     }
   });
 
-  app.get('/apps', (req, res) => {
+  app.post('/logout', (req, res) => {
+    req.session.destroy(() => {
+      res.clearCookie('connect.sid');
+      res.status(200).json({ message: 'Logged out' });
+    });
+  });
+
+  app.get('/apps', requireSession, (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
   });
 
-  app.get('/app_selection.html', (req, res) => {
+  app.get('/app_selection.html', requireSession, (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
   });
 
-  app.get('/dashboard', (req, res) => {
+  app.get('/dashboard', requireSession, (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/dashboard.html'));
   });
 
-  app.get('/advanced-performance-metrics', (req, res) => {
+  app.get('/advanced-performance-metrics', requireSession, (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/advanced_performance_metrics.html'));
   });
 
-  app.get('/advanced-error-metrics', (req, res) => {
+  app.get('/advanced-error-metrics', requireSession, (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/advanced_error_metrics.html'));
   });
 

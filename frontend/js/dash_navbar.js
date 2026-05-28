@@ -97,9 +97,7 @@ class WatchTowerDashNavbar extends HTMLElement {
         `;
 
         this.shadowRoot.querySelector('#dash-logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('watchtowerUser');
-            localStorage.removeItem('watchtowerSelectedApp');
-            window.location.href = homeHref;
+            watchtowerLogout(homeHref);
         });
     }
 

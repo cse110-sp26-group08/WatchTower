@@ -113,7 +113,7 @@ class WatchTowerNavbar extends HTMLElement {
             const logoutBtn = this.shadowRoot.querySelector('#navbar-logout-btn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', () => {
-                    this.dispatchEvent(new CustomEvent('watchtower-logout', { bubbles: true, composed: true }));
+                    watchtowerLogout('/');
                 });
             }
         }
