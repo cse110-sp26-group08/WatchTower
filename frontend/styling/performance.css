@@ -10,15 +10,15 @@
   --text: #211f24;
   --muted: #4d4a52;
   --blue: #0ac2a3;
-  --purple: #8b5cf6;
+  --purple: #0ac2a3;
   --amber: #f5ce60;
   --danger: #c86468;
   --success: #0ac2a3;
   --page-bg: #f7f5ef;
   --card-bg: rgb(255 255 255 / 88%);
   --border: rgb(255 255 255 / 72%);
+  --font-family-primary: "Inter", "Open Sans", sans-serif;
   --shadow-card: 0 14px 30px rgb(33 31 36 / 7%);
-  --font-family-primary: "Inter", sans-serif;
   --font-family-display: "Bitter Pro", sans-serif;
 }
 

@@ -4,12 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WatchTower App Selection</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  >
   <link rel="stylesheet" href="/styling/app_selection.css">
 </head>
 <script>
@@ -20,21 +14,7 @@
   }
 </script>
 <body class="app-selection-page">
-  <header class="site-header">
-    <nav class="site-nav" aria-label="Main navigation">
-      <div class="brand-mark">
-        <a href="/" class="brand-link">WatchTower</a>
-      </div>
-
-      <ul class="nav-links">
-        <li><a href="/#docs">Docs</a></li>
-      </ul>
-
-      <div class="nav-actions">
-        <button type="button" class="button button-secondary" id="logout-button">Log out</button>
-      </div>
-    </nav>
-  </header>
+  <watchtower-navbar logged-in></watchtower-navbar>
 
   <main class="selection-shell">
     <section class="selection-hero" aria-label="App selection overview">
@@ -82,6 +62,9 @@
     </form>
   </dialog>
 
+  <watchtower-footer></watchtower-footer>
   <script src="/js/app_selection.js" defer></script>
+  <script src="/js/navbar.js" defer></script>
+  <script src="/js/footer.js" defer></script>
 </body>
 </html>

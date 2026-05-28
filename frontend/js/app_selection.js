@@ -214,11 +214,10 @@ async function createProjectFromDialog() {
 }
 
 function addLogoutListener() {
-    const logoutButton = document.getElementById('logout-button');
-    logoutButton.addEventListener('click', () => {
+    document.addEventListener('watchtower-logout', () => {
         localStorage.removeItem('watchtowerUser');
         localStorage.removeItem('watchtowerSelectedApp');
-        window.location.href = '/login';
+        window.location.href = '/';
     });
 }
 
