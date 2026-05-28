@@ -1,5 +1,3 @@
-/* global isStaticFrontendPreview, getFieldError, setFieldError, getEmailError, attachFieldValidation */
-
 document.addEventListener('DOMContentLoaded', () => {
     init();
 });

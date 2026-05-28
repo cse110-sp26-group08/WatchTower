@@ -1,4 +1,3 @@
-/* global watchtowerLogout */
 const navbarScriptUrl = document.currentScript ? document.currentScript.src : '';
 const defaultAssetBase = navbarScriptUrl
     ? new URL('../../assets', navbarScriptUrl).href
