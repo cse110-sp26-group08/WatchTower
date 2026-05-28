@@ -1,3 +1,4 @@
+/* global watchtowerLogout */
 const dashNavScriptUrl = document.currentScript ? document.currentScript.src : '';
 const defaultDashNavAssetBase = dashNavScriptUrl
     ? new URL('../../assets', dashNavScriptUrl).href
