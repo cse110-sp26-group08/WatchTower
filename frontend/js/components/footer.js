@@ -1,21 +1,21 @@
 const footerScriptUrl = document.currentScript ? document.currentScript.src : '';
 const defaultFooterAssetBase = footerScriptUrl
-    ? new URL('../assets', footerScriptUrl).href
+    ? new URL('../../assets', footerScriptUrl).href
     : '/assets';
 const defaultFooterStyleBase = footerScriptUrl
-    ? new URL('../styling', footerScriptUrl).href
+    ? new URL('../../styling', footerScriptUrl).href
     : '/styling';
 const isFooterProjectRootStaticServer = footerScriptUrl
-    && new URL(footerScriptUrl).pathname.endsWith('/frontend/js/footer.js');
+    && new URL(footerScriptUrl).pathname.endsWith('/frontend/js/components/footer.js');
 const defaultFooterHomeHref = isFooterProjectRootStaticServer
-    ? new URL('../webpages/index.html', footerScriptUrl).href
+    ? new URL('../../webpages/index.html', footerScriptUrl).href
     : '/';
 const defaultFooterDocsHref = isFooterProjectRootStaticServer
-    ? new URL('../webpages/docs.html', footerScriptUrl).href
+    ? new URL('../../webpages/docs.html', footerScriptUrl).href
     : '/docs';
 const defaultFooterProductHref = 'https://github.com/cse110-sp26-group08/WatchTower/blob/main/documentation/rest-api.md';
 
-class WatchTowerFooter extends HTMLElement {
+class WatchTowerFooter extends WatchTowerBaseElement {
     connectedCallback() {
         if (!this.shadowRoot) {
             this.attachShadow({ mode: 'open' });
@@ -24,26 +24,14 @@ class WatchTowerFooter extends HTMLElement {
         this.render();
     }
 
-    getOption(name, fallback) {
-        return this.getAttribute(name) || fallback;
-    }
-
-    getAssetPath(fileName) {
-        return `${this.getOption('asset-base', defaultFooterAssetBase).replace(/\/$/, '')}/${fileName}`;
-    }
-
-    getStylePath(fileName) {
-        return `${this.getOption('style-base', defaultFooterStyleBase).replace(/\/$/, '')}/${fileName}`;
-    }
-
     render() {
         const homeHref = this.getOption('home-href', defaultFooterHomeHref);
         const productHref = this.getOption('product-href', defaultFooterProductHref);
         const docsHref = this.getOption('docs-href', defaultFooterDocsHref);
         const privacyHref = this.getOption('privacy-href', '#privacy-policy');
         const termsHref = this.getOption('terms-href', '#terms-conditions');
-        const logoSrc = this.getAssetPath('watchtower-logo.png');
-        const stylesheetHref = this.getStylePath('footer.css');
+        const logoSrc = this.getAssetPath('watchtower-logo.png', defaultFooterAssetBase);
+        const stylesheetHref = this.getStylePath('footer.css', defaultFooterStyleBase);
 
         this.shadowRoot.innerHTML = `
             <link rel="stylesheet" href="${stylesheetHref}">
@@ -81,19 +69,6 @@ class WatchTowerFooter extends HTMLElement {
         }
     }
 
-    handleBrandClick(event, homeHref) {
-        const targetUrl = new URL(homeHref, window.location.href);
-        const currentUrl = new URL(window.location.href);
-        const isCurrentPage = targetUrl.origin === currentUrl.origin
-            && targetUrl.pathname === currentUrl.pathname
-            && targetUrl.search === currentUrl.search
-            && targetUrl.hash === currentUrl.hash;
-
-        if (isCurrentPage) {
-            event.preventDefault();
-            window.location.reload();
-        }
-    }
 }
 
 if (!customElements.get('watchtower-footer')) {

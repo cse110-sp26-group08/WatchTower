@@ -4,15 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WatchTower App Selection</title>
-  <link rel="stylesheet" href="/styling/app_selection.css">
+  <link rel="preload" href="../styling/navbar.css" as="style">
+  <link rel="preload" href="../styling/footer.css" as="style">
+  <link rel="stylesheet" href="../styling/base.css">
+  <link rel="stylesheet" href="../styling/app_selection.css">
 </head>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js');
-    });
-  }
-</script>
 <body class="app-selection-page">
   <watchtower-navbar logged-in></watchtower-navbar>
 
@@ -63,9 +59,11 @@
   </dialog>
 
   <watchtower-footer></watchtower-footer>
-  <script src="/js/auth.js" defer></script>
-  <script src="/js/app_selection.js" defer></script>
-  <script src="/js/navbar.js" defer></script>
-  <script src="/js/footer.js" defer></script>
+  <script src="../js/components/wt-base-element.js"></script>
+  <script src="../js/components/navbar.js"></script>
+  <script src="../js/components/footer.js"></script>
+  <script src="../js/utils.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/app_selection.js" defer></script>
 </body>
 </html>

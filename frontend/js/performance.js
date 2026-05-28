@@ -1,6 +1,4 @@
-/* global flatpickr, Chart */
-
-console.log('performance.js loaded');
+/* global flatpickr, Chart, getStoredUser, escapeHtml, average */
 
 let refreshIntervalId = null;
 const AUTO_REFRESH_MS = 5000;
@@ -36,22 +34,8 @@ async function initPerformancePage() {
     startAutoRefresh();
 }
 
-function getStoredUser() {
-    const rawUser = localStorage.getItem('watchtowerUser');
-
-    if (!rawUser) return null;
-
-    try {
-        return JSON.parse(rawUser);
-    } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('watchtowerUser');
-        return null;
-    }
-}
-
 function getStoredSelectedApp() {
-    const raw = localStorage.getItem('watchTowerSelectedApp');
+    const raw = localStorage.getItem('watchtowerSelectedApp');
 
     if (!raw) return null;
 
@@ -343,11 +327,6 @@ function getNumbers(events, field) {
         .filter((value) => Number.isFinite(value));
 }
 
-function average(values) {
-    if (!values.length) return 0;
-    return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
 function percentile(values, percentileNumber) {
     if (!values.length) return 0;
 
@@ -379,7 +358,6 @@ function getHighestAverageEndpoint(events, field, valueKey = 'value') {
     let result = {
         endpoint: 'N/A',
         [valueKey]: 0,
-        value: 0
     };
 
     endpointMap.forEach((stats, endpoint) => {
@@ -389,7 +367,6 @@ function getHighestAverageEndpoint(events, field, valueKey = 'value') {
             result = {
                 endpoint,
                 [valueKey]: avg,
-                value: avg
             };
         }
     });
@@ -530,6 +507,8 @@ function renderSparklines(events, allEvents = events) {
     );
 }
 
+// Raw canvas instead of Chart.js: sparklines need to be very lightweight
+// (many on screen at once) and don't need axes, tooltips, or animations.
 function renderSparkline(canvasId, values, color = '#8b5cf6') {
     const canvas = document.getElementById(canvasId);
 
@@ -808,31 +787,16 @@ function groupEventsByEndpoint(events) {
         if (!endpoint) return;
 
         if (!map.has(endpoint)) {
-            map.set(endpoint, {
-                endpoint,
-                latencies: [],
-                loadTimes: [],
-                ttfbs: []
-            });
+            map.set(endpoint, { endpoint, latencies: [] });
         }
 
-        const bucket = map.get(endpoint);
-
         const latency = Number(event.metadata?.apiLatencyMs);
-        const loadTime = Number(event.metadata?.loadTimeMs);
-        const ttfb = Number(event.metadata?.ttfbMs);
-
-        if (Number.isFinite(latency)) bucket.latencies.push(latency);
-        if (Number.isFinite(loadTime)) bucket.loadTimes.push(loadTime);
-        if (Number.isFinite(ttfb)) bucket.ttfbs.push(ttfb);
+        if (Number.isFinite(latency)) map.get(endpoint).latencies.push(latency);
     });
 
     return [...map.values()].map((bucket) => ({
         endpoint: bucket.endpoint,
         avgLatency: Math.round(average(bucket.latencies)),
-        p95Latency: Math.round(percentile(bucket.latencies, 95)),
-        avgLoadTime: Math.round(average(bucket.loadTimes)),
-        avgTtfb: Math.round(average(bucket.ttfbs))
     }));
 }
 
@@ -885,15 +849,6 @@ function formatMetric(value, unit) {
     if (!Number.isFinite(number)) return 'N/A';
 
     return `${Math.round(number)} ${unit}`;
-}
-
-function escapeHtml(value) {
-    return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
 }
 
 function updateKpiPeriods() {

@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Error Metrics</title>
+    <link rel="preload" href="../styling/dash_navbar.css" as="style">
+    <link rel="stylesheet" href="../styling/base.css">
     <link rel="stylesheet" href="../styling/dashboard.css">
     <link rel="stylesheet" href="../styling/advanced_error_metrics.css">
     <link rel="icon" type="image/x-icon" href="assets/favicon-here.ico">
@@ -28,41 +30,26 @@
       </div>
 
       <div class="metric-container">
-        <div class="metric metric-critical">
-          <h2 class="metric-name">Critical</h2>
-          <h2 class="metric-val sev-val-critical" id="sev-critical">0</h2>
-          <div class="compare-yesterday">
-            <p>TypeError &amp; ReferenceError</p>
-          </div>
-        </div>
-        <div class="metric metric-high">
-          <h2 class="metric-name">High</h2>
-          <h2 class="metric-val sev-val-high" id="sev-high">0</h2>
-          <div class="compare-yesterday">
-            <p>SyntaxError &amp; Network failures</p>
-          </div>
-        </div>
-        <div class="metric metric-medium">
-          <h2 class="metric-name">Medium</h2>
-          <h2 class="metric-val sev-val-medium" id="sev-medium">0</h2>
-          <div class="compare-yesterday">
-            <p>Timeouts &amp; RangeError</p>
-          </div>
-        </div>
-        <div class="metric metric-low">
-          <h2 class="metric-name">Low</h2>
-          <h2 class="metric-val sev-val-low" id="sev-low">0</h2>
-          <div class="compare-yesterday">
-            <p>Non-critical Errors</p>
-          </div>
-        </div>
-        <div class="metric metric-total">
-          <h2 class="metric-name">Total</h2>
-          <h2 class="metric-val sev-val-total" id="sev-total">0</h2>
-          <div class="compare-yesterday">
-            <p>Total errors in the selected range</p>
-          </div>
-        </div>
+        <wt-metric-card card-class="metric-critical" name="Critical"
+            value-id="sev-critical" value-class="sev-val-critical"
+            compare-text="TypeError &amp; ReferenceError">
+        </wt-metric-card>
+        <wt-metric-card card-class="metric-high" name="High"
+            value-id="sev-high" value-class="sev-val-high"
+            compare-text="SyntaxError &amp; Network failures">
+        </wt-metric-card>
+        <wt-metric-card card-class="metric-medium" name="Medium"
+            value-id="sev-medium" value-class="sev-val-medium"
+            compare-text="Timeouts &amp; RangeError">
+        </wt-metric-card>
+        <wt-metric-card card-class="metric-low" name="Low"
+            value-id="sev-low" value-class="sev-val-low"
+            compare-text="Non-critical Errors">
+        </wt-metric-card>
+        <wt-metric-card card-class="metric-total" name="Total"
+            value-id="sev-total" value-class="sev-val-total"
+            compare-text="Total errors in the selected range">
+        </wt-metric-card>
       </div>
     </section>
 
@@ -114,7 +101,7 @@
               </div>
               <p class="graph-summary" id="graph-summary">Loading event data for the selected app.</p>
             </div>
-            <div id="chart-canvas-shell">
+            <div id="errors-chart-canvas-shell">
               <canvas id="dashboard-chart" aria-label="Error chart"></canvas>
             </div>
           </div>
@@ -161,11 +148,14 @@
     </details>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="../js/graphs.js"></script>
-    <script src="../js/advanced_error_metrics.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/dash_navbar.js" defer></script>
+    <script src="../js/components/wt-base-element.js"></script>
+    <script src="../js/components/wt-metric-card.js"></script>
+    <script src="../js/components/dash_navbar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="../js/utils.js" defer></script>
+    <script src="../js/dashboard.js" defer></script>
+    <script src="../js/advanced_error_metrics.js" defer></script>
+    <script src="../js/auth.js" defer></script>
 </body>
 
 </html>

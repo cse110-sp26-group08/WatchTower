@@ -1,31 +1,30 @@
-/* global watchtowerLogout */
 const dashNavScriptUrl = document.currentScript ? document.currentScript.src : '';
 const defaultDashNavAssetBase = dashNavScriptUrl
-    ? new URL('../assets', dashNavScriptUrl).href
+    ? new URL('../../assets', dashNavScriptUrl).href
     : '/assets';
 const defaultDashNavStyleBase = dashNavScriptUrl
-    ? new URL('../styling', dashNavScriptUrl).href
+    ? new URL('../../styling', dashNavScriptUrl).href
     : '/styling';
 const isDashNavProjectRootStaticServer = dashNavScriptUrl
-    && new URL(dashNavScriptUrl).pathname.endsWith('/frontend/js/dash_navbar.js');
+    && new URL(dashNavScriptUrl).pathname.endsWith('/frontend/js/components/dash_navbar.js');
 
 const defaultDashNavHomeHref = isDashNavProjectRootStaticServer
-    ? new URL('../webpages/index.html', dashNavScriptUrl).href
+    ? new URL('../../webpages/index.html', dashNavScriptUrl).href
     : '/';
 const defaultDashNavDashboardHref = isDashNavProjectRootStaticServer
-    ? new URL('../webpages/dashboard.html', dashNavScriptUrl).href
+    ? new URL('../../webpages/dashboard.html', dashNavScriptUrl).href
     : '/dashboard';
 const defaultDashNavAppsHref = isDashNavProjectRootStaticServer
-    ? new URL('../webpages/app_selection.html', dashNavScriptUrl).href
+    ? new URL('../../webpages/app_selection.html', dashNavScriptUrl).href
     : '/apps';
 const defaultDashNavErrorsHref = isDashNavProjectRootStaticServer
-    ? new URL('../webpages/advanced_error_metrics.html', dashNavScriptUrl).href
+    ? new URL('../../webpages/advanced_error_metrics.html', dashNavScriptUrl).href
     : '/advanced-error-metrics';
 const defaultDashNavPerformanceHref = isDashNavProjectRootStaticServer
-    ? new URL('../webpages/advanced_performance_metrics.html', dashNavScriptUrl).href
+    ? new URL('../../webpages/advanced_performance_metrics.html', dashNavScriptUrl).href
     : '/advanced-performance-metrics';
 
-class WatchTowerDashNavbar extends HTMLElement {
+class WatchTowerDashNavbar extends WatchTowerBaseElement {
     constructor() {
         super();
         this.updateScrolledState = this.updateScrolledState.bind(this);
@@ -44,18 +43,6 @@ class WatchTowerDashNavbar extends HTMLElement {
         window.removeEventListener('scroll', this.updateScrolledState);
     }
 
-    getOption(name, fallback) {
-        return this.getAttribute(name) || fallback;
-    }
-
-    getAssetPath(fileName) {
-        return `${this.getOption('asset-base', defaultDashNavAssetBase).replace(/\/$/, '')}/${fileName}`;
-    }
-
-    getStylePath(fileName) {
-        return `${this.getOption('style-base', defaultDashNavStyleBase).replace(/\/$/, '')}/${fileName}`;
-    }
-
     render() {
         const active = this.getOption('active', 'home');
         const homeHref = this.getOption('home-href', defaultDashNavHomeHref);
@@ -63,7 +50,7 @@ class WatchTowerDashNavbar extends HTMLElement {
         const appsHref = this.getOption('apps-href', defaultDashNavAppsHref);
         const errorsHref = this.getOption('errors-href', defaultDashNavErrorsHref);
         const performanceHref = this.getOption('performance-href', defaultDashNavPerformanceHref);
-        const stylesheetHref = this.getStylePath('dash_navbar.css');
+        const stylesheetHref = this.getStylePath('dash_navbar.css', defaultDashNavStyleBase);
 
         const navItems = [
             { key: 'home', label: 'Home', href: dashboardHref },
@@ -82,7 +69,7 @@ class WatchTowerDashNavbar extends HTMLElement {
                 <nav class="site-nav" aria-label="Dashboard navigation">
                     <div class="brand-mark">
                         <a href="${homeHref}" class="brand-link" aria-label="WatchTower home">
-                            <img class="brand-logo" src="${this.getAssetPath('watchtower-logo.png')}" alt="WatchTower">
+                            <img class="brand-logo" src="${this.getAssetPath('watchtower-logo.png', defaultDashNavAssetBase)}" alt="WatchTower">
                         </a>
                     </div>
 

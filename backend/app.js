@@ -79,7 +79,6 @@ function createApp() {
   // Serve static assets for the frontend
   app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
   app.use('/js', express.static(path.join(__dirname, '../frontend/js')));
-  app.use('/sw.js', express.static(path.join(__dirname, '../frontend/sw.js')));
   app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
 
   function requireSession(req, res, next) {

@@ -10,7 +10,6 @@
   --text: #211f24;
   --muted: #4d4a52;
   --blue: #0ac2a3;
-  --purple: #0ac2a3;
   --amber: #f5ce60;
   --danger: #c86468;
   --success: #0ac2a3;
@@ -20,10 +19,6 @@
   --font-family-primary: "Inter", "Open Sans", sans-serif;
   --shadow-card: 0 14px 30px rgb(33 31 36 / 7%);
   --font-family-display: "Bitter Pro", sans-serif;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 body {
@@ -196,7 +191,7 @@ input[type="text"] {
 button {
   min-height: 40px;
   padding: 0 18px;
-  border: 0;
+  border: none;
   border-radius: 8px;
   color: #fff;
   background: var(--blue);
@@ -390,7 +385,8 @@ th {
   font-weight: 800;
 }
 
-/* ===== Insight Severity States ===== */
+/* Insight cards use color-coded backgrounds: critical (red), warning (amber),
+   healthy (teal), neutral (no tint). JS adds these classes via updateInsightCardColors(). */
 
 .insight-item.critical {
   background: linear-gradient(

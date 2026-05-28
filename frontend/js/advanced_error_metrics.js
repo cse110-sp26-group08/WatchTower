@@ -1,3 +1,17 @@
+/*
+ * This file is loaded alongside dashboard.js on the Advanced Error Metrics page.
+ * It reads dashboardState and utility functions from dashboard.js's global scope
+ * (both scripts run without ES modules, so they share the same window scope).
+ *
+ * The window.* assignments below are page-level overrides intended to intercept
+ * dashboard.js's render cycle. Currently dashboard.js calls its own local render
+ * functions, so these overrides act as explicit declarations of which functions
+ * this page customises. If dashboard.js is ever updated to dispatch via window.*,
+ * these overrides will take effect automatically.
+ *
+ * window.startAutoRefresh is intentionally a no-op — this page does not use
+ * the auto-refresh interval that the main dashboard page runs.
+ */
 /* global dashboardState, createOrUpdateChart, escapeHtml, filterErrors, formatTimestamp */
 
 const typeFilter = document.getElementById('type-filter');
@@ -45,7 +59,7 @@ if (typeFilter) {
 
 window.renderGraph = function renderGraph(filteredErrors) {
   const range = document.getElementById('time-range')?.value || '24h';
-  const chartCanvas = document.getElementById('chart-canvas-shell');
+  const chartCanvas = document.getElementById('errors-chart-canvas-shell');
   const graphTitle = document.getElementById('graph-title');
   const graphSummary = document.getElementById('graph-summary');
 
