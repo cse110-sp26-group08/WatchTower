@@ -99,9 +99,25 @@
   color: var(--text);
 }
 
+/* ── p rules (all before :last-child to satisfy no-descending-specificity) ── */
+
 .docs-step-body p {
   margin: 0 0 0.75rem;
   font-size: 0.97rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.docs-advanced-body p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.docs-faq details p {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
   line-height: 1.6;
   color: var(--muted);
 }
@@ -110,16 +126,19 @@
   margin-bottom: 0;
 }
 
-.docs-step-body strong {
-  color: var(--text);
-}
+/* ── Shared inline code (before more-specific pre code / table code rules) ── */
 
-.docs-step-body code {
+.docs-step-body code,
+.docs-advanced-body code {
   font-family: SFMono-Regular, Consolas, "Liberation Mono", monospace;
   font-size: 0.88em;
   background: rgb(33 31 36 / 6%);
   padding: 1px 5px;
   border-radius: 4px;
+}
+
+.docs-step-body strong {
+  color: var(--text);
 }
 
 .docs-step-body pre {
@@ -253,7 +272,7 @@
   transform: translateY(0);
 }
 
-/* ── Backend PDF viewer ─────────────────────────────────── */
+/* ── Foldout (shared by viewer & advanced) ──────────────── */
 
 .docs-viewer {
   width: 100%;
@@ -319,11 +338,7 @@
   background: #fff;
 }
 
-.docs-foldout:not([open]) iframe,
-.docs-foldout:not([open]) .docs-fallback {
-  display: none;
-}
-
+/* .docs-fallback must appear before .docs-foldout:not([open]) .docs-fallback */
 .docs-fallback {
   margin: 0;
   padding: 10px 20px 16px;
@@ -332,13 +347,18 @@
   color: var(--blue);
 }
 
+.docs-foldout:not([open]) iframe,
+.docs-foldout:not([open]) .docs-fallback {
+  display: none;
+}
+
 /* ── Advanced API section ───────────────────────────────── */
 
 .docs-advanced {
   width: 100%;
 }
 
-.docs-foldout--advanced {
+.docs-foldout-advanced {
   border-radius: 12px;
   background: rgb(255 255 255 / 72%);
   border: 1px solid rgb(33 31 36 / 8%);
@@ -346,7 +366,7 @@
   overflow: hidden;
 }
 
-.docs-summary--advanced {
+.docs-summary-advanced {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -373,13 +393,6 @@
   gap: 0.5rem;
 }
 
-.docs-advanced-body p {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--muted);
-}
-
 .docs-advanced-body h4 {
   margin: 1rem 0 0.35rem;
   font-size: 1rem;
@@ -404,14 +417,6 @@
   font-family: SFMono-Regular, Consolas, "Liberation Mono", monospace;
 }
 
-.docs-advanced-body code {
-  font-family: SFMono-Regular, Consolas, "Liberation Mono", monospace;
-  font-size: 0.88em;
-  background: rgb(33 31 36 / 6%);
-  padding: 1px 5px;
-  border-radius: 4px;
-}
-
 .docs-endpoint {
   display: flex;
   align-items: center;
@@ -430,7 +435,7 @@
   font-family: SFMono-Regular, Consolas, "Liberation Mono", monospace;
 }
 
-.docs-method--post {
+.docs-method-post {
   background: rgb(10 194 163 / 14%);
   color: #007a64;
 }
@@ -465,11 +470,8 @@
   color: var(--blue);
 }
 
-.docs-faq details p,
 .docs-faq details pre {
   margin: 10px 0 0;
-  font-size: 0.95rem;
-  line-height: 1.6;
   color: var(--muted);
 }
 
