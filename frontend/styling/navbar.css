@@ -9,7 +9,7 @@
 :host {
   --navbar-bg: #f7f5ef;
   --navbar-scrolled-bg: #fff;
-  --nav-accent: #13c8a8;
+  --nav-accent: #0ac2a3;
   --nav-accent-hover: #0ea98f;
   --font-family-primary: "Open Sans", opensans, sans-serif;
   --font-family-nav: opensans, sans-serif;
@@ -250,7 +250,7 @@ a {
 .button-primary {
   color: #fff;
   background: var(--nav-accent);
-  box-shadow: 0 14px 26px rgb(19 200 168 / 24%);
+  box-shadow: 0 14px 26px rgb(10 194 163 / 24%);
 }
 
 .button-primary:hover,

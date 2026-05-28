@@ -10,15 +10,9 @@
     href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap"
     rel="stylesheet"
   >
+  <link rel="stylesheet" href="../styling/base.css">
   <link rel="stylesheet" href="../styling/login.css">
 </head>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js');
-    });
-  }
-</script>
 <body class="login-page">
   <header class="auth-header">
     <a href="../index.html" class="brand-link" data-home-link aria-label="WatchTower home">
@@ -80,6 +74,7 @@
     </section>
   </main>
 
+  <script src="../js/utils.js" defer></script>
   <script src="../js/login.js" defer></script>
 </body>
 </html>

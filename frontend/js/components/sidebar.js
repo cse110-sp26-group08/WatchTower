@@ -1,37 +1,29 @@
 const sidebarScriptUrl = document.currentScript ? document.currentScript.src : '';
 const defaultSidebarStyleBase = sidebarScriptUrl
-    ? new URL('../styling', sidebarScriptUrl).href
+    ? new URL('../../styling', sidebarScriptUrl).href
     : '/styling';
 const isSidebarProjectRootStaticServer = sidebarScriptUrl
-    && new URL(sidebarScriptUrl).pathname.endsWith('/frontend/js/sidebar.js');
+    && new URL(sidebarScriptUrl).pathname.endsWith('/frontend/js/components/sidebar.js');
 
 const defaultSidebarDashboardHref = isSidebarProjectRootStaticServer
-    ? new URL('../webpages/dashboard.html', sidebarScriptUrl).href
+    ? new URL('../../webpages/dashboard.html', sidebarScriptUrl).href
     : '/dashboard';
 const defaultSidebarAppsHref = isSidebarProjectRootStaticServer
-    ? new URL('../webpages/app_selection.html', sidebarScriptUrl).href
+    ? new URL('../../webpages/app_selection.html', sidebarScriptUrl).href
     : '/apps';
 const defaultSidebarErrorsHref = isSidebarProjectRootStaticServer
-    ? new URL('../webpages/advanced_error_metrics.html', sidebarScriptUrl).href
+    ? new URL('../../webpages/advanced_error_metrics.html', sidebarScriptUrl).href
     : '/advanced-error-metrics';
 const defaultSidebarPerformanceHref = isSidebarProjectRootStaticServer
-    ? new URL('../webpages/advanced_performance_metrics.html', sidebarScriptUrl).href
+    ? new URL('../../webpages/advanced_performance_metrics.html', sidebarScriptUrl).href
     : '/advanced-performance-metrics';
 
-class WatchTowerSidebar extends HTMLElement {
+class WatchTowerSidebar extends WatchTowerBaseElement {
     connectedCallback() {
         if (!this.shadowRoot) {
             this.attachShadow({ mode: 'open' });
         }
         this.render();
-    }
-
-    getOption(name, fallback) {
-        return this.getAttribute(name) || fallback;
-    }
-
-    getStylePath(fileName) {
-        return `${this.getOption('style-base', defaultSidebarStyleBase).replace(/\/$/, '')}/${fileName}`;
     }
 
     render() {
@@ -40,7 +32,7 @@ class WatchTowerSidebar extends HTMLElement {
         const appsHref = this.getOption('apps-href', defaultSidebarAppsHref);
         const errorsHref = this.getOption('errors-href', defaultSidebarErrorsHref);
         const performanceHref = this.getOption('performance-href', defaultSidebarPerformanceHref);
-        const stylesheetHref = this.getStylePath('sidebar.css');
+        const stylesheetHref = this.getStylePath('sidebar.css', defaultSidebarStyleBase);
 
         const items = [
             { key: 'home', label: 'Home', href: dashboardHref },

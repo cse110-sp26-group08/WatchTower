@@ -27,10 +27,6 @@
   font-display: swap;
 }
 
-* {
-  box-sizing: border-box;
-}
-
 body {
   margin: 0;
   font-family: var(--font-family-primary);
@@ -39,11 +35,6 @@ body {
   line-height: var(--font-line-height-base);
   color: var(--text);
   background: var(--page-bg);
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
 }
 
 .app-selection-page {

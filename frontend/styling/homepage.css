@@ -31,14 +31,6 @@
   --dashboard-card-height: 13.56rem;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   margin: 0;
   font-family: var(--font-family-primary);
@@ -47,11 +39,6 @@ body {
   line-height: var(--font-line-height-base);
   color: var(--text);
   background: var(--page-bg);
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
 }
 
 .homepage {
@@ -253,6 +240,8 @@ a {
   gap: 30px;
 }
 
+/* Decorative uptime gauge on the homepage hero.
+   The conic-gradient fill is static (hardcoded at 96 %) for visual demo purposes. */
 .gauge {
   width: 8.5rem;
   height: 8.5rem;
@@ -426,7 +415,7 @@ a {
   justify-content: center;
   min-height: 36px;
   padding: 0 18px;
-  border: 0;
+  border: none;
   border-radius: 6px;
   color: #fff;
   background: var(--danger);

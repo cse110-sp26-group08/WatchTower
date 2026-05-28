@@ -1,3 +1,5 @@
+/* global getStoredUser, escapeHtml */
+
 let currentUser = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,21 +20,6 @@ function init() {
     loadApps(user.id);
 }
 
-function getStoredUser() {
-    const rawUser = localStorage.getItem('watchtowerUser');
-
-    if (!rawUser) {
-        return null;
-    }
-
-    try {
-        return JSON.parse(rawUser);
-    } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('watchtowerUser');
-        return null;
-    }
-}
 
 async function loadApps(ownerId) {
     const appsList = document.getElementById('apps-list');
@@ -52,7 +39,6 @@ async function loadApps(ownerId) {
 
 function renderApps(apps, ownerId) {
     const appsList = document.getElementById('apps-list');
-    const storedUrls = getStoredAppUrls();
     appsList.innerHTML = '';
     const fragment = document.createDocumentFragment();
     fragment.appendChild(createAddProjectCard(ownerId));
@@ -70,7 +56,7 @@ function renderApps(apps, ownerId) {
         const card = document.createElement('button');
         card.type = 'button';
         card.className = 'app-card';
-        const appUrl = app.url || storedUrls[app.id] || '';
+        const appUrl = app.url || '';
 
         card.innerHTML = `
             <div class="app-card-top">
@@ -87,6 +73,9 @@ function renderApps(apps, ownerId) {
         `;
 
         card.addEventListener('click', () => {
+            // Spread app so the stored object always has the resolved URL even if the
+            // server-side record has no url field (url stays undefined rather than null
+            // so JSON.stringify omits it, keeping the stored object clean).
             localStorage.setItem('watchtowerSelectedApp', JSON.stringify({
                 ...app,
                 url: appUrl || undefined,
@@ -108,7 +97,6 @@ function createAddProjectCard(ownerId) {
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'app-card add-project-card';
-    card.setAttribute('onclick', 'window.watchtowerOpenCreateProject && window.watchtowerOpenCreateProject()');
     card.innerHTML = `
         <div class="add-project-card-content">
           <span class="add-project-plus" aria-hidden="true">+</span>
@@ -218,28 +206,6 @@ function updateMessage(element, text, type) {
     element.className = `form-message${type ? ` ${type}` : ''}`;
 }
 
-function getStoredAppUrls() {
-    const rawUrls = localStorage.getItem('watchtowerAppUrls');
-
-    if (!rawUrls) {
-        return {};
-    }
-
-    try {
-        return JSON.parse(rawUrls);
-    } catch (error) {
-        console.error('Failed to parse stored app URLs:', error);
-        localStorage.removeItem('watchtowerAppUrls');
-        return {};
-    }
-}
-
-function saveAppUrl(appId, url) {
-    const appUrls = getStoredAppUrls();
-    appUrls[appId] = url;
-    localStorage.setItem('watchtowerAppUrls', JSON.stringify(appUrls));
-}
-
 function isValidUrl(value) {
     try {
         new URL(value);
@@ -249,11 +215,3 @@ function isValidUrl(value) {
     }
 }
 
-function escapeHtml(value) {
-    return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-}

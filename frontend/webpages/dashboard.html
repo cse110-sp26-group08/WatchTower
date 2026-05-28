@@ -9,18 +9,16 @@
     <!-- Preconnect to external chart CDN before loading Chart.js -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
-    <!--Link css stylesheet-->
+    <link rel="preload" href="../styling/dash_navbar.css" as="style">
+    <link rel="stylesheet" href="../styling/base.css">
     <link rel="stylesheet" href="../styling/dashboard.css">
+    <script src="../js/components/wt-base-element.js"></script>
+    <script src="../js/components/wt-health-score.js"></script>
+    <script src="../js/components/wt-metric-card.js"></script>
+    <script src="../js/components/dash_navbar.js"></script>
     <link rel="icon" type="image/x-icon" href="assets/favicon-here.ico">
 </head>
 
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js');
-    });
-  }
-</script>
 <body class="container">
     <watchtower-dash-navbar active="home"></watchtower-dash-navbar>
 
@@ -39,41 +37,19 @@
                 <p id="status-description">Loading recent service health...</p>
             </div>
 
-            <div class="health-score">
-                <span class="health-score-title">Performance</span>
-                <div class="health-ring score-red" id="performance-bar-fill" aria-label="Performance score">
-                    <div class="health-score-center">
-                        <strong class="health-score-value" id="performance-bar-value">0</strong>
-                        <span class="health-score-label" id="performance-score-label">Poor</span>
-                    </div>
-                </div>
-                <div class="score-support-row">
-                    <span class="support-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" focusable="false">
-                            <path d="M3 12h4l2-7 4 14 2-7h6"></path>
-                        </svg>
-                    </span>
-                    <span>Performance is within normal range.</span>
-                </div>
-            </div>
+            <wt-health-score
+                title="Performance"
+                prefix="performance"
+                icon-path="M3 12h4l2-7 4 14 2-7h6"
+                support-text="Performance is within normal range.">
+            </wt-health-score>
 
-            <div class="health-score">
-                <span class="health-score-title">Reliability</span>
-                <div class="health-ring score-red" id="reliability-bar-fill" aria-label="Reliability score">
-                    <div class="health-score-center">
-                        <strong class="health-score-value" id="reliability-bar-value">0</strong>
-                        <span class="health-score-label" id="reliability-score-label">Poor</span>
-                    </div>
-                </div>
-                <div class="score-support-row">
-                    <span class="support-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" focusable="false">
-                            <path d="M12 3l7 3v5c0 4.4-2.8 8.4-7 10-4.2-1.6-7-5.6-7-10V6l7-3z"></path>
-                        </svg>
-                    </span>
-                    <span>Low error rate and stable system health.</span>
-                </div>
-            </div>
+            <wt-health-score
+                title="Reliability"
+                prefix="reliability"
+                icon-path="M12 3l7 3v5c0 4.4-2.8 8.4-7 10-4.2-1.6-7-5.6-7-10V6l7-3z"
+                support-text="Low error rate and stable system health.">
+            </wt-health-score>
         </div>
 
         <details class="more-info-widget">
@@ -107,41 +83,25 @@
                 </div>
 
                 <div class="metric-container">
-                    <div class="metric metric1">
-                        <h2 class="metric-name">Errors Today</h2>
-                        <h2 class="metric-val" id="errors-today-value">0</h2>
-                        <div class="compare-yesterday">
-                            <img src="assets/up-or-down.png" alt="up/down">
-                            <p id="errors-today-compare">vs yesterday</p>
-                        </div>
-                    </div>
+                    <wt-metric-card card-class="metric1" name="Errors Today"
+                        value-id="errors-today-value" compare-id="errors-today-compare"
+                        compare-text="vs yesterday" img-src="assets/up-or-down.png">
+                    </wt-metric-card>
 
-                    <div class="metric metric2">
-                        <h2 class="metric-name">Avg Response Time</h2>
-                        <h2 class="metric-val" id="avg-response-value">0 ms</h2>
-                        <div class="compare-yesterday">
-                            <img src="assets/up-or-down.png" alt="up/down">
-                            <p id="avg-response-compare">vs previous period</p>
-                        </div>
-                    </div>
+                    <wt-metric-card card-class="metric2" name="Avg Response Time"
+                        value-id="avg-response-value" compare-id="avg-response-compare"
+                        compare-text="vs previous period" img-src="assets/up-or-down.png">
+                    </wt-metric-card>
 
-                    <div class="metric metric3">
-                        <h2 class="metric-name">Critical Errors</h2>
-                        <h2 class="metric-val" id="critical-errors-value">0</h2>
-                        <div class="compare-yesterday">
-                            <img src="assets/up-or-down.png" alt="up/down">
-                            <p id="critical-errors-compare">in selected range</p>
-                        </div>
-                    </div>
+                    <wt-metric-card card-class="metric3" name="Critical Errors"
+                        value-id="critical-errors-value" compare-id="critical-errors-compare"
+                        compare-text="in selected range" img-src="assets/up-or-down.png">
+                    </wt-metric-card>
 
-                    <div class="metric metric5">
-                        <h2 class="metric-name">Active URLs</h2>
-                        <h2 class="metric-val" id="active-urls-value">0</h2>
-                        <div class="compare-yesterday">
-                            <img src="assets/up-or-down.png" alt="up/down">
-                            <p id="active-urls-compare">unique endpoints in range</p>
-                        </div>
-                    </div>
+                    <wt-metric-card card-class="metric4" name="Active URLs"
+                        value-id="active-urls-value" compare-id="active-urls-compare"
+                        compare-text="unique endpoints in range" img-src="assets/up-or-down.png">
+                    </wt-metric-card>
                 </div>
 
                 <div class="dashboard-filters">
@@ -227,9 +187,9 @@
         </details>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-    <script src="../js/graphs.js" defer></script>
+    <script src="../js/utils.js" defer></script>
+    <script src="../js/dashboard.js" defer></script>
     <script src="../js/auth.js" defer></script>
-    <script src="../js/dash_navbar.js" defer></script>
 </body>
 
 </html>

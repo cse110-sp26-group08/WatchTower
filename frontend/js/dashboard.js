@@ -1,3 +1,5 @@
+/* global average */
+
 document.addEventListener('DOMContentLoaded', () => {
     initDashboard().catch((error) => {
         console.error('Dashboard failed to initialize:', error);
@@ -14,7 +16,6 @@ const RANGE_MS = {
 let dashboardChart = null;
 let selectedChartView = 'line';
 let dashboardState = null;
-let refreshIntervalId = null;
 let refreshAbortController = null;
 const EMPTY_VALUE = 'No data';
 const WARNING_CRITICAL_THRESHOLD = 5;
@@ -41,6 +42,12 @@ async function initDashboard() {
     await refreshDashboard(selectedApp, { force: true });
 }
 
+// URL ?appId takes priority over localStorage so that direct links (e.g. from
+// email alerts) always open the intended app, even if the user had a different
+// app selected. The URL is stored back to localStorage so subsequent page loads
+// without the query param still open the same app.
+// The URL field is resolved from the stored app when the API record has no url,
+// because app_selection.js stores a user-supplied URL that the server doesn't save.
 async function resolveSelectedApp() {
     const queryAppId = new URLSearchParams(window.location.search).get('appId');
     const storedApp = readJsonStorage('watchtowerSelectedApp');
@@ -159,11 +166,6 @@ async function refreshDashboard(selectedApp, options = {}) {
 }
 
 function stopAutoRefresh() {
-    if (refreshIntervalId) {
-        window.clearInterval(refreshIntervalId);
-        refreshIntervalId = null;
-    }
-
     abortActiveRefresh();
 }
 
@@ -175,6 +177,9 @@ function abortActiveRefresh() {
 }
 
 
+// Both current-period and previous-period sets are derived here so that
+// each render function (metrics, chart, logs) can compute deltas without
+// re-filtering independently.
 function redrawFromState() {
     if (!dashboardState) {
         return;
@@ -669,14 +674,6 @@ function formatTimestamp(value) {
     }
 
     return date.toLocaleString();
-}
-
-function average(values) {
-    if (!values.length) {
-        return 0;
-    }
-
-    return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
 function buildDeltaText(current, previous, suffix) {

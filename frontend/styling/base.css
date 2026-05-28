@@ -1,0 +1,29 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Hide custom elements until their JS is loaded and they are upgraded,
+   preventing the flash of unstyled/bare content on page load. */
+watchtower-navbar:not(:defined),
+watchtower-dash-navbar:not(:defined),
+watchtower-footer:not(:defined),
+wt-health-score:not(:defined),
+wt-metric-card:not(:defined),
+wt-kpi-card:not(:defined),
+wt-insight-item:not(:defined) {
+    visibility: hidden;
+}

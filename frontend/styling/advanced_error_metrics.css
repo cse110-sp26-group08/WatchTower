@@ -179,7 +179,8 @@
   word-break: break-word;
 }
 
-.url-column {
+.url-column,
+.url-cell {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -191,9 +192,6 @@
 }
 
 .url-cell {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   color: var(--muted);
   font-size: 0.85rem;
   cursor: help;

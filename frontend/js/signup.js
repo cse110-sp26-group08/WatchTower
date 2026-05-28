@@ -1,3 +1,5 @@
+/* global isStaticFrontendPreview, getFieldError, setFieldError, getEmailError, attachFieldValidation */
+
 document.addEventListener('DOMContentLoaded', () => {
     init();
 });
@@ -7,10 +9,8 @@ function init() {
     addSignupFormListener();
 }
 
-function isStaticFrontendPreview() {
-    return window.location.pathname.includes('/frontend/');
-}
-
+// When served as a static file (e.g. VS Code Live Server), Express routes like
+// /signup don't exist, so links must point to relative .html file paths instead.
 function configurePageLinks() {
     const homeLink = document.querySelector('[data-home-link]');
     if (homeLink) {
@@ -21,27 +21,6 @@ function configurePageLinks() {
     if (loginLink) {
         loginLink.href = isStaticFrontendPreview() ? 'login.html' : '/login';
     }
-}
-
-function getFieldError(input) {
-    return input.closest('.form-field').querySelector('.field-error');
-}
-
-function setFieldError(input, message) {
-    const errorElement = getFieldError(input);
-    input.setAttribute('aria-invalid', message ? 'true' : 'false');
-    if (errorElement) {
-        errorElement.textContent = message;
-    }
-}
-
-function getEmailError(email) {
-    if (!email) {
-        return 'Please enter your email.';
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(email) ? '' : 'Please enter a valid email.';
 }
 
 function getFieldValidationMessage(input) {
@@ -91,14 +70,7 @@ function validateSignupForm(signupForm) {
 
 function addValidationListeners(signupForm) {
     const fields = signupForm.querySelectorAll('input[name="username"], input[name="email"], input[name="password"]');
-    fields.forEach((field) => {
-        field.addEventListener('blur', () => validateField(field));
-        field.addEventListener('input', () => {
-            if (field.getAttribute('aria-invalid') === 'true') {
-                validateField(field);
-            }
-        });
-    });
+    fields.forEach((field) => attachFieldValidation(field, validateField));
 }
 
 function showSignupFailure(signupForm, message) {

@@ -1,3 +1,5 @@
+/* global isStaticFrontendPreview, getFieldError, setFieldError, getEmailError, attachFieldValidation */
+
 document.addEventListener('DOMContentLoaded', () => {
     init();
 });
@@ -7,10 +9,8 @@ function init() {
     addLoginFormListener();
 }
 
-function isStaticFrontendPreview() {
-    return window.location.pathname.includes('/frontend/');
-}
-
+// When served as a static file (e.g. VS Code Live Server), Express routes like
+// /login don't exist, so links must point to relative .html file paths instead.
 function configurePageLinks() {
     const homeLink = document.querySelector('[data-home-link]');
     if (homeLink) {
@@ -21,27 +21,6 @@ function configurePageLinks() {
     if (signupLink) {
         signupLink.href = isStaticFrontendPreview() ? 'signup.html' : '/signup';
     }
-}
-
-function getFieldError(input) {
-    return input.closest('.form-field').querySelector('.field-error');
-}
-
-function setFieldError(input, message) {
-    const errorElement = getFieldError(input);
-    input.setAttribute('aria-invalid', message ? 'true' : 'false');
-    if (errorElement) {
-        errorElement.textContent = message;
-    }
-}
-
-function getEmailError(email) {
-    if (!email) {
-        return 'Please enter your email.';
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(email) ? '' : 'Please enter a valid email.';
 }
 
 function validateField(input) {
@@ -79,14 +58,7 @@ function validateLoginForm(loginForm) {
 
 function addValidationListeners(loginForm) {
     const fields = loginForm.querySelectorAll('input[name="email"], input[name="password"]');
-    fields.forEach((field) => {
-        field.addEventListener('blur', () => validateField(field));
-        field.addEventListener('input', () => {
-            if (field.getAttribute('aria-invalid') === 'true') {
-                validateField(field);
-            }
-        });
-    });
+    fields.forEach((field) => attachFieldValidation(field, validateField));
 }
 
 function showLoginFailure(loginForm, message) {

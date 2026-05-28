@@ -10,9 +10,17 @@
     href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap"
     rel="stylesheet"
   >
+  <link rel="preload" href="styling/navbar.css" as="style">
+  <link rel="preload" href="styling/footer.css" as="style">
+  <link rel="stylesheet" href="styling/base.css">
   <link rel="stylesheet" href="styling/homepage.css">
+  <script src="js/components/wt-base-element.js"></script>
+  <script src="js/components/navbar.js"></script>
+  <script src="js/components/footer.js"></script>
 </head>
 <body class="homepage">
+  <!-- Explicit hrefs needed here because this file is one directory above webpages/,
+       so the component's default relative paths would be wrong. -->
   <watchtower-navbar
     home-href="index.html"
     login-href="webpages/login.html"
@@ -143,7 +151,5 @@
     </section>
   </main>
   <watchtower-footer home-href="index.html"></watchtower-footer>
-  <script src="js/navbar.js"></script>
-  <script src="js/footer.js"></script>
 </body>
 </html>
