@@ -1,94 +1,267 @@
 @import url("./homepage.css");
 
-:root {
-  --text: #211f24;
-  --panel: rgb(255 255 255 / 72%);
-  --shadow-card: 0 24px 56px rgb(45 39 62 / 16%);
-}
-
-body {
-  margin: 0;
-  font-family: Manrope, Arial, sans-serif;
-  color: var(--text);
-}
+/* ── Page shell ─────────────────────────────────────────── */
 
 .docs-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  position: relative;
-}
-
-.docs-page::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
 }
 
 .docs-shell {
   position: relative;
   z-index: 1;
-  width: min(1180px, calc(100% - 48px));
+  width: min(820px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 1rem 0 1.2rem;
+  padding: 0 0 3rem;
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 2.5rem;
+  gap: 3rem;
 }
+
+/* ── Hero ───────────────────────────────────────────────── */
+
+.docs-hero {
+  padding: clamp(2.4rem, 5.5vh, 4rem) 0 0;
+  text-align: center;
+  animation: page-fade 700ms ease-out both;
+}
+
+.docs-hero-copy h1 {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: clamp(2.6rem, 6vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.docs-hero-description {
+  margin: 14px auto 0;
+  max-width: 560px;
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* ── Steps section ──────────────────────────────────────── */
+
+.docs-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.docs-steps-heading {
+  margin: 0 0 0.25rem;
+  font-size: clamp(1.4rem, 2.5vw, 1.75rem);
+  font-weight: 800;
+  color: var(--text);
+}
+
+.docs-step {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: 1.75rem;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 72%);
+  border: 1px solid rgb(33 31 36 / 8%);
+  box-shadow: 0 4px 18px rgb(45 39 62 / 7%);
+  align-items: start;
+}
+
+.docs-step-badge {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin-top: 0.15rem;
+}
+
+.docs-step-body {
+  min-width: 0;
+}
+
+.docs-step-body h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.docs-step-body p {
+  margin: 0 0 0.75rem;
+  font-size: 0.97rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.docs-step-body p:last-child {
+  margin-bottom: 0;
+}
+
+.docs-step-body strong {
+  color: var(--text);
+}
+
+.docs-step-body code {
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.88em;
+  background: rgb(33 31 36 / 6%);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.docs-step-body pre {
+  margin: 0.75rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background: #1e1b22;
+  overflow-x: auto;
+}
+
+.docs-step-body pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.88rem;
+  color: #e7eefb;
+  line-height: 1.6;
+}
+
+/* ── Bullet list ────────────────────────────────────────── */
+
+.docs-list {
+  margin: 0.25rem 0 0.75rem;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.docs-list li {
+  font-size: 0.97rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.docs-list li strong {
+  color: var(--text);
+}
+
+/* ── Download button ────────────────────────────────────── */
+
+.docs-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: var(--text);
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-decoration: none;
+  margin-top: 0.25rem;
+  transition: background 150ms ease;
+}
+
+.docs-download:hover {
+  background: color-mix(in srgb, var(--text) 80%, white);
+}
+
+/* ── Attributes table ───────────────────────────────────── */
+
+.docs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.92rem;
+}
+
+.docs-table th,
+.docs-table td {
+  padding: 9px 14px;
+  text-align: left;
+  border-bottom: 1px solid rgb(33 31 36 / 10%);
+}
+
+.docs-table th {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: rgb(10 194 163 / 8%);
+}
+
+.docs-table td {
+  color: var(--muted);
+}
+
+.docs-table td code,
+.docs-table th code {
+  font-size: 0.88rem;
+}
+
+.docs-note {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0.5rem 0 0;
+  font-style: italic;
+}
+
+/* ── Tooltip ────────────────────────────────────────────── */
+
+.docs-tooltip {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dashed rgb(33 31 36 / 35%);
+}
+
+.docs-tooltip-text {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  width: min(320px, 80vw);
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--text);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.4;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.docs-tooltip:hover .docs-tooltip-text,
+.docs-tooltip:focus-within .docs-tooltip-text {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ── Backend PDF viewer ─────────────────────────────────── */
 
 .docs-viewer {
   width: 100%;
-  min-height: 0;
-  margin-top: auto;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 76%);
-  border-radius: 10px;
-  background: var(--panel);
-  box-shadow: var(--shadow-card);
-  backdrop-filter: blur(18px);
-}
-
-.docs-viewer iframe {
-  width: 100%;
-  height: calc(100vh - 250px);
-  min-height: 420px;
-  display: block;
-  border: 0;
-  background: #fff;
-}
-
-.docs-fallback {
-  margin: 0;
-  padding: 14px 18px 18px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #486bea;
-}
-
-@media (width <=980px) {
-  .docs-shell {
-    width: min(100% - 28px, 760px);
-    padding-top: 1rem;
-  }
-
-  .docs-viewer iframe {
-    min-height: 400px;
-  }
-}
-
-@media (width <=620px) {
-  .docs-shell {
-    padding-top: 1rem;
-  }
-
-  .docs-viewer iframe {
-    min-height: 360px;
-  }
+  border: 1px solid rgb(33 31 36 / 8%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 72%);
+  box-shadow: 0 4px 18px rgb(45 39 62 / 7%);
 }
 
 .docs-foldout {
@@ -101,8 +274,9 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 18px;
+  padding: 16px 20px;
   font-weight: 800;
+  font-size: 0.97rem;
   color: var(--text);
   user-select: none;
   list-style: none;
@@ -120,16 +294,16 @@ body {
   display: grid;
   place-items: center;
   border-radius: 8px;
-  background: rgb(72 107 234 / 12%);
-  color: #486bea;
+  background: rgb(10 194 163 / 10%);
+  color: var(--blue);
   font-size: 1.2rem;
   font-weight: 800;
   line-height: 1;
-  transition: background 150ms ease, color 150ms ease;
+  transition: background 150ms ease;
 }
 
 .docs-summary:hover::after {
-  background: rgb(72 107 234 / 22%);
+  background: rgb(10 194 163 / 20%);
 }
 
 .docs-foldout[open] .docs-summary::after {
@@ -150,73 +324,172 @@ body {
   display: none;
 }
 
-.docs-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 400px) minmax(0, 700px);
-  gap: 120px;
-  align-items: center;
+.docs-fallback {
+  margin: 0;
+  padding: 10px 20px 16px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+/* ── Advanced API section ───────────────────────────────── */
+
+.docs-advanced {
   width: 100%;
-  padding: 28px 15px 0;
 }
 
-.hero {
-  animation: page-fade 700ms ease-out both;
+.docs-foldout--advanced {
+  border-radius: 12px;
+  background: rgb(255 255 255 / 72%);
+  border: 1px solid rgb(33 31 36 / 8%);
+  box-shadow: 0 4px 18px rgb(45 39 62 / 7%);
+  overflow: hidden;
 }
 
-.docs-layout .hero {
-  min-height: auto;
+.docs-summary--advanced {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.docs-advanced-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 6px;
+  background: rgb(245 206 96 / 22%);
+  color: #8a6e00;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.docs-advanced-body {
+  padding: 0 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.docs-advanced-body p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.docs-advanced-body h4 {
+  margin: 1rem 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.docs-advanced-body pre {
+  margin: 0.5rem 0 0;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background: #1e1b22;
+  overflow-x: auto;
+}
+
+.docs-advanced-body pre code {
+  background: none;
   padding: 0;
+  font-size: 0.86rem;
+  color: #e7eefb;
+  line-height: 1.65;
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", monospace;
 }
 
-.docs-main h2 {
-  text-align: center;
-  margin: 0;
-  font-size: clamp(1.8rem, 3vw, 2.4rem);
+.docs-advanced-body code {
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.88em;
+  background: rgb(33 31 36 / 6%);
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 
-.docs-main h3 {
-  padding-left: 3em;
-  padding-top: 1em;
+.docs-endpoint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0.5rem !important;
 }
 
-.docs-faq h2 {
-  margin: 0;
-  font-size: clamp(1.8rem, 3vw, 2.4rem);
+.docs-method {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", monospace;
 }
+
+.docs-method--post {
+  background: rgb(10 194 163 / 14%);
+  color: #007a64;
+}
+
+/* ── FAQ ────────────────────────────────────────────────── */
 
 .docs-faq {
   width: 100%;
-  margin: 0;
-  padding: 0 15px 2rem;
+  padding-bottom: 1rem;
 }
 
-@media (width <=980px) {
-  .docs-layout {
-    grid-template-columns: 1fr;
-    gap: 40px;
-    min-height: auto;
-    padding: 25px 5px 40px;
-  }
+.docs-faq h2 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.4rem, 2.5vw, 1.75rem);
+  font-weight: 800;
+  color: var(--text);
 }
 
 .docs-faq details {
-  padding: 18px 0;
-  border-top: 1px solid var(--line);
+  padding: 16px 0;
+  border-top: 1px solid rgb(33 31 36 / 10%);
 }
 
 .docs-faq summary {
   cursor: pointer;
   font-weight: 700;
+  font-size: 0.97rem;
+  color: var(--text);
 }
 
 .docs-faq summary:hover {
   color: var(--blue);
 }
 
-.docs-faq details p {
+.docs-faq details p,
+.docs-faq details pre {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
   color: var(--muted);
 }
 
+.docs-faq details pre {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #1e1b22;
+  overflow-x: auto;
+}
+
+.docs-faq details pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.88rem;
+  color: #e7eefb;
+  line-height: 1.6;
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", monospace;
+}
+
+/* ── Animation ──────────────────────────────────────────── */
 
 @keyframes page-fade {
   from {
@@ -230,55 +503,22 @@ body {
   }
 }
 
-.hero-description {
-  max-width: 380px;
-  margin: 18px 0 0;
-  font-size: clamp(0.95rem, 1.35vw, 1.12rem);
-  line-height: 1.5;
-  color: var(--muted);
-  text-align: left;
-}
+/* ── Responsive ─────────────────────────────────────────── */
 
-.docs-tooltip {
-  position: relative;
-}
+@media (width <= 620px) {
+  .docs-shell {
+    width: calc(100% - 32px);
+    gap: 2rem;
+  }
 
-.docs-tooltip-text {
-  position: absolute;
-  left: 0;
-  width: min(320px, 80vw);
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: var(--text);
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 600;
-  line-height: 1.4;
-  visibility: hidden;
-  transform: translateY(6px);
-  transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
-  z-index: 10;
-  opacity: 0;
-}
+  .docs-step {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
 
-.docs-tooltip:hover .docs-tooltip-text,
-.docs-tooltip:focus-within .docs-tooltip-text {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.docs-download {
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: var(--text);
-  color: white;
-  font-weight: 800;
-  margin: 0 auto;
-  display: block;
-  width: fit-content;
-}
-
-.docs-download:hover {
-  background: color-mix(in srgb, var(--text) 80%, white);
+  .docs-step-badge {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.8rem;
+  }
 }

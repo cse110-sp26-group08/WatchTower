@@ -18,68 +18,180 @@
   <watchtower-navbar></watchtower-navbar>
 
   <main class="docs-shell">
-    <div class="docs-layout">
-      <section class="hero" aria-label="Docs">
-        <div class="hero-copy">
-          <p class="eyebrow"></p>
-          <h1>Documentation</h1>
-          <p class="hero-description">
-            Learn how to connect WatchTower to your projects and start tracking errors in real time.
+
+    <section class="docs-hero" aria-label="Docs hero">
+      <div class="docs-hero-copy">
+        <h1>Documentation</h1>
+        <p class="docs-hero-description">
+          Learn how to connect WatchTower to your projects and start tracking errors in real time.
+        </p>
+      </div>
+    </section>
+
+    <section class="docs-steps" aria-label="Getting started steps">
+      <h2 class="docs-steps-heading">Getting started</h2>
+
+      <article class="docs-step">
+        <div class="docs-step-badge" aria-hidden="true">01</div>
+        <div class="docs-step-body">
+          <h3>Create an account and register your app</h3>
+          <p>
+            Sign up for a WatchTower account and log in. Navigate to the <strong>App Selection</strong> page and
+            register the app you want to monitor with a name and
+            <strong class="docs-tooltip">optionally a URL for uptime monitoring.
+              <span class="docs-tooltip-text">
+                WatchTower automatically polls your app's URL every 5 minutes and will alert you by email if it goes
+                down.
+              </span>
+            </strong>
+          </p>
+          <p>
+            Once registered, WatchTower generates a unique <strong>API key</strong> for your app. Copy it — you will
+            need it in the next step.
           </p>
         </div>
-      </section>
-      <section class="docs-main">
-        <h2>Getting started</h2>
-        <h3>1. Register your app in WatchTower</h3>
-        <p>
-          Once you have created an account, register the app you want to monitor through the App Selection page. <strong
-            class="docs-tooltip">
-            You can optionally add a URL to monitor for uptime.
-            <span class="docs-tooltip-text">
-              WatchTower automatically polls your app's URL every 5 minutes to check if it is reachable and will alert
-              you by email if it goes down.
-            </span>
-          </strong> After the app is created,
-          WatchTower will generate a unique API key for it. Copy this API key because
-          you will need it when adding the collector script to your project.
-        </p>
-        <h3>2. Adding <code>collector.js</code></h3>
-        <p>
-          The WatchTower collector is a single JavaScript file that you add to your own web app. It tracks JavaScript
-          errors, page performance, and API latency automatically.
+      </article>
 
-        </p>
-        <p>
+      <article class="docs-step">
+        <div class="docs-step-badge" aria-hidden="true">02</div>
+        <div class="docs-step-body">
+          <h3>Add <code>collector.js</code> to your project</h3>
+          <p>
+            The WatchTower collector is a single JavaScript file you drop into any web app. It automatically tracks:
+          </p>
+          <ul class="docs-list">
+            <li><strong>JavaScript errors</strong> — unhandled exceptions and promise rejections with severity
+              classification</li>
+            <li><strong>Page performance</strong> — load time, DOM content loaded time, TTFB, and JS memory usage</li>
+            <li><strong>API latency</strong> — intercepts all <code>fetch()</code> calls and records how long each one
+              takes</li>
+          </ul>
           <a class="docs-download" href="../../collector.js" download="collector.js">
             Download collector.js
           </a>
-        </p>
-        <h3>3. Add the collector script to your HTML</h3>
-        <p>
-          Add the following script tag to the <code>&lt;head&gt;</code> or near the end
-          of the <code>&lt;body&gt;</code> in each HTML page you want WatchTower to
-          monitor. Set <code>data-apikey</code> with the unique API key that was generated for
-          your app. Set <code>data-release</code> to a version number or a git commit SHA so performance data is
-          connected to a specific release.
-        </p>
+        </div>
+      </article>
 
-
-        <pre><code>&lt;script
+      <article class="docs-step">
+        <div class="docs-step-badge" aria-hidden="true">03</div>
+        <div class="docs-step-body">
+          <h3>Add the script tag to your HTML</h3>
+          <p>
+            Place <code>collector.js</code> somewhere your HTML can reach, then add the following script tag to the
+            <code>&lt;head&gt;</code> or near the end of the <code>&lt;body&gt;</code> of each page you want to
+            monitor:
+          </p>
+          <pre><code>&lt;script
     id="collector-script"
     src="/scripts/collector.js"
     data-apikey="YOUR_API_KEY"
     data-release="1.0.0"&gt;
   &lt;/script&gt;</code></pre>
-      </section>
-    </div>
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th>Attribute</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>data-apikey</code></td>
+                <td>The API key generated by WatchTower when you registered your app</td>
+              </tr>
+              <tr>
+                <td><code>data-release</code></td>
+                <td>A version string for this deployment (e.g. <code>"1.0.0"</code> or a git SHA) — used to correlate
+                  errors to a specific release</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="docs-note">
+            No build step or package install required. Once the script is on the page, all errors and performance data
+            are sent to WatchTower automatically.
+          </p>
+        </div>
+      </article>
+    </section>
 
-    <section class="docs-viewer" aria-label="Backend architecture documentation">
-      <details class="docs-foldout">
-        <summary class="docs-summary">Backend architecture PDF</summary>
-        <iframe src="../assets/docs/architecture_backend.pdf#view=FitH" title="Backend architecture PDF"></iframe>
-        <p class="docs-fallback">
-          <a href="../assets/docs/architecture_backend.pdf">Open backend architecture PDF</a>
-        </p>
+    <section class="docs-advanced" aria-label="Advanced API usage">
+      <details class="docs-foldout docs-foldout--advanced">
+        <summary class="docs-summary docs-summary--advanced">
+          <span class="docs-advanced-label">Advanced</span>
+          Sending events manually via the API
+        </summary>
+        <div class="docs-advanced-body">
+          <p>
+            If <code>collector.js</code> doesn't fit your stack, you can POST events directly to the WatchTower API
+            from any environment — a Node.js server, a CI pipeline, or a non-browser client. Authentication is done by
+            including your app's <code>apiKey</code> in the request body (no session cookie needed).
+          </p>
+
+          <h4>Report an error</h4>
+          <p class="docs-endpoint"><span class="docs-method docs-method--post">POST</span> <code>/api/events/error</code></p>
+          <table class="docs-table">
+            <thead>
+              <tr><th>Field</th><th>Required</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>apiKey</code></td><td>Yes</td><td>Your app's API key from the App Selection page</td></tr>
+              <tr><td><code>message</code></td><td>Yes</td><td>Error message text</td></tr>
+              <tr><td><code>stack</code></td><td>No</td><td>Stack trace string</td></tr>
+              <tr><td><code>errorType</code></td><td>No</td><td>e.g. <code>"TypeError"</code>, <code>"RangeError"</code></td></tr>
+              <tr><td><code>severity</code></td><td>No</td><td><code>"low"</code> | <code>"medium"</code> | <code>"high"</code> | <code>"critical"</code></td></tr>
+              <tr><td><code>url</code></td><td>No</td><td>Page or route where the error occurred</td></tr>
+              <tr><td><code>release</code></td><td>No</td><td>Version string or git SHA to tie the event to a release</td></tr>
+              <tr><td><code>timestamp</code></td><td>No</td><td>ISO 8601 string — defaults to server time if omitted</td></tr>
+            </tbody>
+          </table>
+          <pre><code>fetch("https://your-watchtower-host.com/api/events/error", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    apiKey:    "YOUR_API_KEY",
+    message:   "Uncaught TypeError: Cannot read properties of null",
+    stack:     error.stack,
+    errorType: "TypeError",
+    severity:  "high",
+    url:       "/dashboard",
+    release:   "1.0.0"
+  })
+});</code></pre>
+
+          <h4>Report a performance metric</h4>
+          <p class="docs-endpoint"><span class="docs-method docs-method--post">POST</span> <code>/api/events/performance</code></p>
+          <table class="docs-table">
+            <thead>
+              <tr><th>Field</th><th>Required</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>apiKey</code></td><td>Yes</td><td>Your app's API key from the App Selection page</td></tr>
+              <tr><td><code>loadTimeMs</code></td><td>No</td><td>Full page load time in milliseconds</td></tr>
+              <tr><td><code>domContentLoadedMs</code></td><td>No</td><td>Time until DOM content loaded (ms)</td></tr>
+              <tr><td><code>ttfbMs</code></td><td>No</td><td>Time to first byte (ms)</td></tr>
+              <tr><td><code>apiEndpoint</code></td><td>No</td><td>The API route being measured</td></tr>
+              <tr><td><code>apiLatencyMs</code></td><td>No</td><td>Round-trip time for an API call (ms)</td></tr>
+              <tr><td><code>memoryMB</code></td><td>No</td><td>JS heap usage in MB</td></tr>
+              <tr><td><code>url</code></td><td>No</td><td>Page or route being measured</td></tr>
+              <tr><td><code>release</code></td><td>No</td><td>Version string or git SHA</td></tr>
+              <tr><td><code>timestamp</code></td><td>No</td><td>ISO 8601 string — defaults to server time if omitted</td></tr>
+            </tbody>
+          </table>
+          <pre><code>fetch("https://your-watchtower-host.com/api/events/performance", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    apiKey:       "YOUR_API_KEY",
+    loadTimeMs:   1240,
+    ttfbMs:       180,
+    memoryMB:     42.3,
+    url:          "/dashboard",
+    release:      "1.0.0"
+  })
+});</code></pre>
+
+          <p class="docs-note">Both endpoints respond with <code>201 Created</code> and the stored event object on success, or a <code>400</code>/<code>401</code> JSON error on failure.</p>
+        </div>
       </details>
     </section>
 
@@ -89,8 +201,8 @@
         <summary>What does WatchTower do?</summary>
         <p>
           WatchTower helps developers a way to monitor their web apps. It helps teams see whether an app is reachable,
-          review
-          metrics, and get notified when the app is unreacable, allowing developers to respond to crashes quickly.
+          review metrics, and get notified when the app is unreachable, allowing developers to respond to crashes
+          quickly.
         </p>
       </details>
       <details>
@@ -110,23 +222,23 @@
         </p>
       </details>
       <details>
-        <summary>Does WatchTower affect my apps performance?</summary>
+        <summary>Does WatchTower affect my app's performance?</summary>
         <p>
           Not significantly. A small browser script reports errors and timing in the background without changing your
-          server or build.
-          Heavy work stays on WatchTower’s side, so normal use should not slow your app down.
+          server or build. Heavy work stays on WatchTower's side, so normal use should not slow your app down.
         </p>
       </details>
       <details>
         <summary>Can I use WatchTower during local development?</summary>
         <p>
           Yes. WatchTower can be used locally while running the server on
-          <code>http://localhost:3000</code>. If your WatchTower instance is hosted elsewhere, open collector.js and
-          modfify baseUrl
+          <code>http://localhost:3000</code>. If your WatchTower instance is hosted elsewhere, open
+          <code>collector.js</code> and modify <code>baseUrl</code>:
         </p>
         <pre><code>const baseUrl = "https://your-watchtower-host.com";</code></pre>
       </details>
     </section>
+
   </main>
 
   <watchtower-footer></watchtower-footer>
