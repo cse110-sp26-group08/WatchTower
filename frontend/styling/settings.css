@@ -154,13 +154,13 @@
   transition: background-color 0.15s;
 }
 
-.settings-btn-copy:hover:not(:disabled) {
-  background: rgb(10 194 163 / 12%);
-}
-
 .settings-btn-copy:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.settings-btn-copy:hover:not(:disabled) {
+  background: rgb(10 194 163 / 12%);
 }
 
 .copy-icon {
