@@ -27,8 +27,8 @@ async function initPerformancePage() {
 
     currentAppId = selectedApp.id;
 
-    const dashNav = document.querySelector('watchtower-dash-navbar');
-    if (dashNav && selectedApp.name) dashNav.setAttribute('app-name', selectedApp.name);
+    const layout = document.querySelector('wt-dash-layout');
+    if (layout && selectedApp.name) layout.setAttribute('app-name', selectedApp.name);
 
     initDatePicker();
     bindControls();

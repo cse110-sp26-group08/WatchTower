@@ -29,8 +29,8 @@ window.renderLogs = function renderLogs() {
 
 window.setProjectName = function setProjectName(name) {
   setElementText('errors-project-name', name || 'Selected project');
-  const dashNav = document.querySelector('watchtower-dash-navbar');
-  if (dashNav) dashNav.setAttribute('app-name', name || '');
+  const layout = document.querySelector('wt-dash-layout');
+  if (layout) layout.setAttribute('app-name', name || '');
 };
 
 window.setStatus = function setStatus(status, description, detail) {

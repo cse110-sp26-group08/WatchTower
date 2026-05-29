@@ -12,157 +12,158 @@
     <link rel="stylesheet" href="../styling/performance.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
+
 <body class="container">
-    <watchtower-navbar logged-in></watchtower-navbar>
-    <watchtower-dash-navbar active="performance"></watchtower-dash-navbar>
+    <wt-dash-layout active="performance">
+        <main class="standalone-main">
+            <header class="page-header">
+                <div class="header-content">
+                    <h1>Performance</h1>
+                    <p>Monitor latency, response times, and system performance</p>
+                </div>
+                <form class="filters">
 
-    <main class="standalone-main">
-        <header class = "page-header"> 
-            <div class="header-content">
-                <h1>Performance</h1>
-                <p>Monitor latency, response times, and system performance</p>
-            </div>
-            <form class="filters">
+                    <div class="filter-card">
+                        <div class="filter-icon">
+                            <img src="../assets/calendar-icon.svg" alt="Calendar Icon">
+                        </div>
 
-                <div class="filter-card">
-                    <div class="filter-icon">
-                        <img src="../assets/calendar-icon.svg" alt="Calendar Icon">
+                        <input
+                            id="date-range"
+                            class="date-range-input"
+                            type="text"
+                            placeholder="Select date range"
+                        >
                     </div>
 
-                    <input
-                        id="date-range"
-                        class="date-range-input"
-                        type="text"
-                        placeholder="Select date range"
-                    >
+                    <div class="filter-card toggle-card">
+                        <span class="refresh-icon" aria-hidden="true">↻</span>
+                        <span class="toggle-label">Auto Refresh</span>
+
+                        <label class="toggle-switch">
+                            <span class="toggle-status">ON</span>
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                </form>
+            </header>
+
+            <section class="kpi-grid">
+                <wt-kpi-card card-title="Average Response Time"
+                    icon-class="response-icon" icon-src="../assets/response-time-icon.png" icon-alt="Response Time Icon"
+                    value-id="avg-response-time" change-id="avg-response-change" sparkline-id="avg-response-sparkline">
+                </wt-kpi-card>
+
+                <wt-kpi-card card-title="Slowest 5% Response Time"
+                    icon-class="latency-icon" icon-src="../assets/latency-icon.png" icon-alt="Latency Icon"
+                    value-id="p95-latency" change-id="p95-latency-change" sparkline-id="p95-latency-sparkline">
+                </wt-kpi-card>
+
+                <wt-kpi-card card-title="Slowest Endpoint"
+                    icon-class="slowest-endpoint-icon" icon-src="../assets/slowest-endpoint-icon.png" icon-alt="Slowest Endpoint Icon"
+                    value-id="slowest-endpoint" change-id="slowest-endpoint-change" sparkline-id="slowest-endpoint-sparkline">
+                </wt-kpi-card>
+
+                <wt-kpi-card card-title="Average Page Load Time"
+                    icon-class="avg-page-load-icon" icon-src="../assets/avg-page-load-icon.png" icon-alt="Average Page Load Icon"
+                    value-id="avg-page-load-time" change-id="avg-page-load-change" sparkline-id="avg-page-load-sparkline">
+                </wt-kpi-card>
+
+                <wt-kpi-card card-title="Average Memory Usage"
+                    icon-class="memory-icon" icon-src="../assets/memory-icon.png" icon-alt="Memory Icon"
+                    value-id="avg-memory-usage" change-id="avg-memory-change" sparkline-id="avg-memory-sparkline">
+                </wt-kpi-card>
+            </section>
+
+            <section class="chart-grid">
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Latency Over Time</h3>
+                        <select id="line-toggle">
+                            <option value="all">All Endpoints</option>
+                            <option value="avg-latency">Average Latency</option>
+                            <option value="p95-latency">P95 Latency</option>
+                            <option value="avg-page-load-time">Average Page Load Time</option>
+                        </select>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="latency-chart"></canvas>
+                    </div>
                 </div>
 
-                <div class="filter-card toggle-card">
-                    <span class="refresh-icon" aria-hidden="true">↻</span>
-                    <span class="toggle-label">Auto Refresh</span>
-
-                    <label class="toggle-switch">
-                        <span class="toggle-status">ON</span>
-                        <input type="checkbox" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Endpoint Performance</h3>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="endpoint-performance-chart"></canvas>
+                    </div>
                 </div>
 
-            </form>
-        </header>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Bottleneck Insights</h3>
+                    </div>
 
-        <section class="kpi-grid">
-            <wt-kpi-card card-title="Average Response Time"
-                icon-class="response-icon" icon-src="../assets/response-time-icon.png" icon-alt="Response Time Icon"
-                value-id="avg-response-time" change-id="avg-response-change" sparkline-id="avg-response-sparkline">
-            </wt-kpi-card>
+                    <div class="insight-list">
+                        <wt-insight-item card-id="slowest-endpoint-card" label="Slowest Endpoint"
+                            insight-id="slowest-endpoint-insight" metric-id="slowest-endpoint-latency">
+                        </wt-insight-item>
 
-            <wt-kpi-card card-title="Slowest 5% Response Time"
-                icon-class="latency-icon" icon-src="../assets/latency-icon.png" icon-alt="Latency Icon"
-                value-id="p95-latency" change-id="p95-latency-change" sparkline-id="p95-latency-sparkline">
-            </wt-kpi-card>
+                        <wt-insight-item card-id="highest-ttfb-card" label="Highest TTFB"
+                            insight-id="highest-ttfb-endpoint" metric-id="highest-ttfb-value">
+                        </wt-insight-item>
 
-            <wt-kpi-card card-title="Slowest Endpoint"
-                icon-class="slowest-endpoint-icon" icon-src="../assets/slowest-endpoint-icon.png" icon-alt="Slowest Endpoint Icon"
-                value-id="slowest-endpoint" change-id="slowest-endpoint-change" sparkline-id="slowest-endpoint-sparkline">
-            </wt-kpi-card>
+                        <wt-insight-item card-id="slow-request-card" label="Frequent Slow Requests"
+                            insight-id="most-frequent-slow-endpoint" metric-id="slow-request-count">
+                        </wt-insight-item>
 
-            <wt-kpi-card card-title="Average Page Load Time"
-                icon-class="avg-page-load-icon" icon-src="../assets/avg-page-load-icon.png" icon-alt="Average Page Load Icon"
-                value-id="avg-page-load-time" change-id="avg-page-load-change" sparkline-id="avg-page-load-sparkline">
-            </wt-kpi-card>
-
-            <wt-kpi-card card-title="Average Memory Usage"
-                icon-class="memory-icon" icon-src="../assets/memory-icon.png" icon-alt="Memory Icon"
-                value-id="avg-memory-usage" change-id="avg-memory-change" sparkline-id="avg-memory-sparkline">
-            </wt-kpi-card>
-        </section>
-
-        <section class="chart-grid">
-            
-            <div class="chart-card"> 
-                <div class="chart-header">
-                    <h3>Latency Over Time</h3>
-                    <select id="line-toggle">
-                        <option value="all">All Endpoints</option>
-                        <option value="avg-latency">Average Latency</option>
-                        <option value="p95-latency">P95 Latency</option>
-                        <option value="avg-page-load-time">Average Page Load Time</option>
-                    </select>
+                        <wt-insight-item card-id="latency-increase-card" label="Largest Latency Spike"
+                            insight-id="largest-latency-increase-endpoint" metric-id="largest-latency-increase">
+                        </wt-insight-item>
+                    </div>
                 </div>
-                <div class="chart-canvas-wrapper">
-                    <canvas id="latency-chart"></canvas>
+            </section>
+
+            <section class="slow-requests-section">
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>Slow Requests</h3>
+                        <input
+                            type="text"
+                            id="slow-request-search"
+                            placeholder="Search endpoints..."
+                        >
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Endpoint</th>
+                                <th>Latency</th>
+                                <th>Load Time</th>
+                                <th>TTFB</th>
+                                <th>Memory</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="slow-requests-body"></tbody>
+                    </table>
                 </div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3>Endpoint Performance</h3>
-                </div>
-                <div class="chart-canvas-wrapper">
-                    <canvas id="endpoint-performance-chart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3>Bottleneck Insights</h3>
-                </div>
-
-                <div class="insight-list">
-                    <wt-insight-item card-id="slowest-endpoint-card" label="Slowest Endpoint"
-                        insight-id="slowest-endpoint-insight" metric-id="slowest-endpoint-latency">
-                    </wt-insight-item>
-
-                    <wt-insight-item card-id="highest-ttfb-card" label="Highest TTFB"
-                        insight-id="highest-ttfb-endpoint" metric-id="highest-ttfb-value">
-                    </wt-insight-item>
-
-                    <wt-insight-item card-id="slow-request-card" label="Frequent Slow Requests"
-                        insight-id="most-frequent-slow-endpoint" metric-id="slow-request-count">
-                    </wt-insight-item>
-
-                    <wt-insight-item card-id="latency-increase-card" label="Largest Latency Spike"
-                        insight-id="largest-latency-increase-endpoint" metric-id="largest-latency-increase">
-                    </wt-insight-item>
-                </div>
-                </div>
-        </section>
-
-        <section class="slow-requests-section">
-            <div class="table-card">
-                <div class="table-header">
-                    <h3>Slow Requests</h3>
-                    <input 
-                        type="text" 
-                        id="slow-request-search" 
-                        placeholder="Search endpoints..."
-                    >
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Endpoint</th>
-                            <th>Latency</th>
-                            <th>Load Time</th>
-                            <th>TTFB</th>
-                            <th>Memory</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="slow-requests-body"></tbody>
-                </table>
-            </div>
-        </section>
-    </main>
+            </section>
+        </main>
+    </wt-dash-layout>
 
     <script src="../js/components/wt-base-element.js"></script>
     <script src="../js/components/navbar.js"></script>
+    <script src="../js/components/dash_navbar.js"></script>
+    <script src="../js/components/wt-dash-layout.js"></script>
     <script src="../js/components/wt-kpi-card.js"></script>
     <script src="../js/components/wt-insight-item.js"></script>
-    <script src="../js/components/dash_navbar.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
     <script src="../js/utils.js" defer></script>

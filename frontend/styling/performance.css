@@ -16,7 +16,7 @@
   --page-bg: #f7f5ef;
   --card-bg: rgb(255 255 255 / 88%);
   --border: rgb(255 255 255 / 72%);
-  --font-family-primary: "Inter", "Open Sans", sans-serif;
+  --font-family-primary: "Open Sans", opensans, sans-serif;
   --shadow-card: 0 14px 30px rgb(33 31 36 / 7%);
   --font-family-display: "Bitter Pro", sans-serif;
 }
@@ -28,14 +28,8 @@ body {
   background: var(--page-bg);
 }
 
-header,
-main {
-  width: min(1240px, calc(100% - 48px));
-  margin: 0 auto;
-}
-
-header {
-  padding: 42px 0 26px;
+header.page-header {
+  padding-bottom: 24px;
 }
 
 header h1 {
@@ -447,11 +441,6 @@ th {
 }
 
 @media (width <= 800px) {
-  header,
-  main {
-    width: min(100% - 28px, 760px);
-  }
-
   header h1 {
     font-size: 2.25rem;
   }
