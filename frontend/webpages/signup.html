@@ -10,15 +10,12 @@
     href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap"
     rel="stylesheet"
   >
+  <link rel="preload" href="../styling/navbar.css" as="style">
   <link rel="stylesheet" href="../styling/base.css">
   <link rel="stylesheet" href="../styling/signup.css">
 </head>
 <body class="signup-page">
-  <header class="auth-header">
-    <a href="../index.html" class="brand-link" data-home-link aria-label="WatchTower home">
-      <img src="../assets/watchtower-logo.png" alt="WatchTower">
-    </a>
-  </header>
+  <watchtower-navbar></watchtower-navbar>
 
   <main class="signup-shell">
     <section class="signup-card" aria-label="Sign up form">
@@ -94,6 +91,8 @@
     </section>
   </main>
 
+  <script src="../js/components/wt-base-element.js"></script>
+  <script src="../js/components/navbar.js"></script>
   <script src="../js/utils.js" defer></script>
   <script src="../js/signup.js" defer></script>
 </body>
