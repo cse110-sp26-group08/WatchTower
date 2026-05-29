@@ -1,0 +1,19 @@
+:host {
+    display: block;
+    min-height: 100vh;
+}
+
+.layout-body {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 28px;
+    box-sizing: border-box;
+}
+
+@media (width <= 900px) {
+    /* dash-nav :host becomes height:auto (0px) here, so manually offset for the fixed sub-header */
+    .layout-body {
+        padding: 18px;
+        padding-top: 76px; /* sub-nav height (48px) + gutter (28px) */
+    }
+}

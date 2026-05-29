@@ -21,6 +21,7 @@ a {
 watchtower-navbar:not(:defined),
 watchtower-dash-navbar:not(:defined),
 watchtower-footer:not(:defined),
+wt-dash-layout:not(:defined),
 wt-health-score:not(:defined),
 wt-metric-card:not(:defined),
 wt-kpi-card:not(:defined),

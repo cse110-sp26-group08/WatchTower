@@ -9,6 +9,15 @@
   --blue: #0ac2a3;
   --shadow: 0 18px 40px rgb(45 39 62 / 10%);
   --font-family-primary: "Open Sans", opensans, sans-serif;
+  --font-family-display: "Bitter Pro", sans-serif;
+}
+
+@font-face {
+  font-family: "Bitter Pro";
+  src: url("https://fonts.gstatic.com/s/bitter/v40/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8XbYOLjOXQ.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -31,20 +40,42 @@ body {
 }
 
 
-.main-dash {
-  margin-left: 0;
-  padding: 28px;
-  padding-top: calc(68px + 48px + 28px);
+.main-dash,
+.standalone-main {
+  width: 100%;
+  padding: 0;
+  margin: 0;
   display: grid;
   gap: 24px;
 }
 
-.standalone-main {
-  margin-left: 0;
-  padding: 28px;
-  padding-top: calc(68px + 48px + 28px);
-  display: grid;
+header.page-header {
+  padding-bottom: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 24px;
+}
+
+.header-content {
+  flex-shrink: 0;
+  max-width: 440px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: 3rem;
+  line-height: 1.1;
+}
+
+.page-header p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 1.1rem;
 }
 
 
@@ -555,16 +586,6 @@ body {
 }
 
 @media (width <= 900px) {
-  .main-dash {
-    padding: 18px;
-    padding-top: 18px;
-  }
-
-  .standalone-main {
-    padding: 18px;
-    padding-top: 18px;
-  }
-
   .status-container {
     grid-template-columns: 1fr;
     gap: 24px;

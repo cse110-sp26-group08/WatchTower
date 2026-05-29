@@ -13,54 +13,53 @@
 </head>
 
 <body class="container">
-    <watchtower-navbar logged-in></watchtower-navbar>
-    <watchtower-dash-navbar active="settings"></watchtower-dash-navbar>
+    <wt-dash-layout active="settings">
+        <main class="main-dash">
+            <div class="settings-panels">
 
-    <main class="main-dash">
-        <div class="settings-panels">
+                <section class="settings-panel">
+                    <h2 class="settings-panel-title">App Info</h2>
+                    <form id="settings-info-form" class="settings-form" novalidate>
+                        <div class="settings-field">
+                            <label class="settings-label" for="settings-name">App Name</label>
+                            <input class="settings-input" id="settings-name" type="text" name="name"
+                                placeholder="My App" autocomplete="off" required>
+                        </div>
+                        <div class="settings-field">
+                            <label class="settings-label" for="settings-url">URL <span class="settings-optional">(optional)</span></label>
+                            <input class="settings-input" id="settings-url" type="url" name="url"
+                                placeholder="https://example.com" autocomplete="off">
+                        </div>
+                        <div class="settings-form-footer">
+                            <p class="settings-feedback" id="settings-save-feedback" aria-live="polite"></p>
+                            <button class="settings-btn settings-btn-primary" type="submit" id="settings-save-btn">Save Changes</button>
+                        </div>
+                    </form>
+                </section>
 
-            <section class="settings-panel">
-                <h2 class="settings-panel-title">App Info</h2>
-                <form id="settings-info-form" class="settings-form" novalidate>
-                    <div class="settings-field">
-                        <label class="settings-label" for="settings-name">App Name</label>
-                        <input class="settings-input" id="settings-name" type="text" name="name"
-                            placeholder="My App" autocomplete="off" required>
+                <section class="settings-panel">
+                    <h2 class="settings-panel-title">API Key</h2>
+                    <p class="settings-panel-description">Include this key in your collector script to send events to WatchTower.</p>
+                    <div class="settings-apikey-wrapper">
+                        <input class="settings-input settings-apikey-input" id="settings-apikey" type="text"
+                            readonly aria-label="API Key" value="Loading...">
+                        <button class="settings-btn-copy" id="settings-copy-btn" type="button"
+                            aria-label="Copy API key">
+                            <img src="../assets/copy-icon.svg" class="copy-icon" alt="">
+                        </button>
                     </div>
-                    <div class="settings-field">
-                        <label class="settings-label" for="settings-url">URL <span class="settings-optional">(optional)</span></label>
-                        <input class="settings-input" id="settings-url" type="url" name="url"
-                            placeholder="https://example.com" autocomplete="off">
-                    </div>
-                    <div class="settings-form-footer">
-                        <p class="settings-feedback" id="settings-save-feedback" aria-live="polite"></p>
-                        <button class="settings-btn settings-btn-primary" type="submit" id="settings-save-btn">Save Changes</button>
-                    </div>
-                </form>
-            </section>
+                    <p class="settings-feedback" id="settings-copy-feedback" aria-live="polite"></p>
+                </section>
 
-            <section class="settings-panel">
-                <h2 class="settings-panel-title">API Key</h2>
-                <p class="settings-panel-description">Include this key in your collector script to send events to WatchTower.</p>
-                <div class="settings-apikey-wrapper">
-                    <input class="settings-input settings-apikey-input" id="settings-apikey" type="text"
-                        readonly aria-label="API Key" value="Loading...">
-                    <button class="settings-btn-copy" id="settings-copy-btn" type="button"
-                        aria-label="Copy API key">
-                        <img src="../assets/copy-icon.svg" class="copy-icon" alt="">
-                    </button>
-                </div>
-                <p class="settings-feedback" id="settings-copy-feedback" aria-live="polite"></p>
-            </section>
+                <section class="settings-panel settings-panel-danger">
+                    <h2 class="settings-panel-title settings-panel-title-danger">Danger Zone</h2>
+                    <p class="settings-panel-description">Permanently delete this app and all its associated events. This action cannot be undone.</p>
+                    <button class="settings-btn settings-btn-danger" id="settings-delete-btn" type="button">Delete App</button>
+                </section>
 
-            <section class="settings-panel settings-panel-danger">
-                <h2 class="settings-panel-title settings-panel-title-danger">Danger Zone</h2>
-                <p class="settings-panel-description">Permanently delete this app and all its associated events. This action cannot be undone.</p>
-                <button class="settings-btn settings-btn-danger" id="settings-delete-btn" type="button">Delete App</button>
-            </section>
-
-        </div>
-    </main>
+            </div>
+        </main>
+    </wt-dash-layout>
 
     <!-- Confirmation modal -->
     <div class="settings-modal-backdrop" id="settings-modal-backdrop" hidden>
@@ -77,6 +76,7 @@
     <script src="../js/components/wt-base-element.js"></script>
     <script src="../js/components/navbar.js"></script>
     <script src="../js/components/dash_navbar.js"></script>
+    <script src="../js/components/wt-dash-layout.js"></script>
     <script src="../js/utils.js" defer></script>
     <script src="../js/auth.js" defer></script>
     <script src="../js/settings.js" defer></script>
