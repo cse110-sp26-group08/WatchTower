@@ -28,8 +28,10 @@ import {
   createAppEndpoint,
   deleteAppEndpoint,
   forceStatusEndpoint,
+  getAppApiKeyEndpoint,
   getAppEndpoint,
   getAppsByOwnerEndpoint,
+  updateAppEndpoint,
 } from './endpoints/apps.js';
 import {
   createUserEndpoint,
@@ -172,6 +174,10 @@ function createApp() {
     res.sendFile(path.join(__dirname, '../frontend/webpages/advanced_error_metrics.html'));
   });
 
+  app.get('/settings', requireSession, (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/settings.html'));
+  });
+
   // API ENDPOINTS
   // Error Endpoints
   app.options('/api/events/error', telemetryCors);
@@ -196,7 +202,9 @@ function createApp() {
   // App Endpoints
   app.post('/api/apps', createAppEndpoint);
   app.post('/api/apps/:id/forceStatus', forceStatusEndpoint);
+  app.get('/api/apps/:id/apikey', getAppApiKeyEndpoint);
   app.get('/api/apps/:id', getAppEndpoint);
+  app.patch('/api/apps/:id', updateAppEndpoint);
   app.delete('/api/apps/:id', deleteAppEndpoint);
   app.get('/api/apps/users/:ownerId', getAppsByOwnerEndpoint);
 

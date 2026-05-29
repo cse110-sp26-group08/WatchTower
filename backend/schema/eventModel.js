@@ -55,4 +55,13 @@ async function removeEvent(id) {
   return event ?? null;
 }
 
-export { insertEvent, selectEventById, selectEventsByAppId, removeEvent };
+/**
+ * Delete all events belonging to an app.
+ * @param {string} appId
+ * @returns {Promise<void>}
+ */
+async function removeEventsByAppId(appId) {
+  await db.delete(events).where(eq(events.appId, appId));
+}
+
+export { insertEvent, selectEventById, selectEventsByAppId, removeEvent, removeEventsByAppId };

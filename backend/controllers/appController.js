@@ -4,8 +4,10 @@ import {
   insertApp,
   selectAppById,
   selectAppByApiKey,
+  selectAppByIdWithApiKey,
   selectAppsByOwnerId,
   removeApp,
+  updateApp,
 } from '../schema/appModel.js';
 import { isValidId } from '../util/idValidator.js';
 import { withToObject, withToObjectArray } from '../util/toObject.js';
@@ -68,4 +70,40 @@ async function deleteAppById(id) {
   return withToObject(await removeApp(id));
 }
 
-export { createApp, getAppByApiKey, getAppById, getAllAppsByOwnerId, deleteAppById };
+/**
+ * Find an app by its UUID, including the apiKey field.
+ * @param {string} id
+ * @returns {Promise<object|null>}
+ */
+async function getAppByIdWithApiKey(id) {
+  if (!isValidId(id)) return null;
+  return withToObject(await selectAppByIdWithApiKey(id));
+}
+
+/**
+ * Update the name and/or url of an app.
+ * @param {string} id
+ * @param {{ name?: string, url?: string }} fields
+ * @returns {Promise<object|null>}
+ * @throws {Error} if name is provided but empty
+ */
+async function updateAppById(id, { name, url }) {
+  if (!isValidId(id)) return null;
+
+  const updates = {};
+
+  if (name !== undefined) {
+    if (typeof name !== 'string' || !name.trim()) {
+      throw new Error('name must be a non-empty string');
+    }
+    updates.name = name.trim();
+  }
+
+  if (url !== undefined) {
+    updates.url = url && typeof url === 'string' && url.trim() ? url.trim() : null;
+  }
+
+  return withToObject(await updateApp(id, updates));
+}
+
+export { createApp, getAppByApiKey, getAppById, getAppByIdWithApiKey, getAllAppsByOwnerId, deleteAppById, updateAppById };

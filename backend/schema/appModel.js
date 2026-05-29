@@ -118,13 +118,43 @@ async function updateAppEmailSent(id, emailSent) {
   return app ?? null;
 }
 
+/**
+ * Select an app by primary key, including the apiKey field.
+ * @param {string} id
+ * @returns {Promise<object|null>}
+ */
+async function selectAppByIdWithApiKey(id) {
+  const [app] = await db.select().from(apps).where(eq(apps.id, id));
+  return app ?? null;
+}
+
+/**
+ * Update the name and/or url of an app.
+ * @param {string} id
+ * @param {{ name?: string, url?: string }} fields
+ * @returns {Promise<object|null>}
+ */
+async function updateApp(id, fields) {
+  const updates = { updatedAt: new Date() };
+  if (fields.name !== undefined) updates.name = fields.name;
+  if (fields.url !== undefined) updates.url = fields.url;
+  const [app] = await db
+    .update(apps)
+    .set(updates)
+    .where(eq(apps.id, id))
+    .returning(DEFAULT_APP_COLUMNS);
+  return app ?? null;
+}
+
 export {
   insertApp,
   selectAppById,
   selectAppByApiKey,
+  selectAppByIdWithApiKey,
   selectAppsByOwnerId,
   removeApp,
   selectAllApps,
+  updateApp,
   updateAppDownOrNot,
   updateAppEmailSent,
 };

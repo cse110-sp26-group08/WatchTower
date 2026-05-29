@@ -6,8 +6,11 @@ import {
   deleteAppById,
   getAllAppsByOwnerId,
   getAppById,
+  getAppByIdWithApiKey,
+  updateAppById,
 } from '../controllers/appController.js';
 import { selectAllApps, updateAppDownOrNot } from '../schema/appModel.js';
+import { removeEventsByAppId } from '../schema/eventModel.js';
 import { checkAndNotifyDowntime } from '../util/downtimeNotificationEnsurer.js';
 
 /**
@@ -118,24 +121,68 @@ async function getAppsByOwnerEndpoint(req, res) {
 }
 
 /**
- * Delete an app by id.
+ * Delete an app by id, along with all its associated events.
  * @route DELETE /api/apps/:id
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  * @returns {Promise<void>}
  */
 async function deleteAppEndpoint(req, res) {
+  const existing = await getAppById(req.params.id);
+  if (!existing) {
+    res.status(404).json({ error: 'App not found' });
+    return;
+  }
+
+  await removeEventsByAppId(req.params.id);
   const app = await deleteAppById(req.params.id);
+
+  const safeApp = app.toObject();
+  delete safeApp.apiKey;
+
+  res.status(200).json({ app: safeApp });
+}
+
+/**
+ * Return the API key for an app.
+ * @route GET /api/apps/:id/apikey
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ */
+async function getAppApiKeyEndpoint(req, res) {
+  const app = await getAppByIdWithApiKey(req.params.id);
 
   if (!app) {
     res.status(404).json({ error: 'App not found' });
     return;
   }
 
-  const safeApp = app.toObject();
-  delete safeApp.apiKey;
+  res.status(200).json({ apiKey: app.apiKey });
+}
 
-  res.status(200).json({ app: safeApp });
+/**
+ * Update the name and/or url of an app.
+ * @route PATCH /api/apps/:id
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ */
+async function updateAppEndpoint(req, res) {
+  try {
+    const payload = req.fields || req.body;
+    const app = await updateAppById(req.params.id, payload);
+
+    if (!app) {
+      res.status(404).json({ error: 'App not found' });
+      return;
+    }
+
+    res.status(200).json({ app });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'An unknown error occurred';
+    res.status(400).json({ error: message });
+  }
 }
 
 /**
@@ -173,6 +220,8 @@ export {
   createAppEndpoint,
   deleteAppEndpoint,
   forceStatusEndpoint,
+  getAppApiKeyEndpoint,
   getAppEndpoint,
   getAppsByOwnerEndpoint,
+  updateAppEndpoint,
 };

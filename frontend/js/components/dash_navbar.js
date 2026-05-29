@@ -93,7 +93,7 @@ class WatchTowerDashNavbar extends WatchTowerBaseElement {
                     </ul>
 
                     <div class="nav-actions">
-                        <a href="${settingsHref}" class="settings-link" aria-label="App settings">
+                        <a href="${settingsHref}" class="settings-link${active === 'settings' ? ' settings-link-active' : ''}" aria-label="App settings">
                             <img class="settings-icon" src="${settingsIconSrc}" alt="">
                         </a>
                     </div>
