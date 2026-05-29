@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="preload" href="../styling/navbar.css" as="style">
+    <link rel="preload" href="../styling/dash_navbar.css" as="style">
+    <link rel="stylesheet" href="../styling/base.css">
+    <link rel="stylesheet" href="../styling/dashboard.css">
+    <link rel="stylesheet" href="../styling/settings.css">
+</head>
+
+<body class="container">
+    <watchtower-navbar logged-in></watchtower-navbar>
+    <watchtower-dash-navbar active="settings"></watchtower-dash-navbar>
+
+    <main class="main-dash">
+        <div class="settings-panels">
+
+            <section class="settings-panel">
+                <h2 class="settings-panel-title">App Info</h2>
+                <form id="settings-info-form" class="settings-form" novalidate>
+                    <div class="settings-field">
+                        <label class="settings-label" for="settings-name">App Name</label>
+                        <input class="settings-input" id="settings-name" type="text" name="name"
+                            placeholder="My App" autocomplete="off" required>
+                    </div>
+                    <div class="settings-field">
+                        <label class="settings-label" for="settings-url">URL <span class="settings-optional">(optional)</span></label>
+                        <input class="settings-input" id="settings-url" type="url" name="url"
+                            placeholder="https://example.com" autocomplete="off">
+                    </div>
+                    <div class="settings-form-footer">
+                        <p class="settings-feedback" id="settings-save-feedback" aria-live="polite"></p>
+                        <button class="settings-btn settings-btn-primary" type="submit" id="settings-save-btn">Save Changes</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="settings-panel">
+                <h2 class="settings-panel-title">API Key</h2>
+                <p class="settings-panel-description">Include this key in your collector script to send events to WatchTower.</p>
+                <div class="settings-apikey-wrapper">
+                    <input class="settings-input settings-apikey-input" id="settings-apikey" type="text"
+                        readonly aria-label="API Key" value="Loading...">
+                    <button class="settings-btn-copy" id="settings-copy-btn" type="button"
+                        aria-label="Copy API key">
+                        <img src="../assets/copy-icon.svg" class="copy-icon" alt="">
+                    </button>
+                </div>
+                <p class="settings-feedback" id="settings-copy-feedback" aria-live="polite"></p>
+            </section>
+
+            <section class="settings-panel settings-panel-danger">
+                <h2 class="settings-panel-title settings-panel-title-danger">Danger Zone</h2>
+                <p class="settings-panel-description">Permanently delete this app and all its associated events. This action cannot be undone.</p>
+                <button class="settings-btn settings-btn-danger" id="settings-delete-btn" type="button">Delete App</button>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Confirmation modal -->
+    <div class="settings-modal-backdrop" id="settings-modal-backdrop" hidden>
+        <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+            <h2 class="settings-modal-title" id="settings-modal-title">Delete App?</h2>
+            <p class="settings-modal-body">This will permanently delete <strong id="settings-modal-app-name"></strong> and all its events. There is no undo.</p>
+            <div class="settings-modal-actions">
+                <button class="settings-btn settings-btn-secondary" id="settings-modal-cancel">Cancel</button>
+                <button class="settings-btn settings-btn-danger" id="settings-modal-confirm">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/components/wt-base-element.js"></script>
+    <script src="../js/components/navbar.js"></script>
+    <script src="../js/components/dash_navbar.js"></script>
+    <script src="../js/utils.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+    <script src="../js/settings.js" defer></script>
+</body>
+
+</html>

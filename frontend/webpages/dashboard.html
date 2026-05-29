@@ -9,6 +9,7 @@
     <!-- Preconnect to external chart CDN before loading Chart.js -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
+    <link rel="preload" href="../styling/navbar.css" as="style">
     <link rel="preload" href="../styling/dash_navbar.css" as="style">
     <link rel="stylesheet" href="../styling/base.css">
     <link rel="stylesheet" href="../styling/dashboard.css">
@@ -16,6 +17,7 @@
 </head>
 
 <body class="container">
+    <watchtower-navbar logged-in></watchtower-navbar>
     <watchtower-dash-navbar active="home"></watchtower-dash-navbar>
 
     <div class="main-dash">
@@ -183,6 +185,7 @@
         </details>
     </div>
     <script src="../js/components/wt-base-element.js"></script>
+    <script src="../js/components/navbar.js"></script>
     <script src="../js/components/wt-health-score.js"></script>
     <script src="../js/components/wt-metric-card.js"></script>
     <script src="../js/components/dash_navbar.js"></script>

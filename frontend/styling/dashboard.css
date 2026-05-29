@@ -34,7 +34,7 @@ body {
 .main-dash {
   margin-left: 0;
   padding: 28px;
-  padding-top: calc(64px + 28px);
+  padding-top: calc(68px + 48px + 28px);
   display: grid;
   gap: 24px;
 }
@@ -42,7 +42,7 @@ body {
 .standalone-main {
   margin-left: 0;
   padding: 28px;
-  padding-top: calc(64px + 28px);
+  padding-top: calc(68px + 48px + 28px);
   display: grid;
   gap: 24px;
 }

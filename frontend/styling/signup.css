@@ -37,28 +37,6 @@ body {
   grid-template-rows: auto 1fr;
 }
 
-.auth-header {
-  width: 100%;
-  padding: 16px 0 0 28px;
-}
-
-.brand-link {
-  width: 170px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  line-height: 0;
-}
-
-.brand-link img {
-  width: 170px;
-  height: 30px;
-  display: block;
-  object-fit: contain;
-  object-position: left center;
-  transform: translateY(-4px);
-}
-
 .signup-shell {
   width: min(100% - 48px, 1240px);
   margin: 0 auto;
@@ -248,20 +226,6 @@ body {
 }
 
 @media (width <= 620px) {
-  .auth-header {
-    padding: 14px 0 0 16px;
-  }
-
-  .brand-link,
-  .brand-link img {
-    width: 154px;
-  }
-
-  .brand-link img {
-    height: 28px;
-    transform: translateY(-3px);
-  }
-
   .signup-shell {
     width: min(100% - 28px, 520px);
     padding-top: 2rem;
@@ -287,7 +251,6 @@ body {
 }
 
 @media (width <= 700px) {
-  .site-nav,
   .signup-card {
     backdrop-filter: none;
   }

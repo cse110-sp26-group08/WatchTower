@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Performance Metrics</title>
+    <link rel="preload" href="../styling/navbar.css" as="style">
     <link rel="preload" href="../styling/dash_navbar.css" as="style">
     <link rel="stylesheet" href="../styling/base.css">
     <link rel="stylesheet" href="../styling/dashboard.css">
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body class="container">
+    <watchtower-navbar logged-in></watchtower-navbar>
     <watchtower-dash-navbar active="performance"></watchtower-dash-navbar>
 
     <main class="standalone-main">
@@ -157,6 +159,7 @@
     </main>
 
     <script src="../js/components/wt-base-element.js"></script>
+    <script src="../js/components/navbar.js"></script>
     <script src="../js/components/wt-kpi-card.js"></script>
     <script src="../js/components/wt-insight-item.js"></script>
     <script src="../js/components/dash_navbar.js"></script>

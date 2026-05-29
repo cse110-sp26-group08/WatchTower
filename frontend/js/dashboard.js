@@ -603,6 +603,8 @@ function getResponseTimes(events) {
 
 function setProjectName(name) {
     document.getElementById('status-project').textContent = name;
+    const dashNav = document.querySelector('watchtower-dash-navbar');
+    if (dashNav) dashNav.setAttribute('app-name', name || '');
 }
 
 function setStatus(status, description, detail) {

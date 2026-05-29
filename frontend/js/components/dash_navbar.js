@@ -8,9 +8,6 @@ const defaultDashNavStyleBase = dashNavScriptUrl
 const isDashNavProjectRootStaticServer = dashNavScriptUrl
     && new URL(dashNavScriptUrl).pathname.endsWith('/frontend/js/components/dash_navbar.js');
 
-const defaultDashNavHomeHref = isDashNavProjectRootStaticServer
-    ? new URL('../../webpages/index.html', dashNavScriptUrl).href
-    : '/';
 const defaultDashNavDashboardHref = isDashNavProjectRootStaticServer
     ? new URL('../../webpages/dashboard.html', dashNavScriptUrl).href
     : '/dashboard';
@@ -23,11 +20,25 @@ const defaultDashNavErrorsHref = isDashNavProjectRootStaticServer
 const defaultDashNavPerformanceHref = isDashNavProjectRootStaticServer
     ? new URL('../../webpages/advanced_performance_metrics.html', dashNavScriptUrl).href
     : '/advanced-performance-metrics';
+const defaultDashNavSettingsHref = isDashNavProjectRootStaticServer
+    ? new URL('../../webpages/settings.html', dashNavScriptUrl).href
+    : '/settings';
 
 class WatchTowerDashNavbar extends WatchTowerBaseElement {
+    static get observedAttributes() {
+        return ['app-name'];
+    }
+
     constructor() {
         super();
         this.updateScrolledState = this.updateScrolledState.bind(this);
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'app-name' && this.shadowRoot) {
+            const el = this.shadowRoot.querySelector('.app-name');
+            if (el) el.textContent = newValue || '';
+        }
     }
 
     connectedCallback() {
@@ -45,16 +56,17 @@ class WatchTowerDashNavbar extends WatchTowerBaseElement {
 
     render() {
         const active = this.getOption('active', 'home');
-        const homeHref = this.getOption('home-href', defaultDashNavHomeHref);
+        const appName = this.getAttribute('app-name') || '';
         const dashboardHref = this.getOption('dashboard-href', defaultDashNavDashboardHref);
         const appsHref = this.getOption('apps-href', defaultDashNavAppsHref);
         const errorsHref = this.getOption('errors-href', defaultDashNavErrorsHref);
         const performanceHref = this.getOption('performance-href', defaultDashNavPerformanceHref);
+        const settingsHref = this.getOption('settings-href', defaultDashNavSettingsHref);
         const stylesheetHref = this.getStylePath('dash_navbar.css', defaultDashNavStyleBase);
+        const settingsIconSrc = this.getAssetPath('settings-icon.svg', defaultDashNavAssetBase);
 
         const navItems = [
             { key: 'home', label: 'Home', href: dashboardHref },
-            { key: 'projects', label: 'Projects', href: appsHref },
             { key: 'errors', label: 'Errors', href: errorsHref },
             { key: 'performance', label: 'Performance', href: performanceHref },
         ];
@@ -65,12 +77,15 @@ class WatchTowerDashNavbar extends WatchTowerBaseElement {
 
         this.shadowRoot.innerHTML = `
             <link rel="stylesheet" href="${stylesheetHref}">
-            <header class="site-header">
-                <nav class="site-nav" aria-label="Dashboard navigation">
-                    <div class="brand-mark">
-                        <a href="${homeHref}" class="brand-link" aria-label="WatchTower home">
-                            <img class="brand-logo" src="${this.getAssetPath('watchtower-logo.png', defaultDashNavAssetBase)}" alt="WatchTower">
+            <header class="sub-header">
+                <nav class="sub-nav" aria-label="App navigation">
+                    <div class="nav-back">
+                        <a href="${appsHref}" class="back-link" aria-label="Back to projects">
+                            <svg class="back-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                                <path d="M12 5l-5 5 5 5"/>
+                            </svg>
                         </a>
+                        <span class="app-name">${appName}</span>
                     </div>
 
                     <ul class="nav-links">
@@ -78,19 +93,17 @@ class WatchTowerDashNavbar extends WatchTowerBaseElement {
                     </ul>
 
                     <div class="nav-actions">
-                        <button type="button" class="button button-logout" id="dash-logout-btn">Log out</button>
+                        <a href="${settingsHref}" class="settings-link${active === 'settings' ? ' settings-link-active' : ''}" aria-label="App settings">
+                            <img class="settings-icon" src="${settingsIconSrc}" alt="">
+                        </a>
                     </div>
                 </nav>
             </header>
         `;
-
-        this.shadowRoot.querySelector('#dash-logout-btn').addEventListener('click', () => {
-            watchtowerLogout(homeHref);
-        });
     }
 
     updateScrolledState() {
-        const header = this.shadowRoot ? this.shadowRoot.querySelector('.site-header') : null;
+        const header = this.shadowRoot ? this.shadowRoot.querySelector('.sub-header') : null;
         if (header) {
             header.classList.toggle('is-scrolled', window.scrollY > 2);
         }
