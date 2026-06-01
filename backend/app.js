@@ -51,7 +51,7 @@ const telemetryCors = cors({
   origin: true,
   methods: ['POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
-  credentials: false,
+  credentials: true,
 });
 
 /**
