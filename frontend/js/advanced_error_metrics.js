@@ -1,86 +1,260 @@
-/*
- * This file is loaded alongside dashboard.js on the Advanced Error Metrics page.
- * It reads dashboardState and utility functions from dashboard.js's global scope
- * (both scripts run without ES modules, so they share the same window scope).
- *
- * The window.* assignments below are page-level overrides intended to intercept
- * dashboard.js's render cycle. Currently dashboard.js calls its own local render
- * functions, so these overrides act as explicit declarations of which functions
- * this page customises. If dashboard.js is ever updated to dispatch via window.*,
- * these overrides will take effect automatically.
- *
- * window.startAutoRefresh is intentionally a no-op — this page does not use
- * the auto-refresh interval that the main dashboard page runs.
- */
-/* global dashboardState, createOrUpdateChart, escapeHtml, filterErrors, formatTimestamp */
+/* global escapeHtml */
+
+const RANGE_MS = {
+  '24h': 24 * 60 * 60 * 1000,
+  '7d': 7 * 24 * 60 * 60 * 1000,
+  '30d': 30 * 24 * 60 * 60 * 1000,
+};
 
 const typeFilter = document.getElementById('type-filter');
-let lastDashboardStateRef = null;
-
-window.startAutoRefresh = function () {};
-
-window.renderMetrics = function renderMetrics(_allErrors, filteredErrors) {
-  renderSeverityBreakdown(filteredErrors || []);
+let advancedState = {
+  app: null,
+  errors: [],
 };
+let errorChart = null;
+let refreshAbortController = null;
 
-window.renderLogs = function renderLogs() {
-  renderErrorsTable();
-};
-
-window.setProjectName = function setProjectName(name) {
-  setElementText('errors-project-name', name || 'Selected project');
-  const layout = document.querySelector('wt-dash-layout');
-  if (layout) layout.setAttribute('app-name', name || '');
-};
-
-window.setStatus = function setStatus(status, description, detail) {
-  const fallbackStatus = status === 'DOWN'
-    ? 'Attention needed for the selected project.'
-    : 'Live telemetry active for the selected project.';
-
-  setElementText('errors-page-status', description || fallbackStatus);
-  setElementText('errors-page-detail', detail || 'Waiting for recent error data.');
-};
-
-window.renderEmptyLogs = function renderEmptyLogs(message) {
-  const emptyMessage = message || 'No error data available.';
-
-  setErrorsTableEmpty(emptyMessage);
-  setErrorsTableSummary(emptyMessage);
-  resetSeverityBreakdown();
-  updateTypeFilter([]);
-  updateLastUpdated(null);
-  setElementText('graph-summary', emptyMessage);
-};
-
-if (typeFilter) {
-  typeFilter.addEventListener('change', () => {
-    renderErrorsTable();
+document.addEventListener('DOMContentLoaded', () => {
+  initAdvancedErrorMetrics().catch((error) => {
+    console.error('Advanced error metrics failed to initialize:', error);
+    setProjectName('Selected project');
+    setStatus('DOWN', 'Could not load error metrics.', 'No backend error data was available for this page.');
+    renderEmptyState('Could not load error data.');
   });
-}
+});
 
-window.renderGraph = function renderGraph(filteredErrors) {
-  const range = document.getElementById('time-range')?.value || '24h';
-  const chartCanvas = document.getElementById('errors-chart-canvas-shell');
-  const graphTitle = document.getElementById('graph-title');
-  const graphSummary = document.getElementById('graph-summary');
-
-  updateTypeFilter(dashboardState?.errors || []);
-  if (dashboardState !== lastDashboardStateRef) {
-    updateLastUpdated(new Date());
-    lastDashboardStateRef = dashboardState;
-  }
-
-  if (!graphTitle || !graphSummary || !chartCanvas) {
+async function initAdvancedErrorMetrics() {
+  bindAdvancedErrorControls();
+  const selectedApp = await resolveSelectedApp();
+  if (!selectedApp?.id) {
+    setProjectName('Selected project');
+    setStatus('DOWN', 'No selected project.', 'Return to app selection and choose a project.');
+    renderEmptyState('No selected app.');
     return;
   }
 
-  chartCanvas.hidden = false;
+  setProjectName(selectedApp.name || 'Selected project');
+  setStatus('UP', `Checking ${selectedApp.name || 'project'}...`, 'Refreshing error telemetry from the backend.');
+  await refreshAdvancedErrorMetrics(selectedApp, { force: true });
+}
 
+function bindAdvancedErrorControls() {
+  document.getElementById('refresh-dashboard')?.addEventListener('click', async () => {
+    const selectedApp = advancedState.app || await resolveSelectedApp();
+    if (selectedApp?.id) {
+      await refreshAdvancedErrorMetrics(selectedApp, { force: true });
+    }
+  });
+
+  document.getElementById('time-range')?.addEventListener('change', redrawFromState);
+  document.getElementById('severity-filter')?.addEventListener('change', redrawFromState);
+  typeFilter?.addEventListener('change', redrawFromState);
+
+  document.addEventListener('visibilitychange', async () => {
+    if (document.hidden) {
+      abortActiveRefresh();
+      return;
+    }
+
+    const selectedApp = advancedState.app || await resolveSelectedApp();
+    if (selectedApp?.id) {
+      await refreshAdvancedErrorMetrics(selectedApp, { force: true });
+    }
+  });
+
+  window.addEventListener('beforeunload', abortActiveRefresh);
+}
+
+async function refreshAdvancedErrorMetrics(selectedApp, options = {}) {
+  if (!selectedApp?.id || document.hidden) {
+    return;
+  }
+
+  if (refreshAbortController) {
+    if (!options.force) {
+      return;
+    }
+    refreshAbortController.abort();
+  }
+
+  refreshAbortController = new AbortController();
+  const { signal } = refreshAbortController;
+
+  setStatus('UP', `Checking ${selectedApp.name || 'project'}...`, 'Refreshing error telemetry from the backend.');
+
+  try {
+    const [appResponse, errorResponse] = await Promise.all([
+      fetch(`/api/apps/${selectedApp.id}`, { cache: 'no-store', signal }),
+      fetch(`/api/events/error/apps/${selectedApp.id}`, { cache: 'no-store', signal }),
+    ]);
+
+    const [appData, errorData] = await Promise.all([
+      appResponse.json(),
+      errorResponse.json(),
+    ]);
+
+    const app = appResponse.ok && appData.app
+      ? {
+        ...appData.app,
+        url: appData.app.url || selectedApp.url,
+      }
+      : selectedApp;
+
+    const errors = Array.isArray(errorData.events)
+      ? errorData.events.filter((event) => event.type === 'error' || !event.type)
+      : [];
+
+    advancedState = { app, errors };
+    localStorage.setItem('watchtowerSelectedApp', JSON.stringify(app));
+    redrawFromState();
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      console.error('Error refreshing advanced error metrics:', error);
+      setStatus('DOWN', 'Could not refresh error metrics.', 'The latest backend error events could not be loaded.');
+      renderEmptyState('Could not load error data.');
+    }
+  } finally {
+    if (refreshAbortController?.signal === signal) {
+      refreshAbortController = null;
+    }
+  }
+}
+
+function abortActiveRefresh() {
+  if (refreshAbortController) {
+    refreshAbortController.abort();
+    refreshAbortController = null;
+  }
+}
+
+function redrawFromState() {
+  const { app, errors } = advancedState;
+
+  if (!app) {
+    renderEmptyState('No selected app.');
+    return;
+  }
+
+  setProjectName(app.name || 'Selected project');
+  updateTypeFilter(errors);
+
+  const filteredErrors = getFilteredErrors(errors);
+
+  renderSeverityBreakdown(filteredErrors);
+  renderErrorsTable(filteredErrors);
+  renderGraph(filteredErrors);
+  renderStatus(app, filteredErrors, errors);
+  updateLastUpdated(new Date());
+}
+
+function renderStatus(app, filteredErrors, allErrors) {
+  const criticalErrors = filteredErrors.filter((event) => normalizeSeverity(event.metadata?.severity) === 'critical');
+
+  if (criticalErrors.length > 0) {
+    setStatus(
+      'UP',
+      `${app.name || 'Project'} has critical errors to review.`,
+      `${criticalErrors.length} critical error${criticalErrors.length === 1 ? '' : 's'} matched the current filters.`,
+    );
+    return;
+  }
+
+  if (filteredErrors.length > 0) {
+    setStatus(
+      'UP',
+      `${app.name || 'Project'} has recent error activity.`,
+      `${filteredErrors.length} error${filteredErrors.length === 1 ? '' : 's'} matched the current filters.`,
+    );
+    return;
+  }
+
+  if (allErrors.length > 0) {
+    setStatus(
+      'UP',
+      `${app.name || 'Project'} has no matching errors in this range.`,
+      'Try changing the time range, severity, or type filters.',
+    );
+    return;
+  }
+
+  setStatus(
+    'UP',
+    `${app.name || 'Project'} has no recorded error events.`,
+    'The backend returned no error events for this application yet.',
+  );
+}
+
+async function resolveSelectedApp() {
+  const queryAppId = new URLSearchParams(window.location.search).get('appId');
+  const storedApp = readJsonStorage('watchtowerSelectedApp');
+  if (queryAppId) {
+    try {
+      const response = await fetch(`/api/apps/${queryAppId}`, { cache: 'no-store' });
+      const data = await response.json();
+      if (response.ok && data.app) {
+        const resolvedUrl = data.app.url || (storedApp?.id === data.app.id ? storedApp.url : undefined);
+        const appWithUrl = { ...data.app, url: resolvedUrl };
+        localStorage.setItem('watchtowerSelectedApp', JSON.stringify(appWithUrl));
+        return appWithUrl;
+      }
+    } catch (error) {
+      console.error('Failed to resolve selected app:', error);
+    }
+  }
+
+  return storedApp;
+}
+
+function readJsonStorage(key) {
+  const rawValue = localStorage.getItem(key);
+  if (!rawValue) {
+    return null;
+  }
+  try {
+    return JSON.parse(rawValue);
+  } catch (error) {
+    console.error(`Failed to parse ${key}:`, error);
+    localStorage.removeItem(key);
+    return null;
+  }
+}
+
+function getFilteredErrors(errors) {
+  const range = document.getElementById('time-range')?.value || '24h';
+  const severity = document.getElementById('severity-filter')?.value || 'all';
+  const selectedType = typeFilter?.value || 'all';
+  const cutoff = Date.now() - (RANGE_MS[range] || RANGE_MS['24h']);
+
+  let filteredErrors = errors.filter((event) => {
+    const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
+    const eventSeverity = normalizeSeverity(event.metadata?.severity);
+    const withinRange = Number.isFinite(timestamp) && timestamp >= cutoff;
+    const severityMatch = severity === 'all' || eventSeverity === severity;
+    return withinRange && severityMatch;
+  });
+
+  if (selectedType !== 'all') {
+    filteredErrors = filteredErrors.filter((event) => {
+      return normalizeErrorType(event.metadata?.errorType) === selectedType;
+    });
+  }
+
+  return filteredErrors;
+}
+
+function renderGraph(filteredErrors) {
+  const range = document.getElementById('time-range')?.value || '24h';
+  const chartCanvasShell = document.getElementById('errors-chart-canvas-shell');
+  const graphTitle = document.getElementById('graph-title');
+  const graphSummary = document.getElementById('graph-summary');
+  if (!chartCanvasShell || !graphTitle || !graphSummary) {
+    return;
+  }
   graphTitle.textContent = 'Error volume by severity';
   graphSummary.textContent = `${filteredErrors.length} error${filteredErrors.length === 1 ? '' : 's'} in the selected range.`;
+  chartCanvasShell.hidden = false;
   renderSeverityLineChart(filteredErrors, range);
-};
+}
 
 function renderSeverityLineChart(filteredErrors, range) {
   const severities = ['critical', 'high', 'medium', 'low'];
@@ -90,17 +264,14 @@ function renderSeverityLineChart(filteredErrors, range) {
     medium: '#eab308',
     low: '#16a34a',
   };
-
-  const allBuckets = createErrorIntervalBuckets(range);
-
+  const bucketSet = createErrorIntervalBuckets(range);
   const datasets = severities.map((severityLevel) => {
     const severityErrors = filteredErrors.filter((event) => {
       return normalizeSeverity(event.metadata?.severity) === severityLevel;
     });
-
     return {
       label: severityLevel.charAt(0).toUpperCase() + severityLevel.slice(1),
-      data: countErrorsInBuckets(severityErrors, allBuckets),
+      data: countErrorsInBuckets(severityErrors, bucketSet),
       borderColor: colors[severityLevel],
       backgroundColor: `${colors[severityLevel]}22`,
       tension: 0,
@@ -110,9 +281,42 @@ function renderSeverityLineChart(filteredErrors, range) {
   });
 
   createOrUpdateChart('line', {
-    labels: allBuckets.labels,
+    labels: bucketSet.labels,
     datasets,
   });
+}
+
+function createOrUpdateChart(type, data) {
+  const context = document.getElementById('dashboard-chart');
+  if (!context || !window.Chart) {
+    return;
+  }
+  destroyChart();
+  errorChart = new window.Chart(context, {
+    type,
+    data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+}
+
+function destroyChart() {
+  if (errorChart) {
+    errorChart.destroy();
+    errorChart = null;
+  }
 }
 
 function createErrorIntervalBuckets(range) {
@@ -183,12 +387,10 @@ function renderSeverityBreakdown(filteredErrors) {
     medium: 0,
     low: 0,
   };
-
   filteredErrors.forEach((event) => {
     const severity = normalizeSeverity(event.metadata?.severity);
     counts[severity] += 1;
   });
-
   setElementText('sev-critical', String(counts.critical));
   setElementText('sev-high', String(counts.high));
   setElementText('sev-medium', String(counts.medium));
@@ -204,24 +406,7 @@ function resetSeverityBreakdown() {
   setElementText('sev-total', '0');
 }
 
-function renderErrorsTable() {
-  if (!dashboardState) {
-    setErrorsTableSummary('No error data available.');
-    return;
-  }
-
-  const range = document.getElementById('time-range')?.value || '24h';
-  const severity = document.getElementById('severity-filter')?.value || 'all';
-  const selectedType = typeFilter?.value || 'all';
-
-  let filteredErrors = filterErrors(dashboardState.errors, range, severity);
-
-  if (selectedType !== 'all') {
-    filteredErrors = filteredErrors.filter((event) => {
-      return normalizeErrorType(event.metadata?.errorType) === selectedType;
-    });
-  }
-
+function renderErrorsTable(filteredErrors) {
   const tableBody = document.getElementById('errors-table-body');
 
   if (!tableBody) {
@@ -236,51 +421,102 @@ function renderErrorsTable() {
   }
 
   setErrorsTableSummary(`${filteredErrors.length} matching error${filteredErrors.length === 1 ? '' : 's'} in the selected range.`);
-
-  tableBody.innerHTML = filteredErrors
+  const fragment = document.createDocumentFragment();
+  filteredErrors
     .slice()
     .sort((leftEvent, rightEvent) => {
       return Date.parse(rightEvent.timestamp || rightEvent.receivedAt || 0)
         - Date.parse(leftEvent.timestamp || leftEvent.receivedAt || 0);
     })
-    .map((event, index) => {
+    .forEach((event, index) => {
       const severityLabel = normalizeSeverity(event.metadata?.severity);
-      const errorType = escapeHtml(normalizeErrorType(event.metadata?.errorType));
-      const message = escapeHtml(event.metadata?.message || 'Error event');
-      const url = escapeHtml(event.url || '-');
+      const errorType = normalizeErrorType(event.metadata?.errorType);
+      const message = event.metadata?.message || 'Error event';
+      const url = event.url || '-';
       const stack = event.metadata?.stack;
-      const time = escapeHtml(formatTimestamp(event.timestamp || event.receivedAt));
+      const time = formatTimestamp(event.timestamp || event.receivedAt);
 
-      return `
-        <tr class="error-row">
-          <td class="time-column" style="font-size:0.82rem;color:var(--muted);">${time}</td>
-          <td class="severity-column"><span class="severity-badge sev-${severityLabel}">${severityLabel}</span></td>
-          <td class="compact-left-column"><span class="error-type-badge">${errorType}</span></td>
-          <td class="message-column" style="font-size:0.88rem;">${message}</td>
-          <td class="url-cell" title="${url}">${url}</td>
-          <td class="stack-column">${stack
-    ? `<button class="stack-toggle" type="button" onclick="toggleStack(${index})">view</button>`
-    : '-'
-}</td>
-        </tr>
-        ${stack
-    ? `<tr>
-          <td colspan="6" style="padding:0 10px 14px;">
-            <div class="stack-trace" id="stack-${index}">${escapeHtml(stack)}</div>
-          </td>
-        </tr>`
-    : ''
-}
-      `;
-    })
-    .join('');
+      const row = document.createElement('tr');
+      row.className = 'error-row';
+
+      const timeCell = document.createElement('td');
+      timeCell.className = 'time-column';
+      timeCell.style.fontSize = '0.82rem';
+      timeCell.style.color = 'var(--muted)';
+      timeCell.textContent = time;
+      row.appendChild(timeCell);
+
+      const severityCell = document.createElement('td');
+      severityCell.className = 'severity-column';
+      const severityBadge = document.createElement('span');
+      severityBadge.className = `severity-badge sev-${severityLabel}`;
+      severityBadge.textContent = severityLabel;
+      severityCell.appendChild(severityBadge);
+      row.appendChild(severityCell);
+
+      const typeCell = document.createElement('td');
+      typeCell.className = 'compact-left-column';
+      const typeBadge = document.createElement('span');
+      typeBadge.className = 'error-type-badge';
+      typeBadge.textContent = errorType;
+      typeCell.appendChild(typeBadge);
+      row.appendChild(typeCell);
+
+      const messageCell = document.createElement('td');
+      messageCell.className = 'message-column';
+      messageCell.style.fontSize = '0.88rem';
+      messageCell.textContent = message;
+      row.appendChild(messageCell);
+
+      const urlCell = document.createElement('td');
+      urlCell.className = 'url-cell';
+      urlCell.title = url;
+      urlCell.textContent = url;
+      row.appendChild(urlCell);
+
+      const stackCell = document.createElement('td');
+      stackCell.className = 'stack-column';
+
+      if (stack) {
+        const stackButton = document.createElement('button');
+        stackButton.className = 'stack-toggle';
+        stackButton.type = 'button';
+        stackButton.textContent = 'view';
+        stackButton.addEventListener('click', () => {
+          toggleStack(index);
+        });
+        stackCell.appendChild(stackButton);
+      } else {
+        stackCell.textContent = '-';
+      }
+
+      row.appendChild(stackCell);
+      fragment.appendChild(row);
+
+      if (stack) {
+        const stackRow = document.createElement('tr');
+        const stackRowCell = document.createElement('td');
+        stackRowCell.colSpan = 6;
+        stackRowCell.style.padding = '0 10px 14px';
+
+        const stackTrace = document.createElement('div');
+        stackTrace.className = 'stack-trace';
+        stackTrace.id = `stack-${index}`;
+        stackTrace.textContent = stack;
+
+        stackRowCell.appendChild(stackTrace);
+        stackRow.appendChild(stackRowCell);
+        fragment.appendChild(stackRow);
+      }
+    });
+
+  tableBody.replaceChildren(fragment);
 }
 
 function updateTypeFilter(errors) {
   if (!typeFilter) {
     return;
   }
-
   const previousValue = typeFilter.value || 'all';
   const errorTypes = Array.from(new Set(
     errors.map((event) => normalizeErrorType(event.metadata?.errorType)),
@@ -296,14 +532,45 @@ function updateTypeFilter(errors) {
     : 'all';
 }
 
+function renderEmptyState(message) {
+  setErrorsTableEmpty(message);
+  setErrorsTableSummary(message);
+  resetSeverityBreakdown();
+  updateTypeFilter([]);
+  updateLastUpdated(null);
+  setElementText('graph-summary', message);
+  destroyChart();
+}
+
+function setProjectName(name) {
+  setElementText('errors-project-name', name || 'Selected project');
+  const layout = document.querySelector('wt-dash-layout');
+  if (layout) {
+    layout.setAttribute('app-name', name || '');
+  }
+}
+
+function setStatus(status, description, detail) {
+  const fallbackStatus = status === 'DOWN'
+    ? 'Attention needed for the selected project.'
+    : 'Live telemetry active for the selected project.';
+  setElementText('errors-page-status', description || fallbackStatus);
+  setElementText('errors-page-detail', detail || 'Waiting for recent error data.');
+}
+
 function setErrorsTableEmpty(message) {
   const tableBody = document.getElementById('errors-table-body');
 
   if (!tableBody) {
     return;
   }
-
-  tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">${escapeHtml(message)}</td></tr>`;
+  const row = document.createElement('tr');
+  const cell = document.createElement('td');
+  cell.colSpan = 6;
+  cell.className = 'empty-state';
+  cell.textContent = message;
+  row.appendChild(cell);
+  tableBody.replaceChildren(row);
 }
 
 function setErrorsTableSummary(message) {
@@ -312,7 +579,6 @@ function setErrorsTableSummary(message) {
 
 function updateLastUpdated(date) {
   const lastUpdated = document.getElementById('errors-last-updated');
-
   if (!lastUpdated) {
     return;
   }
@@ -321,7 +587,6 @@ function updateLastUpdated(date) {
     lastUpdated.textContent = 'Not refreshed yet';
     return;
   }
-
   lastUpdated.textContent = `Last refreshed ${date.toLocaleTimeString([], {
     hour: 'numeric',
     minute: '2-digit',
@@ -339,17 +604,27 @@ function setElementText(id, value) {
 
 function normalizeSeverity(value) {
   const normalizedValue = String(value || '').toLowerCase();
-
   if (['critical', 'high', 'medium', 'low'].includes(normalizedValue)) {
     return normalizedValue;
   }
-
   return 'low';
 }
 
 function normalizeErrorType(value) {
   const trimmedValue = String(value || '').trim();
   return trimmedValue || 'Error';
+}
+
+function formatTimestamp(value) {
+  if (!value) {
+    return 'Unknown time';
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'Unknown time';
+  }
+
+  return date.toLocaleString();
 }
 
 function toggleStack(index) {
