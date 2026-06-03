@@ -152,7 +152,6 @@ class WatchTowerNavbar extends WatchTowerBaseElement {
 
     renderCompactHeader(variant) {
         const homeHref = this.getOption('home-href', defaultHomeHref);
-        const docsHref = this.getOption('docs-href', defaultDocsHref);
         const dashboardHref = this.getOption('dashboard-href', defaultDashboardHref);
         const appsHref = this.getOption('apps-href', defaultAppsHref);
         const settingsHref = this.getOption('settings-href', defaultSettingsHref);
