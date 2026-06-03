@@ -26,7 +26,7 @@ const defaultDashNavSettingsHref = isDashNavProjectRootStaticServer
 
 class WatchTowerDashNavbar extends WatchTowerBaseElement {
     static get observedAttributes() {
-        return ['app-name'];
+        return ['app-name', 'active'];
     }
 
     constructor() {
@@ -35,9 +35,8 @@ class WatchTowerDashNavbar extends WatchTowerBaseElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'app-name' && this.shadowRoot) {
-            const el = this.shadowRoot.querySelector('.app-name');
-            if (el) el.textContent = newValue || '';
+        if (oldValue !== newValue && this.shadowRoot) {
+            this.render();
         }
     }
 
