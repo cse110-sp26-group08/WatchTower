@@ -36,15 +36,6 @@ body {
   display: grid;
 }
 
-.signup-page > watchtower-navbar,
-.signup-page > .signup-shell {
-  grid-area: 1 / 1;
-}
-
-.signup-page > watchtower-navbar {
-  align-self: start;
-}
-
 .signup-shell {
   width: min(100% - 48px, 1240px);
   margin: 0 auto;
@@ -52,6 +43,15 @@ body {
   padding: 0;
   display: grid;
   place-items: center;
+}
+
+.signup-page > watchtower-navbar,
+.signup-page > .signup-shell {
+  grid-area: 1 / 1;
+}
+
+.signup-page > watchtower-navbar {
+  align-self: start;
 }
 
 .signup-card {

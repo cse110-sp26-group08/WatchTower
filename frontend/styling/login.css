@@ -33,15 +33,6 @@ body {
   display: grid;
 }
 
-.login-page > watchtower-navbar,
-.login-page > .login-shell {
-  grid-area: 1 / 1;
-}
-
-.login-page > watchtower-navbar {
-  align-self: start;
-}
-
 .login-shell {
   width: min(100% - 48px, 1240px);
   margin: 0 auto;
@@ -49,6 +40,15 @@ body {
   padding: 0;
   display: grid;
   place-items: center;
+}
+
+.login-page > watchtower-navbar,
+.login-page > .login-shell {
+  grid-area: 1 / 1;
+}
+
+.login-page > watchtower-navbar {
+  align-self: start;
 }
 
 .login-card {
