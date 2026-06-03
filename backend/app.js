@@ -127,6 +127,14 @@ function createApp() {
     res.sendFile(path.join(__dirname, '../frontend/webpages/docs.html'));
   });
 
+  app.get(['/privacy', '/privacy.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/privacy.html'));
+  });
+
+  app.get(['/terms', '/terms.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/terms.html'));
+  });
+
   app.post('/signup', async (req, res) => {
     try {
       const { username, email, password, confirmPassword } = req.fields || req.body;

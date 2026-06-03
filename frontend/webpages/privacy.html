@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - WatchTower</title>
+  <meta name="description" content="Read WatchTower's Privacy Policy to understand how we collect, process, and protect your account data, application metrics, and error logs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" href="../styling/navbar.css" as="style">
+  <link rel="preload" href="../styling/footer.css" as="style">
+  <link rel="stylesheet" href="../styling/base.css">
+  <link rel="stylesheet" href="../styling/legal.css">
+</head>
+
+<body class="legal-page">
+  <watchtower-navbar></watchtower-navbar>
+
+  <main class="legal-shell" id="main-content">
+    <section class="legal-hero" aria-label="Privacy Policy Hero">
+      <div class="legal-hero-copy">
+        <h1>Privacy Policy</h1>
+        <p class="legal-hero-description">
+          Last updated: June 3, 2026. Learn how we handle your information and respect your privacy.
+        </p>
+      </div>
+    </section>
+
+    <article class="legal-content-card" aria-label="Privacy Policy Content">
+      <table class="legal-meta-table" aria-label="Document Metadata">
+        <thead>
+          <tr>
+            <th>Effective Date</th>
+            <th>Version</th>
+            <th>Scope</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>June 3, 2026</td>
+            <td>v1.0.0</td>
+            <td>Global WatchTower users and connected applications</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="sec-introduction">1. Introduction</h2>
+      <p>
+        Welcome to WatchTower. We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, process, and protect your information when you register for an account, use the WatchTower dashboard, or integrate our monitoring script (<code>collector.js</code>) into your web applications.
+      </p>
+      <p>
+        By using WatchTower, you agree to the collection and use of information in accordance with this policy. If you do not agree with any terms in this policy, please do not access the services or integrate our collector.
+      </p>
+
+      <h2 id="sec-data-collection">2. Information We Collect</h2>
+      <p>
+        We collect data in two ways: information you provide to us directly, and metrics collected automatically from the applications you choose to monitor.
+      </p>
+      
+      <h3>A. Account and Registration Information</h3>
+      <ul>
+        <li><strong>Personal Details:</strong> When you register an account, we collect your name and email address.</li>
+        <li><strong>Credentials:</strong> We store salted and cryptographically hashed passwords. We never store plain-text passwords.</li>
+        <li><strong>App Metadata:</strong> We collect the names and URLs of the applications you register under your account to provision your API keys.</li>
+      </ul>
+
+      <h3>B. Application Metrics and Monitoring Data (via <code>collector.js</code>)</h3>
+      <p>
+        When you install our monitoring script in your application, it records and transmits the following metrics to our servers:
+      </p>
+      <ul>
+        <li><strong>JavaScript Errors:</strong> Unhandled exceptions, runtime errors, and promise rejections including error messages, stack traces, severity levels, and associated file locations.</li>
+        <li><strong>Performance Metrics:</strong> Page load speed, DOM Content Loaded (DCL) times, Time to First Byte (TTFB), and JavaScript memory usage.</li>
+        <li><strong>Network Latency:</strong> API response latency collected from standard <code>fetch()</code> requests.</li>
+        <li><strong>Contextual Environment Data:</strong> Browser user-agent strings (to identify operating systems and browser versions), release version tags, and URLs where events occurred. We do not track user IP addresses permanently or store cookies containing personal identifiers on your visitors' browsers.</li>
+      </ul>
+
+      <h2 id="sec-data-usage">3. How We Use Your Information</h2>
+      <p>
+        We use the collected information for the following specific purposes:
+      </p>
+      <ol>
+        <li>To provide, operate, and maintain the WatchTower dashboard.</li>
+        <li>To generate and display real-time metrics, system health charts, and error trace graphs.</li>
+        <li>To send automated email alerts regarding downtime or critical errors in your registered applications.</li>
+        <li>To troubleshoot dashboard issues, address support inquiries, and detect/prevent abuse.</li>
+        <li>To continuously optimize our metrics processing pipelines and script bundle sizes.</li>
+      </ol>
+
+      <h2 id="sec-data-sharing">4. Data Sharing and Third-Party Disclosures</h2>
+      <p>
+        We do not sell, rent, or trade your personal data or your application metrics to third parties. We share data only with third-party service providers who assist us in operating our platform, subject to strict confidentiality agreements:
+      </p>
+      <ul>
+        <li><strong>Hosting and Infrastructure:</strong> Our database and dashboard servers are hosted on secure cloud infrastructure providers.</li>
+        <li><strong>Email Dispatch:</strong> We share your email address and application health status with transactional email services solely to deliver critical system alerts and verify your account.</li>
+        <li><strong>Legal Compliance:</strong> We may disclose information if required to do so by law, court order, or government regulation.</li>
+      </ul>
+
+      <h2 id="sec-security">5. Data Security</h2>
+      <p>
+        The security of your data is paramount to us. We implement industry-standard protective measures:
+      </p>
+      <ul>
+        <li>All incoming and outgoing traffic is encrypted in transit using Secure Sockets Layer (SSL/TLS).</li>
+        <li>API keys are cryptographically generated and must be treated with the same confidentiality as passwords.</li>
+        <li>We enforce access control policies so that project metrics are only visible to the account that registered them.</li>
+      </ul>
+      <p>
+        While we strive to use commercially acceptable means to protect your information, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.
+      </p>
+
+      <h2 id="sec-user-rights">6. Your Rights and Data Retention</h2>
+      <p>
+        You retain full control over your account data. You can delete individual projects or request the complete deletion of your account at any time. Once an account or project is deleted, all corresponding historical metrics, error logs, and API credentials will be permanently purged from our active databases within 30 days.
+      </p>
+      <p>
+        If you are located in the European Economic Area (EEA) or California, you are entitled to statutory rights under GDPR and CCPA, including the right to request access to, correction of, or erasure of your personal data. To exercise these rights, please contact us.
+      </p>
+
+      <h2 id="sec-changes">7. Changes to This Policy</h2>
+      <p>
+        We may update our Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy on this page and updating the "Last updated" date at the top. We encourage you to review this page periodically to stay informed about how we protect your information.
+      </p>
+
+      <h2 id="sec-contact">8. Contact Us</h2>
+      <p>
+        If you have any questions or suggestions regarding this Privacy Policy, please contact our team at <a href="mailto:privacy@watchtower.dev">privacy@watchtower.dev</a>.
+      </p>
+    </article>
+  </main>
+
+  <watchtower-footer></watchtower-footer>
+
+  <script src="../js/components/wt-base-element.js"></script>
+  <script src="../js/components/navbar.js"></script>
+  <script src="../js/components/footer.js"></script>
+</body>
+
+</html>

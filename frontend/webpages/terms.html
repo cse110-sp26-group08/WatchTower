@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms & Conditions - WatchTower</title>
+  <meta name="description" content="Read WatchTower's Terms & Conditions to understand your rights, responsibilities, API usage guidelines, and service level agreements.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" href="../styling/navbar.css" as="style">
+  <link rel="preload" href="../styling/footer.css" as="style">
+  <link rel="stylesheet" href="../styling/base.css">
+  <link rel="stylesheet" href="../styling/legal.css">
+</head>
+
+<body class="legal-page">
+  <watchtower-navbar></watchtower-navbar>
+
+  <main class="legal-shell" id="main-content">
+    <section class="legal-hero" aria-label="Terms and Conditions Hero">
+      <div class="legal-hero-copy">
+        <h1>Terms &amp; Conditions</h1>
+        <p class="legal-hero-description">
+          Last updated: June 3, 2026. Please read these terms carefully before using our monitoring platform.
+        </p>
+      </div>
+    </section>
+
+    <article class="legal-content-card" aria-label="Terms and Conditions Content">
+      <table class="legal-meta-table" aria-label="Document Metadata">
+        <thead>
+          <tr>
+            <th>Effective Date</th>
+            <th>Version</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>June 3, 2026</td>
+            <td>v1.0.0</td>
+            <td>User Service Agreement</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="sec-agreement">1. Acceptance of Terms</h2>
+      <p>
+        By registering for, accessing, or using the WatchTower dashboard, or by embedding our tracking script (<code>collector.js</code>) in your web properties, you agree to be bound by these Terms &amp; Conditions. These terms form a legally binding agreement between you (the "User") and WatchTower.
+      </p>
+      <p>
+        If you are entering into these terms on behalf of a company, organization, or other legal entity, you represent that you have the authority to bind such entity to these terms. If you do not agree to these terms, you must not use or access the services.
+      </p>
+
+      <h2 id="sec-services">2. Description of Services</h2>
+      <p>
+        WatchTower is a developer-focused monitoring and analytics platform. The service provides:
+      </p>
+      <ul>
+        <li>Real-time application availability monitoring (uptime tracking).</li>
+        <li>Client-side JavaScript error and promise rejection reporting.</li>
+        <li>Page speed, network latency, and memory utilization analytics.</li>
+        <li>Email notifications when application availability drops or performance degrades.</li>
+      </ul>
+      <p>
+        We reserve the right to modify, suspend, or discontinue any aspect of the service at any time without prior notice or liability.
+      </p>
+
+      <h2 id="sec-accounts">3. Account Registration and Security</h2>
+      <p>
+        To access the dashboard, you must register a WatchTower account. You agree to:
+      </p>
+      <ol>
+        <li>Provide accurate, current, and complete information during registration.</li>
+        <li>Maintain the security and confidentiality of your account credentials.</li>
+        <li>Take full responsibility for all activities that occur under your API keys and credentials.</li>
+      </ol>
+      <p>
+        You must notify us immediately at <a href="mailto:support@watchtower.dev">support@watchtower.dev</a> upon becoming aware of any unauthorized use of your account, password, or API keys.
+      </p>
+
+      <h2 id="sec-license">4. Software License (collector.js)</h2>
+      <p>
+        WatchTower grants you a limited, non-exclusive, non-transferable, revocable license to download and embed the <code>collector.js</code> script in applications owned or legally controlled by you. 
+      </p>
+      <p>
+        Under this license, you may not:
+      </p>
+      <ul>
+        <li>Redistribute or sell the script as a standalone product.</li>
+        <li>Modify the script to intentionally bypass rate limits, mask authentication, or flood WatchTower API endpoints.</li>
+        <li>Use the script to collect personally identifiable information (PII) of your end users.</li>
+      </ul>
+
+      <h2 id="sec-acceptable-use">5. Acceptable Use and Rate Limits</h2>
+      <p>
+        To preserve service stability and fair access for all developers, we enforce reasonable usage controls:
+      </p>
+      <ul>
+        <li><strong>API Rate Limits:</strong> Applications are subject to rate limits on incoming telemetry payloads. Excessive logs or artificially generated errors may be throttled or dropped.</li>
+        <li><strong>Prohibited Actions:</strong> You may not attempt to reverse engineer, decompile, or break security mechanisms on the WatchTower ingestion server or dashboard app. Do not inject malicious scripts or payloads into the dashboard text fields.</li>
+      </ul>
+
+      <h2 id="sec-liability">6. Limitation of Liability and Disclaimers</h2>
+      <p>
+        THE WATCHTOWER SERVICE AND COLLECTOR SCRIPT ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. 
+      </p>
+      <p>
+        In no event shall WatchTower, its developers, or affiliates be liable for any direct, indirect, incidental, special, or consequential damages resulting from:
+      </p>
+      <ul>
+        <li>The use or inability to use our platform.</li>
+        <li>Delays or failures in transmitting uptime email alerts.</li>
+        <li>Loss of data, logs, or metrics.</li>
+        <li>Unauthorized access to or alteration of your registered applications.</li>
+      </ul>
+      <p>
+        It is your responsibility to maintain independent backups of crucial monitoring data and ensure your application functions properly in the event that WatchTower goes offline.
+      </p>
+
+      <h2 id="sec-termination">7. Termination</h2>
+      <p>
+        We reserve the right, without notice and in our sole discretion, to terminate or suspend your account and access to the dashboard if we determine you have violated these Terms &amp; Conditions or engaged in abusive use of the service.
+      </p>
+      <p>
+        You may close your account at any time by deleting your projects and deleting your profile via the settings page. All terms which by their nature should survive termination shall survive, including ownership provisions, warranty disclaimers, indemnity, and limitations of liability.
+      </p>
+
+      <h2 id="sec-governing-law">8. Governing Law</h2>
+      <p>
+        These Terms &amp; Conditions shall be governed by and construed in accordance with the laws of the State of California, United States, without regard to its conflict of law principles. Any dispute arising out of or in connection with these terms shall be subject to the exclusive jurisdiction of the state and federal courts located in California.
+      </p>
+
+      <h2 id="sec-contact">9. Contact</h2>
+      <p>
+        For inquiries regarding these terms, please contact our legal team at <a href="mailto:terms@watchtower.dev">terms@watchtower.dev</a>.
+      </p>
+    </article>
+  </main>
+
+  <watchtower-footer></watchtower-footer>
+
+  <script src="../js/components/wt-base-element.js"></script>
+  <script src="../js/components/navbar.js"></script>
+  <script src="../js/components/footer.js"></script>
+</body>
+
+</html>
