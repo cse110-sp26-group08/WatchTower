@@ -202,6 +202,7 @@ body {
 .app-card-top {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
 .app-badge {
@@ -221,6 +222,16 @@ body {
   font-size: var(--font-size-md);
   font-weight: 700;
   line-height: 1.2;
+}
+
+.app-description {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-meta {
