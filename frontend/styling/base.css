@@ -19,7 +19,6 @@ a {
 /* Hide custom elements until their JS is loaded and they are upgraded,
    preventing the flash of unstyled/bare content on page load. */
 watchtower-navbar:not(:defined),
-watchtower-dash-navbar:not(:defined),
 watchtower-footer:not(:defined),
 wt-dash-layout:not(:defined),
 wt-health-score:not(:defined),

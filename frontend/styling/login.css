@@ -31,13 +31,22 @@ body {
 .login-page {
   min-height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr;
+}
+
+.login-page > watchtower-navbar,
+.login-page > .login-shell {
+  grid-area: 1 / 1;
+}
+
+.login-page > watchtower-navbar {
+  align-self: start;
 }
 
 .login-shell {
   width: min(100% - 48px, 1240px);
   margin: 0 auto;
-  padding: clamp(2rem, 8vh, 5rem) 0 clamp(2rem, 7vh, 4rem);
+  min-height: 100vh;
+  padding: 0;
   display: grid;
   place-items: center;
 }
@@ -217,7 +226,7 @@ body {
 @media (width <= 620px) {
   .login-shell {
     width: min(100% - 28px, 520px);
-    padding-top: 2rem;
+    padding: 0;
   }
 
   .login-card {

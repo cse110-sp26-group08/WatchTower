@@ -25,6 +25,7 @@ class WatchTowerFooter extends WatchTowerBaseElement {
     }
 
     render() {
+        const variant = this.getOption('variant', 'public');
         const homeHref = this.getOption('home-href', defaultFooterHomeHref);
         const productHref = this.getOption('product-href', defaultFooterProductHref);
         const docsHref = this.getOption('docs-href', defaultFooterDocsHref);
@@ -32,6 +33,22 @@ class WatchTowerFooter extends WatchTowerBaseElement {
         const termsHref = this.getOption('terms-href', '#terms-conditions');
         const logoSrc = this.getAssetPath('watchtower-logo.png', defaultFooterAssetBase);
         const stylesheetHref = this.getStylePath('footer.css', defaultFooterStyleBase);
+
+        if (variant === 'app') {
+            this.shadowRoot.innerHTML = `
+                <link rel="stylesheet" href="${stylesheetHref}">
+
+                <footer class="site-footer footer-app">
+                    <nav class="app-footer-group" aria-label="Internal footer navigation">
+                        <span class="app-footer-copy">&copy; 2026 UCSD CSE 110 TEAM 7 ATE 9</span>
+                        <a href="${termsHref}">Terms</a>
+                        <a href="${privacyHref}">Privacy</a>
+                        <a href="mailto:contact@watchtower.dev">Contact Us</a>
+                    </nav>
+                </footer>
+            `;
+            return;
+        }
 
         this.shadowRoot.innerHTML = `
             <link rel="stylesheet" href="${stylesheetHref}">

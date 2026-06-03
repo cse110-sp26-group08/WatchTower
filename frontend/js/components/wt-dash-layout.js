@@ -11,7 +11,7 @@ if (!customElements.get('watchtower-footer')) {
 
 class WtDashLayout extends WatchTowerBaseElement {
     static get observedAttributes() {
-        return ['active', 'app-name'];
+        return ['active'];
     }
 
     connectedCallback() {
@@ -23,13 +23,14 @@ class WtDashLayout extends WatchTowerBaseElement {
 
     attributeChangedCallback(name, oldVal, newVal) {
         if (oldVal !== newVal) {
-            this._syncAttr(name, newVal);
+            this._syncNavbarAttr(name, newVal);
         }
     }
 
-    _syncAttr(name, value) {
-        const nav = this.shadowRoot && this.shadowRoot.querySelector('#layout-dash-nav');
+    _syncNavbarAttr(name, value) {
+        const nav = this.shadowRoot && this.shadowRoot.querySelector('#layout-app-nav');
         if (!nav) return;
+
         if (value !== null) {
             nav.setAttribute(name, value);
         } else {
@@ -45,7 +46,7 @@ class WtDashLayout extends WatchTowerBaseElement {
             ? new URL('../../styling/dashboard-layout.css', layoutScriptUrl).href
             : '/frontend/styling/dashboard-layout.css';
 
-        fetch(templateUrl)
+        fetch(templateUrl, { cache: 'no-cache' })
             .then(r => r.text())
             .then(html => {
                 const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -60,10 +61,9 @@ class WtDashLayout extends WatchTowerBaseElement {
                 this.shadowRoot.appendChild(link);
                 this.shadowRoot.appendChild(tpl.content.cloneNode(true));
 
-                // Forward observed attributes to the inner dash-navbar
                 for (const attr of WtDashLayout.observedAttributes) {
                     if (this.hasAttribute(attr)) {
-                        this._syncAttr(attr, this.getAttribute(attr));
+                        this._syncNavbarAttr(attr, this.getAttribute(attr));
                     }
                 }
             });
