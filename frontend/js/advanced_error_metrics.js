@@ -6,7 +6,6 @@ const RANGE_MS = {
   '30d': 30 * 24 * 60 * 60 * 1000,
 };
 
-const typeFilter = document.getElementById('type-filter');
 let advancedState = {
   app: null,
   errors: [],
@@ -48,7 +47,6 @@ function bindAdvancedErrorControls() {
 
   document.getElementById('time-range')?.addEventListener('change', redrawFromState);
   document.getElementById('severity-filter')?.addEventListener('change', redrawFromState);
-  typeFilter?.addEventListener('change', redrawFromState);
 
   document.addEventListener('visibilitychange', async () => {
     if (document.hidden) {
@@ -136,7 +134,6 @@ function redrawFromState() {
   }
 
   setProjectName(app.name || 'Selected project');
-  updateTypeFilter(errors);
 
   const filteredErrors = getFilteredErrors(errors);
 
@@ -154,7 +151,7 @@ function renderStatus(app, filteredErrors, allErrors) {
     setStatus(
       'UP',
       `${app.name || 'Project'} has critical errors to review.`,
-      `${criticalErrors.length} critical error${criticalErrors.length === 1 ? '' : 's'} matched the current filters.`,
+      `${criticalErrors.length} critical error${criticalErrors.length === 1 ? '' : 's'} in the current filters.`,
     );
     return;
   }
@@ -163,7 +160,7 @@ function renderStatus(app, filteredErrors, allErrors) {
     setStatus(
       'UP',
       `${app.name || 'Project'} has recent error activity.`,
-      `${filteredErrors.length} error${filteredErrors.length === 1 ? '' : 's'} matched the current filters.`,
+      `${filteredErrors.length} error${filteredErrors.length === 1 ? '' : 's'} in the current filters.`,
     );
     return;
   }
@@ -171,8 +168,8 @@ function renderStatus(app, filteredErrors, allErrors) {
   if (allErrors.length > 0) {
     setStatus(
       'UP',
-      `${app.name || 'Project'} has no matching errors in this range.`,
-      'Try changing the time range, severity, or type filters.',
+      `${app.name || 'Project'} has no errors in this range.`,
+      'Try changing the time range or severity filter.',
     );
     return;
   }
@@ -222,24 +219,15 @@ function readJsonStorage(key) {
 function getFilteredErrors(errors) {
   const range = document.getElementById('time-range')?.value || '24h';
   const severity = document.getElementById('severity-filter')?.value || 'all';
-  const selectedType = typeFilter?.value || 'all';
   const cutoff = Date.now() - (RANGE_MS[range] || RANGE_MS['24h']);
 
-  let filteredErrors = errors.filter((event) => {
+  return errors.filter((event) => {
     const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
     const eventSeverity = normalizeSeverity(event.metadata?.severity);
     const withinRange = Number.isFinite(timestamp) && timestamp >= cutoff;
     const severityMatch = severity === 'all' || eventSeverity === severity;
     return withinRange && severityMatch;
   });
-
-  if (selectedType !== 'all') {
-    filteredErrors = filteredErrors.filter((event) => {
-      return normalizeErrorType(event.metadata?.errorType) === selectedType;
-    });
-  }
-
-  return filteredErrors;
 }
 
 function renderGraph(filteredErrors) {
@@ -414,7 +402,7 @@ function renderErrorsTable(filteredErrors) {
   }
 
   if (!filteredErrors.length) {
-    const emptyMessage = 'No errors match the selected filters.';
+    const emptyMessage = 'No errors in the selected filters.';
     setErrorsTableEmpty(emptyMessage);
     setErrorsTableSummary(emptyMessage);
     return;
@@ -513,30 +501,10 @@ function renderErrorsTable(filteredErrors) {
   tableBody.replaceChildren(fragment);
 }
 
-function updateTypeFilter(errors) {
-  if (!typeFilter) {
-    return;
-  }
-  const previousValue = typeFilter.value || 'all';
-  const errorTypes = Array.from(new Set(
-    errors.map((event) => normalizeErrorType(event.metadata?.errorType)),
-  )).sort((leftType, rightType) => leftType.localeCompare(rightType));
-
-  typeFilter.innerHTML = '';
-  typeFilter.appendChild(new Option('All Types', 'all'));
-  errorTypes.forEach((errorType) => {
-    typeFilter.appendChild(new Option(errorType, errorType));
-  });
-  typeFilter.value = errorTypes.includes(previousValue) || previousValue === 'all'
-    ? previousValue
-    : 'all';
-}
-
 function renderEmptyState(message) {
   setErrorsTableEmpty(message);
   setErrorsTableSummary(message);
   resetSeverityBreakdown();
-  updateTypeFilter([]);
   updateLastUpdated(null);
   setElementText('graph-summary', message);
   destroyChart();
