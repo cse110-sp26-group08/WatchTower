@@ -1,10 +1,11 @@
-/* global escapeHtml */
+/* global flatpickr, escapeHtml */
 
 const RANGE_MS = {
   '24h': 24 * 60 * 60 * 1000,
   '7d': 7 * 24 * 60 * 60 * 1000,
   '30d': 30 * 24 * 60 * 60 * 1000,
 };
+const AUTO_REFRESH_MS = 5000;
 
 const typeFilter = document.getElementById('type-filter');
 let advancedState = {
@@ -13,6 +14,7 @@ let advancedState = {
 };
 let errorChart = null;
 let refreshAbortController = null;
+let refreshIntervalId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initAdvancedErrorMetrics().catch((error) => {
@@ -24,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initAdvancedErrorMetrics() {
+  initDatePicker();
   bindAdvancedErrorControls();
   const selectedApp = await resolveSelectedApp();
   if (!selectedApp?.id) {
@@ -36,6 +39,25 @@ async function initAdvancedErrorMetrics() {
   setProjectName(selectedApp.name || 'Selected project');
   setStatus('UP', `Checking ${selectedApp.name || 'project'}...`, 'Refreshing error telemetry from the backend.');
   await refreshAdvancedErrorMetrics(selectedApp, { force: true });
+  startAutoRefresh();
+}
+
+function initDatePicker() {
+  if (!window.flatpickr) {
+    return;
+  }
+
+  flatpickr('#date-range', {
+    mode: 'range',
+    dateFormat: 'm/d/Y',
+    defaultDate: [
+      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      new Date(),
+    ],
+    onChange: () => {
+      redrawFromState();
+    },
+  });
 }
 
 function bindAdvancedErrorControls() {
@@ -50,19 +72,66 @@ function bindAdvancedErrorControls() {
   document.getElementById('severity-filter')?.addEventListener('change', redrawFromState);
   typeFilter?.addEventListener('change', redrawFromState);
 
+  const autoRefreshToggle = document.querySelector('.toggle-switch input');
+  const toggleStatus = document.querySelector('.toggle-status');
+  if (autoRefreshToggle && toggleStatus) {
+    toggleStatus.textContent = autoRefreshToggle.checked ? 'ON' : 'OFF';
+    autoRefreshToggle.addEventListener('change', () => {
+      toggleStatus.textContent = autoRefreshToggle.checked ? 'ON' : 'OFF';
+
+      if (autoRefreshToggle.checked) {
+        startAutoRefresh();
+      } else {
+        stopAutoRefresh();
+      }
+    });
+  }
+
   document.addEventListener('visibilitychange', async () => {
     if (document.hidden) {
       abortActiveRefresh();
+      stopAutoRefresh();
       return;
     }
 
     const selectedApp = advancedState.app || await resolveSelectedApp();
     if (selectedApp?.id) {
       await refreshAdvancedErrorMetrics(selectedApp, { force: true });
+      startAutoRefresh();
     }
   });
 
-  window.addEventListener('beforeunload', abortActiveRefresh);
+  window.addEventListener('beforeunload', () => {
+    abortActiveRefresh();
+    stopAutoRefresh();
+  });
+}
+
+async function refreshCurrentErrors(options = {}) {
+  const selectedApp = advancedState.app || await resolveSelectedApp();
+  if (selectedApp?.id) {
+    await refreshAdvancedErrorMetrics(selectedApp, options);
+  }
+}
+
+function startAutoRefresh() {
+  stopAutoRefresh();
+
+  const autoRefreshToggle = document.querySelector('.toggle-switch input');
+  if (!autoRefreshToggle?.checked || document.hidden) {
+    return;
+  }
+
+  refreshIntervalId = window.setInterval(() => {
+    refreshCurrentErrors();
+  }, AUTO_REFRESH_MS);
+}
+
+function stopAutoRefresh() {
+  if (refreshIntervalId) {
+    window.clearInterval(refreshIntervalId);
+    refreshIntervalId = null;
+  }
 }
 
 async function refreshAdvancedErrorMetrics(selectedApp, options = {}) {
@@ -223,14 +292,17 @@ function getFilteredErrors(errors) {
   const range = document.getElementById('time-range')?.value || '24h';
   const severity = document.getElementById('severity-filter')?.value || 'all';
   const selectedType = typeFilter?.value || 'all';
+  const selectedDateRange = getSelectedDateRange();
   const cutoff = Date.now() - (RANGE_MS[range] || RANGE_MS['24h']);
 
   let filteredErrors = errors.filter((event) => {
     const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
     const eventSeverity = normalizeSeverity(event.metadata?.severity);
-    const withinRange = Number.isFinite(timestamp) && timestamp >= cutoff;
+    const withinRange = selectedDateRange
+      ? timestamp >= selectedDateRange.startTime && timestamp <= selectedDateRange.endTime
+      : timestamp >= cutoff;
     const severityMatch = severity === 'all' || eventSeverity === severity;
-    return withinRange && severityMatch;
+    return Number.isFinite(timestamp) && withinRange && severityMatch;
   });
 
   if (selectedType !== 'all') {
@@ -240,6 +312,29 @@ function getFilteredErrors(errors) {
   }
 
   return filteredErrors;
+}
+
+function getSelectedDateRange() {
+  const dateRangeValue = document.getElementById('date-range')?.value?.trim() || '';
+  if (!dateRangeValue || !dateRangeValue.includes(' to ')) {
+    return null;
+  }
+
+  const [startValue, endValue] = dateRangeValue.split(' to ');
+  const startDate = new Date(startValue);
+  const endDate = new Date(endValue);
+
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+    return null;
+  }
+
+  startDate.setHours(0, 0, 0, 0);
+  endDate.setHours(23, 59, 59, 999);
+
+  return {
+    startTime: startDate.getTime(),
+    endTime: endDate.getTime(),
+  };
 }
 
 function renderGraph(filteredErrors) {
