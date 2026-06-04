@@ -160,7 +160,7 @@ function renderStatus(app, filteredErrors, allErrors) {
     setStatus(
       'UP',
       `${app.name || 'Project'} has recent error activity.`,
-      `${filteredErrors.length} error${filteredErrors.length === 1 ? '' : 's'} in the current filters.`,
+      '0 critical errors in the current filters.',
     );
     return;
   }
