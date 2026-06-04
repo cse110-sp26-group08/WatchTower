@@ -7,6 +7,7 @@ class WtKpiCard extends HTMLElement {
         const valueId = this.getAttribute('value-id') || '';
         const changeId = this.getAttribute('change-id') || '';
         const sparklineId = this.getAttribute('sparkline-id') || '';
+        const valueClass = valueId === 'slowest-endpoint' ? 'kpi-value kpi-value-endpoint' : 'kpi-value';
 
         this.innerHTML = `
             <div class="kpi-card">
@@ -16,7 +17,7 @@ class WtKpiCard extends HTMLElement {
                         <img src="${iconSrc}" alt="${iconAlt}">
                     </div>
                 </div>
-                <p id="${valueId}" class="kpi-value">Loading...</p>
+                <p id="${valueId}" class="${valueClass}" title="Loading...">Loading...</p>
                 <p id="${changeId}" class="kpi-change">Loading...</p>
                 <p class="kpi-period">Selected date range</p>
                 <canvas id="${sparklineId}" class="sparkline-canvas"></canvas>
