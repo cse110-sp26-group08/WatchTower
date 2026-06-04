@@ -961,7 +961,7 @@ function formatEndpoint(endpoint) {
     try {
         const url = new URL(endpoint);
 
-        return url.pathname || url.hostname;
+        return `${url.hostname}${url.pathname.slice(0, 20)}...`;
     } catch {
         return endpoint;
     }
