@@ -11,6 +11,28 @@ We split the architecture decisions into frontend and backend decisions. This do
 
 For more backend details, see [architecture_backend.pdf](./architecture_backend.pdf) and [collector.pdf](./collector.pdf).
 
+## Individual ADR Files
+
+Decisions are also maintained as individual files in two subfolders, divided by when they apply:
+
+- **[`adr_dev/`](./adr_dev/)** — decisions about how the app is coded and tested (language, framework, auth model, UI choices). These apply during development regardless of deployment target.
+- **[`adr_deploy/`](./adr_deploy/)** — decisions about what runs in production (hosted DB, deploy runtime, static hosting, scheduling, auth transport).
+
+| File | Decision | Folder |
+|---|---|---|
+| [chart-js-visualization.md](./adr_dev/chart-js-visualization.md) | Chart.js for data visualization | dev |
+| [blue-white-color-scheme.md](./adr_dev/blue-white-color-scheme.md) | Blue-white UI color scheme | dev |
+| [email-password-login.md](./adr_dev/email-password-login.md) | Email + password login | dev |
+| [nodejs-runtime.md](./adr_dev/nodejs-runtime.md) | Node.js as the development runtime | dev |
+| [mongodb-initial-choice.md](./adr_dev/mongodb-initial-choice.md) | MongoDB initial choice (superseded) | dev |
+| [neon-postgresql-drizzle.md](./adr_deploy/neon-postgresql-drizzle.md) | Neon PostgreSQL + Drizzle ORM | deploy |
+| [hono-cloudflare-workers.md](./adr_deploy/hono-cloudflare-workers.md) | Hono.js on Cloudflare Workers | deploy |
+| [cloudflare-pages-frontend.md](./adr_deploy/cloudflare-pages-frontend.md) | Cloudflare Pages for frontend | deploy |
+| [cloudflare-cron-triggers.md](./adr_deploy/cloudflare-cron-triggers.md) | CF Cron Triggers for uptime monitoring | deploy |
+| [jwt-stateless-auth.md](./adr_deploy/jwt-stateless-auth.md) | JWT cookies replacing express-session | deploy |
+
+---
+
 ## Frontend Decision: Use Chart.js for data visualization
 
 ### Context and Problem Statement
@@ -233,6 +255,10 @@ Chosen option: "Node.js", because the team has already learned Node.js in its la
 * The backend should support database interactions needed by the project.
 * The team should be able to implement the collector API and retrieval API within the Node.js runtime.
 
+#### Post-migration Note (2026-06-03)
+
+This ADR covers the **development-time runtime**. Node.js remains the runtime for local development and Jest tests. The **production deployment runtime** is Cloudflare Workers. See [adr_deploy/hono-cloudflare-workers.md](./adr_deploy/hono-cloudflare-workers.md). The language remains JavaScript throughout — only the runtime host changes between dev and deploy.
+
 ### Pros and Cons of the Options
 
 #### Node.js
@@ -384,3 +410,45 @@ Chosen option: "Neon PostgreSQL + Drizzle ORM", because Neon provides free datab
 * Good, because PlanetScale also offers branching and a serverless driver.
 * Bad, because MySQL syntax differs from PostgreSQL and the team had no prior MySQL experience.
 * Bad, because PlanetScale removed its free tier.
+
+---
+
+## Deploy Decision: Use Hono.js on Cloudflare Workers for API deployment
+
+Full details: [adr_deploy/hono-cloudflare-workers.md](./adr_deploy/hono-cloudflare-workers.md)
+
+**Context:** Course requirement mandates all server-side code runs on Cloudflare. Express.js requires Node.js `http.Server` which is unavailable in the CF Workers V8-isolate runtime.
+
+**Decision:** Use Hono v4 as the HTTP framework. Use `@hono/node-server` adapter for local development and Jest tests. All business logic in controllers and schema is unchanged.
+
+**Key consequence:** Endpoint handler signatures change from Express `(req, res)` to Hono context `(c)`. `bcrypt` is replaced by `bcryptjs` (pure JS, identical API) as a direct result of targeting the Workers runtime.
+
+---
+
+## Deploy Decision: Use Cloudflare Pages for frontend deployment
+
+Full details: [adr_deploy/cloudflare-pages-frontend.md](./adr_deploy/cloudflare-pages-frontend.md)
+
+**Context:** With Express removed, static files can no longer be served by the backend. The frontend is pure HTML/CSS/JS with no build step required.
+
+**Decision:** Deploy the `frontend/` directory to CF Pages. Use a `_redirects` file to proxy `/api/*`, `/login`, `/signup`, `/logout` to the CF Worker — keeping all requests same-origin so JWT cookies work without frontend changes.
+
+---
+
+## Deploy Decision: Use Cloudflare Cron Triggers for uptime monitoring
+
+Full details: [adr_deploy/cloudflare-cron-triggers.md](./adr_deploy/cloudflare-cron-triggers.md)
+
+**Context:** `node-cron` requires a persistent Node.js process. CF Workers are stateless.
+
+**Decision:** Replace the `node-cron` 5-minute schedule with a CF Cron Trigger (`*/5 * * * *`) in `wrangler.toml`. The Worker's `scheduled` export calls the unchanged `checkDowntimeStatus` and `checkAndNotifyDowntime` functions using `ctx.waitUntil()`.
+
+---
+
+## Deploy Decision: Replace express-session with JWT cookies for stateless auth
+
+Full details: [adr_deploy/jwt-stateless-auth.md](./adr_deploy/jwt-stateless-auth.md)
+
+**Context:** `express-session` stores state in server memory. CF Workers have no persistent memory across requests.
+
+**Decision:** Use `jose` (pure-JS JOSE library) to sign/verify 7-day JWTs stored as `HttpOnly; SameSite=Lax` cookies named `watchtower_token`. The frontend login flow is unchanged — `POST /login` still returns `{ user }` JSON which the frontend stores in `localStorage`.

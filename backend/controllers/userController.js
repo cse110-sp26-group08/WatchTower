@@ -1,6 +1,6 @@
 /* eslint-env node */
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import {
   insertUser,
   selectUserById,

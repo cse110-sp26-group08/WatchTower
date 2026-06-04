@@ -1,12 +1,14 @@
 {
   "name": "watchtower-backend",
   "version": "1.0.0",
-  "description": "Express backend for WatchTower frontend serving homepage and static assets.",
+  "description": "Hono backend for WatchTower, deployable on Cloudflare Workers.",
   "type": "module",
   "main": "app.js",
   "scripts": {
-    "start": "drizzle-kit migrate && node app.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
+    "start": "drizzle-kit migrate && node dev.js",
+    "migrate": "drizzle-kit migrate",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "deploy": "wrangler deploy"
   },
   "jest": {
     "setupFilesAfterEnv": [
@@ -15,18 +17,16 @@
     "testEnvironment": "node"
   },
   "dependencies": {
+    "@hono/node-server": "^1.14.0",
     "@neondatabase/serverless": "^0.10.4",
-    "bcrypt": "^6.0.0",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
+    "bcryptjs": "^3.0.2",
     "drizzle-orm": "^0.44.0",
-    "express": "^4.18.4",
-    "express-formidable": "^1.2.0",
-    "express-session": "^1.19.0",
-    "node-cron": "^4.2.1",
+    "hono": "^4.7.0",
+    "jose": "^5.9.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.0",
     "jest": "^30.4.2",
     "supertest": "^7.2.2"

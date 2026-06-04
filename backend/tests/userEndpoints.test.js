@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import request from 'supertest';
 import { createApp } from '../app.js';
 import { insertUser, selectUserById, selectUserByEmail } from '../schema/userModel.js';

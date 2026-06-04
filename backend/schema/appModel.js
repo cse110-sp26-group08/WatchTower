@@ -1,6 +1,5 @@
 /* eslint-env node */
 
-import crypto from 'crypto';
 import { pgTable, text, uuid, timestamp, json, boolean } from 'drizzle-orm/pg-core';
 import { eq } from 'drizzle-orm';
 import { db } from '../util/database.js';
@@ -36,7 +35,9 @@ const DEFAULT_APP_COLUMNS = {
  * @returns {Promise<object>}
  */
 async function insertApp(data) {
-  const apiKey = crypto.randomBytes(32).toString('hex');
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  const apiKey = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
   const [app] = await db.insert(apps).values({ ...data, apiKey }).returning();
   return app;
 }

@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import {
   checkLoginCredentials,
   createUser,
