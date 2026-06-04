@@ -398,16 +398,16 @@ button {
   overflow-x: auto;
 }
 
-.table-card table {
-  table-layout: fixed;
-  width: 100%;
-  min-width: 860px;
-}
-
 table {
   width: 100%;
   margin-top: 18px;
   border-collapse: collapse;
+}
+
+.table-card table {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 860px;
 }
 
 th,
