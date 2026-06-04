@@ -38,6 +38,7 @@ class WatchTowerDashNavbar extends WatchTowerBaseElement {
         if (name === 'app-name' && this.shadowRoot) {
             const el = this.shadowRoot.querySelector('.app-name');
             if (el) el.textContent = newValue || '';
+            this.render();
         }
     }
 
