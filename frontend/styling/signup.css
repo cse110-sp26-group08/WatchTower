@@ -34,15 +34,24 @@ body {
 .signup-page {
   min-height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr;
 }
 
 .signup-shell {
   width: min(100% - 48px, 1240px);
   margin: 0 auto;
-  padding: clamp(2rem, 8vh, 5rem) 0 clamp(2rem, 7vh, 4rem);
+  min-height: 100vh;
+  padding: 0;
   display: grid;
   place-items: center;
+}
+
+.signup-page > watchtower-navbar,
+.signup-page > .signup-shell {
+  grid-area: 1 / 1;
+}
+
+.signup-page > watchtower-navbar {
+  align-self: start;
 }
 
 .signup-card {
@@ -228,7 +237,7 @@ body {
 @media (width <= 620px) {
   .signup-shell {
     width: min(100% - 28px, 520px);
-    padding-top: 2rem;
+    padding: 0;
   }
 
   .signup-card {

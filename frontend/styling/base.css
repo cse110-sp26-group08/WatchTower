@@ -19,7 +19,6 @@ a {
 /* Hide custom elements until their JS is loaded and they are upgraded,
    preventing the flash of unstyled/bare content on page load. */
 watchtower-navbar:not(:defined),
-watchtower-dash-navbar:not(:defined),
 watchtower-footer:not(:defined),
 wt-dash-layout:not(:defined),
 wt-health-score:not(:defined),
@@ -27,4 +26,67 @@ wt-metric-card:not(:defined),
 wt-kpi-card:not(:defined),
 wt-insight-item:not(:defined) {
     visibility: hidden;
+}
+
+watchtower-navbar:not(:defined),
+watchtower-footer:not(:defined) {
+    display: block;
+}
+
+watchtower-navbar:not(:defined) {
+    height: 68px;
+}
+
+watchtower-navbar[variant="app"]:not(:defined) {
+    height: 118px;
+}
+
+watchtower-navbar[variant="app"][actions=""]:not(:defined) {
+    height: 68px;
+}
+
+watchtower-footer:not(:defined) {
+    min-height: 170px;
+}
+
+watchtower-footer[variant="app"]:not(:defined) {
+    min-height: 50px;
+}
+
+@media (width <= 980px) {
+    watchtower-navbar:not(:defined) {
+        height: 214px;
+    }
+
+    watchtower-navbar[variant="app"]:not(:defined) {
+        height: 118px;
+    }
+
+    watchtower-navbar[variant="app"][actions=""]:not(:defined) {
+        height: 68px;
+    }
+}
+
+@media (width <= 620px) {
+    watchtower-navbar:not(:defined) {
+        height: 242px;
+    }
+
+    watchtower-navbar[variant="app"]:not(:defined) {
+        height: 132px;
+    }
+
+    watchtower-navbar[variant="app"][actions=""]:not(:defined) {
+        height: 68px;
+    }
+}
+
+@media (width <= 480px) {
+    watchtower-navbar[variant="app"]:not(:defined) {
+        height: 156px;
+    }
+
+    watchtower-navbar[variant="app"][actions=""]:not(:defined) {
+        height: 68px;
+    }
 }
