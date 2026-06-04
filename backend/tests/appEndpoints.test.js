@@ -2,6 +2,7 @@
 
 import { jest } from '@jest/globals';
 import request from 'supertest';
+import { createAdaptorServer } from '@hono/node-server';
 import { createApp } from '../app.js';
 import { insertApp, selectAppById } from '../schema/appModel.js';
 import { insertUser } from '../schema/userModel.js';
@@ -23,21 +24,25 @@ function mockFetchForUrl(appUrl, statusOrError) {
 }
 
 describe('App endpoints', () => {
-  const app = createApp();
+  const server = createAdaptorServer(createApp());
 
-  test('GET /apps serves the app selection page', async () => {
-    const agent = request.agent(app);
-    await agent.post('/signup').send({
+  test('JWT cookie from signup is preserved for subsequent API requests', async () => {
+    const agent = request.agent(server);
+    const signupRes = await agent.post('/signup').send({
       username: 'apptestuser',
       email: 'apptest@example.com',
       password: 'pass123',
       confirmPassword: 'pass123',
     });
 
-    const response = await agent.get('/apps');
+    expect(signupRes.statusCode).toBe(201);
+    expect(signupRes.headers['set-cookie']).toBeDefined();
+
+    const userId = signupRes.body.user.id;
+    const response = await agent.get(`/api/apps/users/${userId}`);
 
     expect(response.statusCode).toBe(200);
-    expect(response.text).toContain('Select a current project or create a new one!');
+    expect(response.body.apps).toEqual([]);
   });
 
   test('POST /api/apps creates an app for an owner', async () => {
@@ -47,7 +52,7 @@ describe('App endpoints', () => {
       passwordHash: 'hashed-password',
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/apps')
       .send({ ownerId: user.id, name: ' WatchTower Web ' });
 
@@ -61,7 +66,7 @@ describe('App endpoints', () => {
   });
 
   test('POST /api/apps returns 400 for invalid app payloads', async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/apps')
       .send({ ownerId: 'not-a-uuid', name: 'Broken App' });
 
@@ -78,7 +83,7 @@ describe('App endpoints', () => {
 
     mockFetchForUrl('https://example.com', 200);
 
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/apps')
       .send({ ownerId: user.id, name: 'Monitored App', url: 'https://example.com' });
 
@@ -98,7 +103,7 @@ describe('App endpoints', () => {
     });
     const savedApp = await insertApp({ ownerId: user.id, name: 'API' });
 
-    const getResponse = await request(app).get(`/api/apps/${savedApp.id}`);
+    const getResponse = await request(server).get(`/api/apps/${savedApp.id}`);
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.body.app.name).toBe('API');
     expect(getResponse.body.app.apiKey).toBeUndefined();
@@ -112,7 +117,7 @@ describe('App endpoints', () => {
     });
     const savedApp = await insertApp({ ownerId: user.id, name: 'API' });
 
-    const deleteResponse = await request(app).delete(`/api/apps/${savedApp.id}`);
+    const deleteResponse = await request(server).delete(`/api/apps/${savedApp.id}`);
 
     expect(deleteResponse.statusCode).toBe(200);
     expect(deleteResponse.body.app.id).toBe(savedApp.id);
@@ -134,7 +139,7 @@ describe('App endpoints', () => {
     await insertApp({ ownerId: owner.id, name: 'API' });
     await insertApp({ ownerId: otherOwner.id, name: 'Other' });
 
-    const response = await request(app).get(`/api/apps/users/${owner.id}`);
+    const response = await request(server).get(`/api/apps/users/${owner.id}`);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.apps).toHaveLength(2);
@@ -142,7 +147,7 @@ describe('App endpoints', () => {
   });
 
   test('GET /api/apps/:id returns 404 for unknown apps', async () => {
-    const response = await request(app).get('/api/apps/00000000-0000-0000-0000-000000000000');
+    const response = await request(server).get('/api/apps/00000000-0000-0000-0000-000000000000');
 
     expect(response.statusCode).toBe(404);
   });
@@ -327,7 +332,7 @@ describe('checkDowntimeStatus', () => {
 });
 
 describe('POST /api/apps/:id/forceStatus', () => {
-  const app = createApp();
+  const server = createAdaptorServer(createApp());
 
   test('returns 200 with updated app and isUp when site is up', async () => {
     const user = await insertUser({
@@ -338,7 +343,7 @@ describe('POST /api/apps/:id/forceStatus', () => {
     const saved = await insertApp({ ownerId: user.id, name: 'Force Up', url: 'https://forceup.example.com' });
 
     mockFetchForUrl('https://forceup.example.com', 200);
-    const response = await request(app).post(`/api/apps/${saved.id}/forceStatus`);
+    const response = await request(server).post(`/api/apps/${saved.id}/forceStatus`);
     jest.restoreAllMocks();
 
     expect(response.statusCode).toBe(200);
@@ -355,7 +360,7 @@ describe('POST /api/apps/:id/forceStatus', () => {
     const saved = await insertApp({ ownerId: user.id, name: 'Force Down', url: 'https://forcedown.example.com' });
 
     mockFetchForUrl('https://forcedown.example.com', 500);
-    const response = await request(app).post(`/api/apps/${saved.id}/forceStatus`);
+    const response = await request(server).post(`/api/apps/${saved.id}/forceStatus`);
     jest.restoreAllMocks();
 
     expect(response.statusCode).toBe(200);
@@ -364,7 +369,7 @@ describe('POST /api/apps/:id/forceStatus', () => {
   });
 
   test('returns 404 for unknown app', async () => {
-    const response = await request(app).post('/api/apps/00000000-0000-0000-0000-000000000000/forceStatus');
+    const response = await request(server).post('/api/apps/00000000-0000-0000-0000-000000000000/forceStatus');
     expect(response.statusCode).toBe(404);
     expect(response.body.error).toBe('App not found');
   });
@@ -377,7 +382,7 @@ describe('POST /api/apps/:id/forceStatus', () => {
     });
     const saved = await insertApp({ ownerId: user.id, name: 'No URL' });
 
-    const response = await request(app).post(`/api/apps/${saved.id}/forceStatus`);
+    const response = await request(server).post(`/api/apps/${saved.id}/forceStatus`);
 
     expect(response.statusCode).toBe(400);
     expect(response.body.error).toBe('App has no URL configured');

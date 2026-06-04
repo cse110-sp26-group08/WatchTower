@@ -1,6 +1,7 @@
 /* eslint-env jest */
 
 import request from 'supertest';
+import { createAdaptorServer } from '@hono/node-server';
 import { db } from '../util/database.js';
 import { count } from 'drizzle-orm';
 import { createApp } from '../app.js';
@@ -8,10 +9,10 @@ import { insertApp } from '../schema/appModel.js';
 import { insertEvent, selectEventById, events } from '../schema/eventModel.js';
 
 describe('Event endpoints', () => {
-  const app = createApp();
+  const server = createAdaptorServer(createApp());
 
   test('POST /api/events/error returns 400 without required fields', async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/events/error')
       .send({});
 
@@ -21,7 +22,7 @@ describe('Event endpoints', () => {
   test('POST /api/events/error saves an error event', async () => {
     const savedApp = await insertApp({ ownerId: crypto.randomUUID(), name: 'Web' });
 
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/events/error')
       .send({
         apiKey: savedApp.apiKey,
@@ -42,7 +43,7 @@ describe('Event endpoints', () => {
   });
 
   test('POST /api/events/error returns 401 with an invalid apiKey', async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/events/error')
       .send({
         apiKey: 'invalid-api-key',
@@ -55,7 +56,7 @@ describe('Event endpoints', () => {
   });
 
   test('POST /api/events/performance returns 400 without apiKey', async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/events/performance')
       .send({});
 
@@ -65,7 +66,7 @@ describe('Event endpoints', () => {
   test('POST /api/events/performance saves a performance event', async () => {
     const savedApp = await insertApp({ ownerId: crypto.randomUUID(), name: 'Web' });
 
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/events/performance')
       .send({
         apiKey: savedApp.apiKey,
@@ -89,7 +90,7 @@ describe('Event endpoints', () => {
   });
 
   test('POST /api/events/performance returns 401 with an invalid apiKey', async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/events/performance')
       .send({
         apiKey: 'invalid-api-key',
@@ -110,7 +111,7 @@ describe('Event endpoints', () => {
       metadata: { message: 'Something broke' },
     });
 
-    const getResponse = await request(app).get(`/api/events/error/${event.id}`);
+    const getResponse = await request(server).get(`/api/events/error/${event.id}`);
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.body.event.type).toBe('error');
     expect(getResponse.body.event.metadata.message).toBe('Something broke');
@@ -125,7 +126,7 @@ describe('Event endpoints', () => {
       metadata: { message: 'Something broke' },
     });
 
-    const deleteResponse = await request(app).delete(`/api/events/error/${event.id}`);
+    const deleteResponse = await request(server).delete(`/api/events/error/${event.id}`);
 
     expect(deleteResponse.statusCode).toBe(200);
     expect(deleteResponse.body.event.id).toBe(event.id);
@@ -139,7 +140,7 @@ describe('Event endpoints', () => {
     await insertEvent({ appId, type: 'performance', timestamp: new Date(), receivedAt: new Date() });
     await insertEvent({ appId: otherAppId, type: 'error', timestamp: new Date(), receivedAt: new Date() });
 
-    const response = await request(app).get(`/api/events/error/apps/${appId}`);
+    const response = await request(server).get(`/api/events/error/apps/${appId}`);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.events).toHaveLength(1);
@@ -155,7 +156,7 @@ describe('Event endpoints', () => {
       metadata: { loadTimeMs: 1200 },
     });
 
-    const getResponse = await request(app).get(`/api/events/performance/${event.id}`);
+    const getResponse = await request(server).get(`/api/events/performance/${event.id}`);
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.body.event.type).toBe('performance');
     expect(getResponse.body.event.metadata.loadTimeMs).toBe(1200);
@@ -170,7 +171,7 @@ describe('Event endpoints', () => {
       metadata: { loadTimeMs: 1200 },
     });
 
-    const deleteResponse = await request(app).delete(`/api/events/performance/${event.id}`);
+    const deleteResponse = await request(server).delete(`/api/events/performance/${event.id}`);
 
     expect(deleteResponse.statusCode).toBe(200);
     expect(deleteResponse.body.event.id).toBe(event.id);
@@ -184,7 +185,7 @@ describe('Event endpoints', () => {
     await insertEvent({ appId, type: 'performance', timestamp: new Date(), receivedAt: new Date() });
     await insertEvent({ appId: otherAppId, type: 'performance', timestamp: new Date(), receivedAt: new Date() });
 
-    const response = await request(app).get(`/api/events/performance/apps/${appId}`);
+    const response = await request(server).get(`/api/events/performance/apps/${appId}`);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.events).toHaveLength(1);
@@ -199,8 +200,8 @@ describe('Event endpoints', () => {
       receivedAt: new Date(),
     });
 
-    const unknownResponse = await request(app).get('/api/events/error/00000000-0000-0000-0000-000000000000');
-    const mismatchResponse = await request(app).get(`/api/events/error/${performanceEvent.id}`);
+    const unknownResponse = await request(server).get('/api/events/error/00000000-0000-0000-0000-000000000000');
+    const mismatchResponse = await request(server).get(`/api/events/error/${performanceEvent.id}`);
 
     expect(unknownResponse.statusCode).toBe(404);
     expect(mismatchResponse.statusCode).toBe(404);

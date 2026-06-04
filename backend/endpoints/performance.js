@@ -11,13 +11,12 @@ import { getAppByApiKey } from '../controllers/appController.js';
 /**
  * Collect performance metric data from a monitored application.
  * @route POST /api/events/performance
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function createPerformanceEndpoint(req, res) {
+async function createPerformanceEndpoint(c) {
   try {
-    const payload = req.fields || req.body;
+    const payload = await c.req.json();
     const {
       apiKey,
       loadTimeMs,
@@ -32,14 +31,12 @@ async function createPerformanceEndpoint(req, res) {
     } = payload;
 
     if (!apiKey) {
-      res.status(400).json({ error: 'apiKey is required' });
-      return;
+      return c.json({ error: 'apiKey is required' }, 400);
     }
 
     const app = await getAppByApiKey(apiKey);
     if (!app) {
-      res.status(401).json({ error: 'Invalid apiKey' });
-      return;
+      return c.json({ error: 'Invalid apiKey' }, 401);
     }
 
     const event = await createEvent({
@@ -58,60 +55,55 @@ async function createPerformanceEndpoint(req, res) {
       },
     });
 
-    res.status(201).json({ event });
+    return c.json({ event }, 201);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred';
-    res.status(400).json({ error: message });
+    return c.json({ error: message }, 400);
   }
 }
 
 /**
  * Fetch a performance event by id.
  * @route GET /api/events/performance/:id
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function getPerformanceEndpoint(req, res) {
-  const event = await getEventById(req.params.id);
+async function getPerformanceEndpoint(c) {
+  const event = await getEventById(c.req.param('id'));
 
   if (!event || event.type !== 'performance') {
-    res.status(404).json({ error: 'Performance event not found' });
-    return;
+    return c.json({ error: 'Performance event not found' }, 404);
   }
 
-  res.status(200).json({ event });
+  return c.json({ event }, 200);
 }
 
 /**
  * Fetch all performance events for an app.
  * @route GET /api/events/performance/apps/:appId
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function getPerformanceByAppEndpoint(req, res) {
-  const events = await getAllEventsByAppId(req.params.appId);
-  res.status(200).json({ events: events.filter((event) => event.type === 'performance') });
+async function getPerformanceByAppEndpoint(c) {
+  const events = await getAllEventsByAppId(c.req.param('appId'));
+  return c.json({ events: events.filter((event) => event.type === 'performance') }, 200);
 }
 
 /**
  * Delete a performance event by id.
  * @route DELETE /api/events/performance/:id
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function deletePerformanceEndpoint(req, res) {
-  const event = await getEventById(req.params.id);
+async function deletePerformanceEndpoint(c) {
+  const event = await getEventById(c.req.param('id'));
 
   if (!event || event.type !== 'performance') {
-    res.status(404).json({ error: 'Performance event not found' });
-    return;
+    return c.json({ error: 'Performance event not found' }, 404);
   }
 
-  const deletedEvent = await deleteEventById(req.params.id);
-  res.status(200).json({ event: deletedEvent });
+  const deletedEvent = await deleteEventById(c.req.param('id'));
+  return c.json({ event: deletedEvent }, 200);
 }
 
 export {

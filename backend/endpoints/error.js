@@ -11,24 +11,21 @@ import { getAppByApiKey } from '../controllers/appController.js';
 /**
  * Collect error event data from a monitored application.
  * @route POST /api/events/error
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function createErrorEndpoint(req, res) {
+async function createErrorEndpoint(c) {
   try {
-    const payload = req.fields || req.body;
+    const payload = await c.req.json();
     const { apiKey, message, stack, url, errorType, severity, release, timestamp } = payload;
 
     if (!apiKey || !message) {
-      res.status(400).json({ error: 'apiKey and message are required' });
-      return;
+      return c.json({ error: 'apiKey and message are required' }, 400);
     }
 
     const app = await getAppByApiKey(apiKey);
     if (!app) {
-      res.status(401).json({ error: 'Invalid apiKey' });
-      return;
+      return c.json({ error: 'Invalid apiKey' }, 401);
     }
 
     const event = await createEvent({
@@ -45,60 +42,55 @@ async function createErrorEndpoint(req, res) {
       },
     });
 
-    res.status(201).json({ event });
+    return c.json({ event }, 201);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred';
-    res.status(400).json({ error: message });
+    return c.json({ error: message }, 400);
   }
 }
 
 /**
  * Fetch an error event by id.
  * @route GET /api/events/error/:id
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function getErrorEndpoint(req, res) {
-  const event = await getEventById(req.params.id);
+async function getErrorEndpoint(c) {
+  const event = await getEventById(c.req.param('id'));
 
   if (!event || event.type !== 'error') {
-    res.status(404).json({ error: 'Error event not found' });
-    return;
+    return c.json({ error: 'Error event not found' }, 404);
   }
 
-  res.status(200).json({ event });
+  return c.json({ event }, 200);
 }
 
 /**
  * Fetch all error events for an app.
  * @route GET /api/events/error/apps/:appId
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function getErrorsByAppEndpoint(req, res) {
-  const events = await getAllEventsByAppId(req.params.appId);
-  res.status(200).json({ events: events.filter((event) => event.type === 'error') });
+async function getErrorsByAppEndpoint(c) {
+  const events = await getAllEventsByAppId(c.req.param('appId'));
+  return c.json({ events: events.filter((event) => event.type === 'error') }, 200);
 }
 
 /**
  * Delete an error event by id.
  * @route DELETE /api/events/error/:id
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function deleteErrorEndpoint(req, res) {
-  const event = await getEventById(req.params.id);
+async function deleteErrorEndpoint(c) {
+  const event = await getEventById(c.req.param('id'));
 
   if (!event || event.type !== 'error') {
-    res.status(404).json({ error: 'Error event not found' });
-    return;
+    return c.json({ error: 'Error event not found' }, 404);
   }
 
-  const deletedEvent = await deleteEventById(req.params.id);
-  res.status(200).json({ event: deletedEvent });
+  const deletedEvent = await deleteEventById(c.req.param('id'));
+  return c.json({ event: deletedEvent }, 200);
 }
 
 export { createErrorEndpoint, deleteErrorEndpoint, getErrorEndpoint, getErrorsByAppEndpoint };

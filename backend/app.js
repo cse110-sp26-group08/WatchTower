@@ -1,17 +1,7 @@
 /* eslint-env node */
 
-/**
- * @fileoverview Express server for WatchTower backend.
- * @module backend/app
- */
-
-import express from 'express';
-import formidable from 'express-formidable';
-import session from 'express-session';
-import dotenv from 'dotenv';
-import path from 'path';
-import cors from 'cors';
-import { fileURLToPath } from 'url';
+import { Hono } from 'hono';
+import { signJwt, COOKIE_NAME } from './util/auth.js';
 import {
   createErrorEndpoint,
   deleteErrorEndpoint,
@@ -40,187 +30,101 @@ import {
   updateUserEndpoint,
 } from './endpoints/users.js';
 import { checkLoginCredentials, createUser } from './controllers/userController.js';
-import { initDb } from './util/database.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-dotenv.config({ path: path.join(__dirname, '.env') });
-
-const telemetryCors = cors({
-  origin: true,
-  methods: ['POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-  credentials: true,
-});
 
 /**
- * Create an Express application.
- * @returns {import('express').Express} Configured Express app.
+ * Create and return the Hono application.
+ * Does not start a server — use worker.js (CF Workers) or dev.js (Node.js local).
+ * @returns {import('hono').Hono}
  */
 function createApp() {
-  const app = express();
-  const formidableMiddleware = formidable();
+  const app = new Hono();
 
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
-  app.use((req, res, next) => {
-    if (req.is('application/json') || req.is('application/x-www-form-urlencoded')) {
-      next();
-      return;
-    }
-
-    formidableMiddleware(req, res, next);
-  });
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'watchtower-development-secret',
-    resave: false,
-    saveUninitialized: false,
-  }));
-
-  // Serve static assets for the frontend
-  app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
-  app.use('/js', express.static(path.join(__dirname, '../frontend/js')));
-  app.use('/templates', express.static(path.join(__dirname, '../frontend/templates')));
-  app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
-
-  function requireSession(req, res, next) {
-    if (req.session?.user) {
-      next();
-      return;
-    }
-    res.redirect('/login');
-  }
-
-  // Serve Pages
-  app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/index.html'));
+  // CORS for telemetry endpoints — open to any origin since collector.js runs on user apps
+  app.use('/api/events/*', async (c, next) => {
+    c.header('Access-Control-Allow-Origin', c.req.header('Origin') || '*');
+    c.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    c.header('Access-Control-Allow-Headers', 'Content-Type');
+    if (c.req.method === 'OPTIONS') return c.body(null, 204);
+    await next();
   });
 
-  app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/login.html'));
-  });
+  // ── Auth routes ─────────────────────────────────────────────────────────────
 
-  app.post('/login', async (req, res) => {
+  app.post('/login', async (c) => {
     try {
-      const { email, password } = req.fields || req.body;
+      const { email, password } = await c.req.json();
       const user = await checkLoginCredentials(email, password);
+      if (!user) return c.json({ message: 'Invalid email or password' }, 401);
 
-      if (!user) {
-        res.status(401).json({ message: 'Invalid email or password' });
-        return;
-      }
-
-      req.session.user = user;
-      res.status(200).json({ user });
+      const secret = c.env?.JWT_SECRET ?? process.env.JWT_SECRET ?? 'dev-secret';
+      const token = await signJwt({ userId: user.id, email: user.email, username: user.username }, secret);
+      c.header('Set-Cookie', `${COOKIE_NAME}=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 86400}`);
+      return c.json({ user }, 200);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unknown error occurred';
-      res.status(500).json({ message });
+      return c.json({ message }, 500);
     }
   });
 
-  app.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/signup.html'));
-  });
-
-  app.get('/docs', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/docs.html'));
-  });
-
-  app.post('/signup', async (req, res) => {
+  app.post('/signup', async (c) => {
     try {
-      const { username, email, password, confirmPassword } = req.fields || req.body;
+      const { username, email, password, confirmPassword } = await c.req.json();
 
       if (password !== confirmPassword) {
-        res.status(400).json({ message: 'Passwords do not match' });
-        return;
+        return c.json({ message: 'Passwords do not match' }, 400);
       }
 
       const user = await createUser({ username, email, password });
       const safeUser = user.toObject();
       delete safeUser.passwordHash;
 
-      req.session.user = safeUser;
-      res.status(201).json({ user: safeUser });
+      const secret = c.env?.JWT_SECRET ?? process.env.JWT_SECRET ?? 'dev-secret';
+      const token = await signJwt({ userId: safeUser.id, email: safeUser.email, username: safeUser.username }, secret);
+      c.header('Set-Cookie', `${COOKIE_NAME}=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 86400}`);
+      return c.json({ user: safeUser }, 201);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unknown error occurred';
-      res.status(400).json({ message });
+      return c.json({ message }, 400);
     }
   });
 
-  app.post('/logout', (req, res) => {
-    req.session.destroy(() => {
-      res.clearCookie('connect.sid');
-      res.status(200).json({ message: 'Logged out' });
-    });
+  app.post('/logout', (c) => {
+    c.header('Set-Cookie', `${COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0`);
+    return c.json({ message: 'Logged out' }, 200);
   });
 
-  app.get('/apps', requireSession, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
-  });
+  // ── Error event endpoints ────────────────────────────────────────────────────
 
-  app.get('/app_selection.html', requireSession, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
-  });
-
-  app.get('/dashboard', requireSession, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/dashboard.html'));
-  });
-
-  app.get('/advanced-performance-metrics', requireSession, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/advanced_performance_metrics.html'));
-  });
-
-  app.get('/advanced-error-metrics', requireSession, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/advanced_error_metrics.html'));
-  });
-
-  app.get('/settings', requireSession, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/settings.html'));
-  });
-
-  // API ENDPOINTS
-  // Error Endpoints
-  app.options('/api/events/error', telemetryCors);
-  app.post('/api/events/error', telemetryCors, createErrorEndpoint);
+  app.post('/api/events/error', createErrorEndpoint);
   app.get('/api/events/error/apps/:appId', getErrorsByAppEndpoint);
   app.get('/api/events/error/:id', getErrorEndpoint);
   app.delete('/api/events/error/:id', deleteErrorEndpoint);
 
-  // Performance Endpoints
-  app.options('/api/events/performance', telemetryCors);
-  app.post('/api/events/performance', telemetryCors, createPerformanceEndpoint);
+  // ── Performance event endpoints ──────────────────────────────────────────────
+
+  app.post('/api/events/performance', createPerformanceEndpoint);
   app.get('/api/events/performance/apps/:appId', getPerformanceByAppEndpoint);
   app.get('/api/events/performance/:id', getPerformanceEndpoint);
   app.delete('/api/events/performance/:id', deletePerformanceEndpoint);
 
-  // User Endpoints
+  // ── User endpoints ───────────────────────────────────────────────────────────
+
   app.post('/api/users', createUserEndpoint);
   app.get('/api/users/:id', getUserEndpoint);
   app.patch('/api/users/:id', updateUserEndpoint);
   app.delete('/api/users/:id', deleteUserEndpoint);
 
-  // App Endpoints
+  // ── App endpoints ────────────────────────────────────────────────────────────
+
   app.post('/api/apps', createAppEndpoint);
   app.post('/api/apps/:id/forceStatus', forceStatusEndpoint);
   app.get('/api/apps/:id/apikey', getAppApiKeyEndpoint);
+  app.get('/api/apps/users/:ownerId', getAppsByOwnerEndpoint);
   app.get('/api/apps/:id', getAppEndpoint);
   app.patch('/api/apps/:id', updateAppEndpoint);
   app.delete('/api/apps/:id', deleteAppEndpoint);
-  app.get('/api/apps/users/:ownerId', getAppsByOwnerEndpoint);
 
   return app;
-}
-
-const app = createApp();
-const port = process.env.PORT || 3000;
-
-if (process.env.NODE_ENV !== 'test') {
-  initDb();
-  app.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`WatchTower backend listening on http://localhost:${port}`);
-  });
 }
 
 export { createApp };

@@ -10,88 +10,81 @@ import {
 /**
  * Create a WatchTower user.
  * @route POST /api/users
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function createUserEndpoint(req, res) {
+async function createUserEndpoint(c) {
   try {
-    const payload = req.fields || req.body;
+    const payload = await c.req.json();
     const user = await createUser(payload);
     const safeUser = user.toObject();
     delete safeUser.passwordHash;
 
-    res.status(201).json({ user: safeUser });
+    return c.json({ user: safeUser }, 201);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred';
-    res.status(400).json({ error: message });
+    return c.json({ error: message }, 400);
   }
 }
 
 /**
  * Fetch a user by id.
  * @route GET /api/users/:id
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function getUserEndpoint(req, res) {
-  const user = await getUserById(req.params.id);
+async function getUserEndpoint(c) {
+  const user = await getUserById(c.req.param('id'));
 
   if (!user) {
-    res.status(404).json({ error: 'User not found' });
-    return;
+    return c.json({ error: 'User not found' }, 404);
   }
 
   const safeUser = user.toObject();
   delete safeUser.passwordHash;
 
-  res.status(200).json({ user: safeUser });
+  return c.json({ user: safeUser }, 200);
 }
 
 /**
  * Update a user by id.
  * @route PATCH /api/users/:id
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function updateUserEndpoint(req, res) {
+async function updateUserEndpoint(c) {
   try {
-    const payload = req.fields || req.body;
-    const user = await editUser(req.params.id, payload);
+    const payload = await c.req.json();
+    const user = await editUser(c.req.param('id'), payload);
 
     if (!user) {
-      res.status(404).json({ error: 'User not found' });
-      return;
+      return c.json({ error: 'User not found' }, 404);
     }
 
-    res.status(200).json({ user });
+    return c.json({ user }, 200);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred';
-    res.status(400).json({ error: message });
+    return c.json({ error: message }, 400);
   }
 }
 
 /**
  * Delete a user by id.
  * @route DELETE /api/users/:id
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {import('hono').Context} c
+ * @returns {Promise<Response>}
  */
-async function deleteUserEndpoint(req, res) {
-  const user = await deleteUserById(req.params.id);
+async function deleteUserEndpoint(c) {
+  const user = await deleteUserById(c.req.param('id'));
 
   if (!user) {
-    res.status(404).json({ error: 'User not found' });
-    return;
+    return c.json({ error: 'User not found' }, 404);
   }
 
   const safeUser = user.toObject();
   delete safeUser.passwordHash;
 
-  res.status(200).json({ user: safeUser });
+  return c.json({ user: safeUser }, 200);
 }
 
 export { createUserEndpoint, deleteUserEndpoint, getUserEndpoint, updateUserEndpoint };

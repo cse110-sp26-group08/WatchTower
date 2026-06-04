@@ -2,14 +2,15 @@
 
 import bcrypt from 'bcryptjs';
 import request from 'supertest';
+import { createAdaptorServer } from '@hono/node-server';
 import { createApp } from '../app.js';
 import { insertUser, selectUserById, selectUserByEmail } from '../schema/userModel.js';
 
 describe('User endpoints', () => {
-  const app = createApp();
+  const server = createAdaptorServer(createApp());
 
   test('POST /api/users hashes password and does not expose passwordHash', async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/users')
       .send({
         username: ' anaya ',
@@ -29,7 +30,7 @@ describe('User endpoints', () => {
   });
 
   test('POST /api/users returns 400 for invalid user payloads', async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post('/api/users')
       .send({ email: 'missing-username@example.com' });
 
@@ -44,7 +45,7 @@ describe('User endpoints', () => {
       passwordHash: 'hashed-password',
     });
 
-    const getResponse = await request(app).get(`/api/users/${user.id}`);
+    const getResponse = await request(server).get(`/api/users/${user.id}`);
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.body.user.username).toBe('owner');
     expect(getResponse.body.user.passwordHash).toBeUndefined();
@@ -57,7 +58,7 @@ describe('User endpoints', () => {
       passwordHash: 'hashed-password',
     });
 
-    const patchResponse = await request(app)
+    const patchResponse = await request(server)
       .patch(`/api/users/${user.id}`)
       .send({ username: 'updated-owner', role: 'admin' });
 
@@ -78,7 +79,7 @@ describe('User endpoints', () => {
       passwordHash: 'hashed-password',
     });
 
-    const deleteResponse = await request(app).delete(`/api/users/${user.id}`);
+    const deleteResponse = await request(server).delete(`/api/users/${user.id}`);
 
     expect(deleteResponse.statusCode).toBe(200);
     expect(deleteResponse.body.user.id).toBe(user.id);
@@ -93,7 +94,7 @@ describe('User endpoints', () => {
       passwordHash,
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .post('/login')
       .send({
         email: 'loginendpoint@example.com',
@@ -114,7 +115,7 @@ describe('User endpoints', () => {
       passwordHash,
     });
 
-    const response = await request(app)
+    const response = await request(server)
       .post('/login')
       .send({
         email: 'failedlogin@example.com',
@@ -127,7 +128,7 @@ describe('User endpoints', () => {
   });
 
   test('POST /signup creates a user, hashes password, and saves session', async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post('/signup')
       .send({
         username: 'signupuser',
@@ -149,7 +150,7 @@ describe('User endpoints', () => {
   });
 
   test('POST /signup returns 400 when passwords do not match', async () => {
-    const response = await request(app)
+    const response = await request(server)
       .post('/signup')
       .send({
         username: 'mismatchuser',
@@ -167,7 +168,7 @@ describe('User endpoints', () => {
   });
 
   test('GET /api/users/:id returns 404 for unknown users', async () => {
-    const response = await request(app).get('/api/users/00000000-0000-0000-0000-000000000000');
+    const response = await request(server).get('/api/users/00000000-0000-0000-0000-000000000000');
 
     expect(response.statusCode).toBe(404);
   });
