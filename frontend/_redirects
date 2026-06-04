@@ -1,0 +1,17 @@
+# Proxy auth and API routes to the CF Worker.
+# Using 200 (proxy/rewrite) keeps all requests same-origin so JWT cookies work
+# without SameSite=None and without any frontend JS changes.
+#
+# Replace YOUR_ACCOUNT with your Cloudflare account subdomain after deployment.
+/api/*   https://watchtower-backend.YOUR_ACCOUNT.workers.dev/api/:splat   200
+/login   https://watchtower-backend.YOUR_ACCOUNT.workers.dev/login         200
+/signup  https://watchtower-backend.YOUR_ACCOUNT.workers.dev/signup        200
+/logout  https://watchtower-backend.YOUR_ACCOUNT.workers.dev/logout        200
+
+# Rewrite clean paths to their HTML files
+/apps                         /webpages/app_selection.html              200
+/dashboard                    /webpages/dashboard.html                  200
+/settings                     /webpages/settings.html                   200
+/advanced-performance-metrics /webpages/advanced_performance_metrics.html  200
+/advanced-error-metrics       /webpages/advanced_error_metrics.html     200
+/docs                         /webpages/docs.html                       200

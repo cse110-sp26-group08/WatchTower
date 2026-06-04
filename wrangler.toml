@@ -1,0 +1,16 @@
+name = "watchtower-backend"
+main = "backend/worker.js"
+compatibility_date = "2025-06-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cron trigger: check uptime for all apps every 5 minutes
+[[triggers]]
+crons = ["*/5 * * * *"]
+
+# Non-secret config variables
+[vars]
+NODE_ENV = "production"
+
+# Secrets (set via: wrangler secret put DATABASE_URL / wrangler secret put JWT_SECRET)
+# DATABASE_URL — Neon PostgreSQL connection string
+# JWT_SECRET   — Random string used to sign/verify JWT tokens
