@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
   <link rel="stylesheet" href="../styling/base.css">
   <link rel="stylesheet" href="../styling/app_selection.css">
 </head>
+
 <body class="app-selection-page">
   <watchtower-navbar logged-in></watchtower-navbar>
 
@@ -22,9 +24,8 @@
         <div class="card-header">
           <p class="card-eyebrow" id="apps-title">Your projects</p>
         </div>
+        <p class="form-message" id="create-app-message" aria-live="polite"></p>
       </div>
-
-      <p class="form-message" id="create-app-message" aria-live="polite"></p>
 
       <div id="apps-list" class="apps-list" aria-live="polite"></div>
     </section>
@@ -37,7 +38,8 @@
           <p class="card-eyebrow">New project</p>
           <h2>Add project</h2>
         </div>
-        <button type="button" class="button button-secondary project-dialog-close" id="close-project-dialog">Cancel</button>
+        <button type="button" class="button button-secondary project-dialog-close"
+          id="close-project-dialog">Cancel</button>
       </div>
 
       <div class="project-dialog-grid">
@@ -66,4 +68,5 @@
   <script src="../js/auth.js" defer></script>
   <script src="../js/app_selection.js" defer></script>
 </body>
+
 </html>
