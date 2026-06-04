@@ -11,10 +11,17 @@
     margin: 0 auto;
     padding: 28px;
     box-sizing: border-box;
+    min-width: 0;
 }
 
 @media (width <= 900px) {
     .layout-body {
         padding: 18px;
+    }
+}
+
+@media (width <= 480px) {
+    .layout-body {
+        padding: 18px 14px;
     }
 }

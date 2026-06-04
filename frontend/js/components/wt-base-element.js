@@ -12,19 +12,105 @@ class WatchTowerBaseElement extends HTMLElement {
         return `${this.getOption('style-base', defaultBase).replace(/\/$/, '')}/${fileName}`;
     }
 
-    // Reloads the page when the brand link is clicked on the current page,
-    // rather than navigating (which would be a no-op but resets scroll position).
-    handleBrandClick(event, homeHref) {
-        const targetUrl = new URL(homeHref, window.location.href);
-        const currentUrl = new URL(window.location.href);
-        const isCurrentPage = targetUrl.origin === currentUrl.origin
-            && targetUrl.pathname === currentUrl.pathname
-            && targetUrl.search === currentUrl.search
-            && targetUrl.hash === currentUrl.hash;
-
-        if (isCurrentPage) {
+    handleCurrentPageClick(event, href) {
+        if (this.isCurrentPageHref(href)) {
             event.preventDefault();
-            window.location.reload();
+            if (!new URL(href, window.location.href).hash) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            return true;
         }
+
+        return false;
+    }
+
+    handleBrandClick(event, homeHref) {
+        this.handleCurrentPageClick(event, homeHref);
+    }
+
+    isCurrentPageHref(href) {
+        const targetUrl = new URL(href, window.location.href);
+        const currentUrl = new URL(window.location.href);
+
+        if (targetUrl.origin !== currentUrl.origin || targetUrl.pathname !== currentUrl.pathname) {
+            return false;
+        }
+
+        if (targetUrl.hash && targetUrl.hash !== currentUrl.hash) {
+            return false;
+        }
+
+        return !targetUrl.search || targetUrl.search === currentUrl.search;
+    }
+
+    getCachedValue(key) {
+        try {
+            return sessionStorage.getItem(key) || '';
+        } catch (error) {
+            return '';
+        }
+    }
+
+    setCachedValue(key, value) {
+        try {
+            sessionStorage.setItem(key, value);
+        } catch (error) {
+            // Components still render correctly without tab-level caching.
+        }
+    }
+
+    getCachedStylesheet(cachePrefix, stylesheetHref) {
+        return this.getCachedValue(`${cachePrefix}${stylesheetHref}`);
+    }
+
+    cacheStylesheet(cachePrefix, stylesheetHref) {
+        fetch(stylesheetHref, { cache: 'force-cache' })
+            .then((response) => (response.ok ? response.text() : ''))
+            .then((cssText) => {
+                if (cssText) {
+                    this.setCachedValue(`${cachePrefix}${stylesheetHref}`, cssText);
+                }
+            })
+            .catch(() => undefined);
+    }
+
+    mountCachedStylesheet({ cachePrefix, onReady, root, slotSelector, stylesheetHref }) {
+        const styleSlot = root.querySelector(slotSelector);
+        const cachedCss = this.getCachedStylesheet(cachePrefix, stylesheetHref);
+
+        if (!styleSlot) {
+            onReady();
+            return;
+        }
+
+        if (cachedCss) {
+            const style = document.createElement('style');
+            style.textContent = cachedCss;
+            styleSlot.replaceWith(style);
+            onReady();
+            return;
+        }
+
+        const stylesheet = document.createElement('link');
+        let revealed = false;
+        const reveal = () => {
+            if (revealed || !this.isConnected) return;
+            revealed = true;
+            onReady();
+            this.cacheStylesheet(cachePrefix, stylesheetHref);
+        };
+
+        stylesheet.rel = 'stylesheet';
+        stylesheet.addEventListener('load', reveal, { once: true });
+        stylesheet.addEventListener('error', reveal, { once: true });
+        styleSlot.replaceWith(stylesheet);
+        stylesheet.href = stylesheetHref;
+
+        if (stylesheet.sheet) {
+            reveal();
+            return;
+        }
+
+        window.setTimeout(reveal, 1200);
     }
 }

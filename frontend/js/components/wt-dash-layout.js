@@ -1,4 +1,6 @@
 const layoutScriptUrl = document.currentScript ? document.currentScript.src : '';
+const dashLayoutTemplateCachePrefix = 'watchtower:shadow-template:';
+const dashLayoutStyleCachePrefix = 'watchtower:shadow-css:';
 
 // Load footer component alongside this layout component if not already registered
 if (!customElements.get('watchtower-footer')) {
@@ -45,28 +47,48 @@ class WtDashLayout extends WatchTowerBaseElement {
         const styleUrl = layoutScriptUrl
             ? new URL('../../styling/dashboard-layout.css', layoutScriptUrl).href
             : '/frontend/styling/dashboard-layout.css';
+        const cachedTemplate = this.getCachedValue(`${dashLayoutTemplateCachePrefix}${templateUrl}`);
 
-        fetch(templateUrl, { cache: 'no-cache' })
+        if (cachedTemplate) {
+            this._mountTemplate(cachedTemplate, styleUrl);
+            return;
+        }
+
+        fetch(templateUrl, { cache: 'force-cache' })
             .then(r => r.text())
             .then(html => {
-                const doc = new DOMParser().parseFromString(html, 'text/html');
-                const tpl = doc.getElementById('wt-dash-layout-template');
-                if (!tpl) return;
-
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = styleUrl;
-
-                this.shadowRoot.innerHTML = '';
-                this.shadowRoot.appendChild(link);
-                this.shadowRoot.appendChild(tpl.content.cloneNode(true));
-
-                for (const attr of WtDashLayout.observedAttributes) {
-                    if (this.hasAttribute(attr)) {
-                        this._syncNavbarAttr(attr, this.getAttribute(attr));
-                    }
-                }
+                this.setCachedValue(`${dashLayoutTemplateCachePrefix}${templateUrl}`, html);
+                this._mountTemplate(html, styleUrl);
             });
+    }
+
+    _mountTemplate(html, styleUrl) {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const tpl = doc.getElementById('wt-dash-layout-template');
+        if (!tpl) return;
+
+        this.shadowRoot.innerHTML = '';
+        this._appendStylesheet(styleUrl);
+        this.shadowRoot.appendChild(tpl.content.cloneNode(true));
+
+        for (const attr of WtDashLayout.observedAttributes) {
+            if (this.hasAttribute(attr)) {
+                this._syncNavbarAttr(attr, this.getAttribute(attr));
+            }
+        }
+    }
+
+    _appendStylesheet(styleUrl) {
+        const slot = document.createElement('span');
+        slot.dataset.layoutStyleSlot = '';
+        this.shadowRoot.appendChild(slot);
+        this.mountCachedStylesheet({
+            cachePrefix: dashLayoutStyleCachePrefix,
+            root: this.shadowRoot,
+            slotSelector: '[data-layout-style-slot]',
+            stylesheetHref: styleUrl,
+            onReady: () => undefined,
+        });
     }
 }
 

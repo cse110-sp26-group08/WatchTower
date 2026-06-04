@@ -58,11 +58,13 @@ header.page-header {
   justify-content: space-between;
   align-items: flex-start;
   gap: 24px;
+  min-width: 0;
 }
 
 .header-content {
-  flex-shrink: 0;
-  max-width: 440px;
+  flex: 1 1 440px;
+  max-width: min(440px, 100%);
+  min-width: 0;
 }
 
 .page-header h1 {
@@ -76,6 +78,7 @@ header.page-header {
   margin: 10px 0 0;
   color: var(--muted);
   font-size: 1.1rem;
+  overflow-wrap: anywhere;
 }
 
 
@@ -593,6 +596,36 @@ header.page-header {
 
   .graph-card-header {
     flex-direction: column;
+  }
+}
+
+@media (width <= 520px) {
+  .page-header {
+    display: block;
+  }
+
+  .header-content {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .page-header h1 {
+    font-size: clamp(2.45rem, 13vw, 3rem);
+  }
+
+  .dashboard-filters {
+    align-items: stretch;
+  }
+
+  .dashboard-filters label,
+  .dashboard-filters select,
+  .dashboard-filters button {
+    width: 100%;
+  }
+
+  .status-card,
+  .health-score {
+    padding: 34px 24px;
   }
 }
 

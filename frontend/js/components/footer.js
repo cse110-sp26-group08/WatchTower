@@ -14,6 +14,7 @@ const defaultFooterDocsHref = isFooterProjectRootStaticServer
     ? new URL('../../webpages/docs.html', footerScriptUrl).href
     : '/docs';
 const defaultFooterProductHref = 'https://github.com/cse110-sp26-group08/WatchTower/blob/main/documentation/rest-api.md';
+const footerStyleCachePrefix = 'watchtower:footer-css:v1:';
 
 class WatchTowerFooter extends WatchTowerBaseElement {
     connectedCallback() {
@@ -25,6 +26,8 @@ class WatchTowerFooter extends WatchTowerBaseElement {
     }
 
     render() {
+        this.removeAttribute('data-footer-ready');
+
         const variant = this.getOption('variant', 'public');
         const homeHref = this.getOption('home-href', defaultFooterHomeHref);
         const productHref = this.getOption('product-href', defaultFooterProductHref);
@@ -36,7 +39,17 @@ class WatchTowerFooter extends WatchTowerBaseElement {
 
         if (variant === 'app') {
             this.shadowRoot.innerHTML = `
-                <link rel="stylesheet" href="${stylesheetHref}">
+                <style>
+                    :host {
+                        display: block;
+                        visibility: hidden;
+                    }
+
+                    :host([data-footer-ready]) {
+                        visibility: visible;
+                    }
+                </style>
+                <span data-footer-style-slot></span>
 
                 <footer class="site-footer footer-app">
                     <nav class="app-footer-group" aria-label="Internal footer navigation">
@@ -47,11 +60,22 @@ class WatchTowerFooter extends WatchTowerBaseElement {
                     </nav>
                 </footer>
             `;
+            this.mountStylesheet(stylesheetHref);
             return;
         }
 
         this.shadowRoot.innerHTML = `
-            <link rel="stylesheet" href="${stylesheetHref}">
+            <style>
+                :host {
+                    display: block;
+                    visibility: hidden;
+                }
+
+                :host([data-footer-ready]) {
+                    visibility: visible;
+                }
+            </style>
+            <span data-footer-style-slot></span>
 
             <footer class="site-footer">
                 <div class="footer-panel">
@@ -78,12 +102,25 @@ class WatchTowerFooter extends WatchTowerBaseElement {
             </footer>
         `;
 
-        const brandLink = this.shadowRoot.querySelector('.footer-brand');
-        if (brandLink) {
-            brandLink.addEventListener('click', (event) => {
-                this.handleBrandClick(event, homeHref);
+        this.shadowRoot.querySelectorAll('a[href]').forEach((link) => {
+            link.addEventListener('click', (event) => {
+                this.handleCurrentPageClick(event, link.href);
             });
-        }
+        });
+    }
+
+    mountStylesheet(stylesheetHref) {
+        this.mountCachedStylesheet({
+            cachePrefix: footerStyleCachePrefix,
+            root: this.shadowRoot,
+            slotSelector: '[data-footer-style-slot]',
+            stylesheetHref,
+            onReady: () => {
+                if (this.isConnected) {
+                    this.setAttribute('data-footer-ready', '');
+                }
+            },
+        });
     }
 
 }
