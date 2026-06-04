@@ -168,8 +168,10 @@ function renderKpis(events, allEvents = events) {
     document.querySelector('#avg-memory-usage').textContent =
         avgMemoryUsage ? `${Math.round(avgMemoryUsage)} MB` : 'No data';
 
+    const slowest = getSlowestEndpoint(events);
+
     document.querySelector('#slowest-endpoint').textContent =
-        getSlowestEndpoint(events).endpoint;
+        formatEndpoint(slowest.endpoint);
 
     setChangeText('#avg-response-change', avgResponseTime, previousAvgResponseTime, 'ms');
     setChangeText('#p95-latency-change', p95Latency, previousP95Latency, 'ms');
@@ -949,4 +951,18 @@ function getComparisonColor(currentValue, previousValue) {
     }
 
     return '#8b5cf6';
+}
+
+function formatEndpoint(endpoint) {
+    if (!endpoint || endpoint === 'N/A') {
+        return 'N/A';
+    }
+
+    try {
+        const url = new URL(endpoint);
+
+        return url.pathname || url.hostname;
+    } catch {
+        return endpoint;
+    }
 }
