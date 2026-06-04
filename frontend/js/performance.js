@@ -168,8 +168,10 @@ function renderKpis(events, allEvents = events) {
     document.querySelector('#avg-memory-usage').textContent =
         avgMemoryUsage ? `${Math.round(avgMemoryUsage)} MB` : 'No data';
 
+    const slowest = getSlowestEndpoint(events);
+
     document.querySelector('#slowest-endpoint').textContent =
-        getSlowestEndpoint(events).endpoint;
+        formatEndpoint(slowest.endpoint);
 
     setChangeText('#avg-response-change', avgResponseTime, previousAvgResponseTime, 'ms');
     setChangeText('#p95-latency-change', p95Latency, previousP95Latency, 'ms');
@@ -185,28 +187,23 @@ function renderKpis(events, allEvents = events) {
 function renderBottleneckInsights(events) {
     const slowest = getSlowestEndpoint(events);
     const highestTtfb = getHighestAverageEndpoint(events, 'ttfbMs');
-    const mostFrequentSlow = getMostFrequentSlowEndpoint(events);
-    const largestIncrease = getLargestLatencyIncrease(events);
 
-    updateInsightCardColors(slowest, highestTtfb, mostFrequentSlow, largestIncrease);
-    document.querySelector('#slowest-endpoint-insight').textContent = slowest.endpoint;
+    updateInsightCardColors(slowest, highestTtfb);
+
+    document.querySelector('#slowest-endpoint-insight').textContent =
+        formatEndpoint(slowest.endpoint);
+
     document.querySelector('#slowest-endpoint-latency').textContent =
         slowest.latency ? `${Math.round(slowest.latency)} ms avg` : 'No data';
 
-    document.querySelector('#highest-ttfb-endpoint').textContent = highestTtfb.endpoint;
+    document.querySelector('#highest-ttfb-endpoint').textContent =
+        formatEndpoint(highestTtfb.endpoint);
+
     document.querySelector('#highest-ttfb-value').textContent =
         highestTtfb.value ? `${Math.round(highestTtfb.value)} ms avg` : 'No data';
-
-    document.querySelector('#most-frequent-slow-endpoint').textContent = mostFrequentSlow.endpoint;
-    document.querySelector('#slow-request-count').textContent =
-
-        mostFrequentSlow.count ? `${mostFrequentSlow.count} slow requests` : 'No data';
-    document.querySelector('#largest-latency-increase-endpoint').textContent = largestIncrease.endpoint;
-    document.querySelector('#largest-latency-increase').textContent =
-        largestIncrease.percent ? `↑ ${largestIncrease.percent}%` : 'No data';
 }
 
-function updateInsightCardColors(slowest, highestTtfb, mostFrequentSlow, largestIncrease) {
+function updateInsightCardColors(slowest, highestTtfb) {
     applySeverity(
         'slowest-endpoint-card',
         'slowest-endpoint-latency',
@@ -217,18 +214,6 @@ function updateInsightCardColors(slowest, highestTtfb, mostFrequentSlow, largest
         'highest-ttfb-card',
         'highest-ttfb-value',
         getTtfbSeverity(highestTtfb.value)
-    );
-
-    applySeverity(
-        'slow-request-card',
-        'slow-request-count',
-        getSlowRequestSeverity(mostFrequentSlow.count)
-    );
-
-    applySeverity(
-        'latency-increase-card',
-        'largest-latency-increase',
-        getIncreaseSeverity(largestIncrease.percent)
     );
 }
 
@@ -271,30 +256,6 @@ function getTtfbSeverity(value) {
 
 }
 
-function getSlowRequestSeverity(value) {
-
-    if (!value) return 'neutral';
-
-    if (value > 100) return 'critical';
-
-    if (value > 20) return 'warning';
-
-    return 'healthy';
-
-}
-
-function getIncreaseSeverity(value) {
-
-    if (!value) return 'neutral';
-
-    if (value > 30) return 'critical';
-
-    if (value > 10) return 'warning';
-
-    return 'healthy';
-
-}
-
 function renderSlowRequestsTable(events) {
     const tbody = document.querySelector('#slow-requests-body');
 
@@ -315,7 +276,15 @@ function renderSlowRequestsTable(events) {
     tbody.innerHTML = slowRequests.map((event) => `
         <tr>
             <td>${formatTimestamp(event.timestamp || event.receivedAt)}</td>
-            <td>${escapeHtml(event.metadata?.apiEndpoint || event.url || 'N/A')}</td>
+            <td class="endpoint-cell">
+                <a
+                    href="${escapeHtml(event.metadata?.apiEndpoint || event.url || '#')}"
+                    target="_blank"
+                    title="${escapeHtml(event.metadata?.apiEndpoint || event.url || 'N/A')}"
+                >
+                    ${escapeHtml(formatEndpoint(event.metadata?.apiEndpoint || event.url || 'N/A'))}
+                </a>
+            </td>
             <td>${formatMetric(event.metadata?.apiLatencyMs, 'ms')}</td>
             <td>${formatMetric(event.metadata?.loadTimeMs, 'ms')}</td>
             <td>${formatMetric(event.metadata?.ttfbMs, 'ms')}</td>
@@ -371,76 +340,6 @@ function getHighestAverageEndpoint(events, field, valueKey = 'value') {
                 endpoint,
                 [valueKey]: avg,
             };
-        }
-    });
-
-    return result;
-}
-
-function getMostFrequentSlowEndpoint(events) {
-    const SLOW_REQUEST_MS = 1000;
-    const counts = new Map();
-
-    events.forEach((event) => {
-        const endpoint = event.metadata?.apiEndpoint || event.url;
-        const latency = Number(event.metadata?.apiLatencyMs);
-
-        if (!endpoint || !Number.isFinite(latency) || latency < SLOW_REQUEST_MS) return;
-
-        counts.set(endpoint, (counts.get(endpoint) || 0) + 1);
-    });
-
-    let result = { endpoint: 'N/A', count: 0 };
-
-    counts.forEach((count, endpoint) => {
-        if (count > result.count) {
-            result = { endpoint, count };
-        }
-    });
-
-    return result;
-}
-
-function getLargestLatencyIncrease(events) {
-    const sortedEvents = [...events]
-        .filter((event) => Number.isFinite(Number(event.metadata?.apiLatencyMs)))
-        .sort((a, b) => new Date(a.timestamp || a.receivedAt) - new Date(b.timestamp || b.receivedAt));
-
-    const midpoint = Math.floor(sortedEvents.length / 2);
-
-    if (midpoint === 0) {
-        return { endpoint: 'N/A', percent: 0 };
-    }
-
-    const firstHalf = sortedEvents.slice(0, midpoint);
-    const secondHalf = sortedEvents.slice(midpoint);
-    const endpoints = new Set(sortedEvents.map((event) => event.metadata?.apiEndpoint || event.url));
-
-    let result = { endpoint: 'N/A', percent: 0 };
-
-    endpoints.forEach((endpoint) => {
-        if (!endpoint) return;
-
-        const firstAvg = average(
-            firstHalf
-                .filter((event) => (event.metadata?.apiEndpoint || event.url) === endpoint)
-                .map((event) => Number(event.metadata?.apiLatencyMs))
-                .filter((value) => Number.isFinite(value))
-        );
-
-        const secondAvg = average(
-            secondHalf
-                .filter((event) => (event.metadata?.apiEndpoint || event.url) === endpoint)
-                .map((event) => Number(event.metadata?.apiLatencyMs))
-                .filter((value) => Number.isFinite(value))
-        );
-
-        if (!firstAvg || !secondAvg) return;
-
-        const percent = Math.round(((secondAvg - firstAvg) / firstAvg) * 100);
-
-        if (percent > result.percent) {
-            result = { endpoint, percent };
         }
     });
 
@@ -598,17 +497,19 @@ function renderLatencyChart(events) {
             data: grouped.map((item) => item.avgLatency),
             borderWidth: 2,
             tension: 0.35,
-            pointRadius: 0
+            pointRadius: grouped.length === 1 ? 6 : 3,
+            pointHoverRadius: 8
         });
     }
 
     if (selectedMetric === 'all' || selectedMetric === 'p95-latency') {
         datasets.push({
-            label: 'P95 Latency',
+            label: 'P95 Response Time (Typical worst-case latency)',
             data: grouped.map((item) => item.p95Latency),
             borderWidth: 2,
             tension: 0.35,
-            pointRadius: 0
+            pointRadius: grouped.length === 1 ? 6 : 3,
+            pointHoverRadius: 8
         });
     }
 
@@ -618,7 +519,8 @@ function renderLatencyChart(events) {
             data: grouped.map((item) => item.avgLoadTime),
             borderWidth: 2,
             tension: 0.35,
-            pointRadius: 0
+            pointRadius: grouped.length === 1 ? 6 : 3,
+            pointHoverRadius: 8
         });
     }
 
@@ -691,7 +593,7 @@ function renderEndpointPerformanceChart(events) {
     const endpointStats = groupEventsByEndpoint(events)
         .sort((a, b) => b.avgLatency - a.avgLatency);
 
-    let labels = endpointStats.map((item) => item.endpoint);
+    let labels = endpointStats.map((item) => formatEndpoint(item.endpoint));
     let values = endpointStats.map((item) => item.avgLatency);
 
     if (endpointChart) {
@@ -812,15 +714,9 @@ function clearDashboard() {
 
     applySeverity('slowest-endpoint-card', 'slowest-endpoint-latency', 'neutral');
     applySeverity('highest-ttfb-card', 'highest-ttfb-value', 'neutral');
-    applySeverity('slow-request-card', 'slow-request-count', 'neutral');
-    applySeverity('latency-increase-card', 'largest-latency-increase', 'neutral');
 
     document.querySelector('#highest-ttfb-endpoint').textContent = 'N/A';
     document.querySelector('#highest-ttfb-value').textContent = 'No data';
-    document.querySelector('#most-frequent-slow-endpoint').textContent = 'N/A';
-    document.querySelector('#slow-request-count').textContent = 'No data';
-    document.querySelector('#largest-latency-increase-endpoint').textContent = 'N/A';
-    document.querySelector('#largest-latency-increase').textContent = 'No data';
 
     renderSparklines([]);
     renderLatencyChart([]);
@@ -949,4 +845,20 @@ function getComparisonColor(currentValue, previousValue) {
     }
 
     return '#8b5cf6';
+}
+
+function formatEndpoint(endpoint) {
+    if (!endpoint || endpoint === 'N/A') {
+        return 'N/A';
+    }
+
+    try {
+        const hostname = new URL(endpoint).hostname;
+
+        return hostname.length > 18
+            ? hostname.slice(0, 18) + '...'
+            : hostname;
+    } catch {
+        return endpoint;
+    }
 }
