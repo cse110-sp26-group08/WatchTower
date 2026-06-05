@@ -41,6 +41,7 @@ import {
 } from './endpoints/users.js';
 import { checkLoginCredentials, createUser } from './controllers/userController.js';
 import { initDb } from './util/database.js';
+import { initializeEmailService } from './util/emailService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,6 +63,9 @@ function createApp() {
   const app = express();
   const formidableMiddleware = formidable();
 
+  // Initialize email service after dotenv is loaded
+  initializeEmailService();
+
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use((req, res, next) => {
@@ -82,7 +86,14 @@ function createApp() {
   app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
   app.use('/js', express.static(path.join(__dirname, '../frontend/js')));
   app.use('/templates', express.static(path.join(__dirname, '../frontend/templates')));
-  app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
+  
+  // Serve collector.js with CORS headers so it can be loaded from any domain
+  app.use('/assets', cors({
+    origin: '*',
+    methods: ['GET', 'HEAD', 'OPTIONS'],
+    allowedHeaders: ['Content-Type'],
+    credentials: false,
+  }), express.static(path.join(__dirname, '../frontend/assets')));
 
   function requireSession(req, res, next) {
     if (req.session?.user) {
