@@ -532,11 +532,38 @@ header.page-header {
   padding: 14px 10px;
   border-top: 1px solid var(--line);
   text-align: left;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.chart-data-table td:last-child {
-  max-width: 280px;
-  word-break: break-word;
+.logs-table th:nth-child(1),
+.logs-table td:nth-child(1) {
+  width: 26%;
+}
+
+.logs-table th:nth-child(2),
+.logs-table td:nth-child(2) {
+  width: 18%;
+}
+
+.logs-table th:nth-child(3),
+.logs-table td:nth-child(3) {
+  width: 14%;
+}
+
+.logs-table th:nth-child(4),
+.logs-table td:nth-child(4) {
+  width: 42%;
+}
+
+.logs-message-cell,
+.chart-message-cell,
+.chart-url-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 

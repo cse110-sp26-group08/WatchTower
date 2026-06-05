@@ -54,8 +54,22 @@ class WatchTowerDashNavbar extends WatchTowerBaseElement {
         window.removeEventListener('scroll', this.updateScrolledState);
     }
 
+    detectActivePage() {
+        const path = window.location.pathname;
+        if (path.includes('advanced-error-metrics') || path.includes('advanced_error_metrics')) {
+            return 'errors';
+        }
+        if (path.includes('advanced-performance-metrics') || path.includes('advanced_performance_metrics')) {
+            return 'performance';
+        }
+        if (path.includes('settings')) {
+            return 'settings';
+        }
+        return 'home';
+    }
+
     render() {
-        const active = this.getOption('active', 'home');
+        const active = this.getOption('active', this.detectActivePage());
         const appName = this.getAttribute('app-name') || '';
         const dashboardHref = this.getOption('dashboard-href', defaultDashNavDashboardHref);
         const appsHref = this.getOption('apps-href', defaultDashNavAppsHref);
