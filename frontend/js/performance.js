@@ -171,7 +171,9 @@ function renderKpis(events, allEvents = events) {
     const slowest = getSlowestEndpoint(events);
 
     document.querySelector('#slowest-endpoint').textContent =
-        formatEndpoint(slowest.endpoint);
+        getSlowestEndpoint(events).endpoint;
+    document.querySelector('#slowest-endpoint').title =
+        getSlowestEndpoint(events).endpoint;
 
     setChangeText('#avg-response-change', avgResponseTime, previousAvgResponseTime, 'ms');
     setChangeText('#p95-latency-change', p95Latency, previousP95Latency, 'ms');
@@ -709,6 +711,7 @@ function clearDashboard() {
     document.querySelector('#avg-response-time').textContent = 'No data';
     document.querySelector('#p95-latency').textContent = 'No data';
     document.querySelector('#slowest-endpoint').textContent = 'N/A';
+    document.querySelector('#slowest-endpoint').title = 'N/A';
     document.querySelector('#avg-page-load-time').textContent = 'No data';
     document.querySelector('#avg-memory-usage').textContent = 'No data';
 
