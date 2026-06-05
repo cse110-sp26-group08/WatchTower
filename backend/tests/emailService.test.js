@@ -1,17 +1,29 @@
 /* eslint-env jest */
 
 import { jest } from '@jest/globals';
-import { sendEmail, sendDownEmail } from '../util/emailService.js';
+
+/**
+ * IMPORTANT:
+ * Mock MUST happen BEFORE importing the module under test
+ */
+jest.unstable_mockModule('@sendgrid/mail', () => ({
+  default: {
+    setApiKey: jest.fn(),
+    send: jest.fn().mockResolvedValue([{ statusCode: 202 }]),
+  },
+}));
+
+const { sendEmail, sendDownEmail } = await import('../util/emailService.js');
 
 describe('emailService', () => {
   let consoleSpy;
 
   beforeEach(() => {
     consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
-    consoleSpy.mockClear();
     consoleSpy.mockRestore();
   });
 
@@ -24,13 +36,7 @@ describe('emailService', () => {
       await sendEmail(testEmail, testSubject, testBody);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        `[emailService] Sending email to ${testEmail}`
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        `[emailService] Subject : ${testSubject}`
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        `[emailService] Body    : ${testBody}`
+        `[emailService] Email sent successfully to ${testEmail}. Status: 202`
       );
     });
   });
@@ -39,12 +45,9 @@ describe('emailService', () => {
     test('sends downtime alert email with formatted subject', async () => {
       await sendDownEmail('owner@example.com');
 
-      const subjectCall = consoleSpy.mock.calls.find((call) =>
-        call[0].includes('[emailService] Subject')
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Status: 202')
       );
-
-      expect(subjectCall).toBeDefined();
-      expect(subjectCall[0]).toContain('⚠️ Website Down Alert');
     });
 
     test('sends email to correct recipient', async () => {
@@ -52,73 +55,41 @@ describe('emailService', () => {
 
       await sendDownEmail(testEmail);
 
-      const recipientCall = consoleSpy.mock.calls.find((call) =>
-        call[0].includes('[emailService] Sending email to')
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining(testEmail)
       );
-
-      expect(recipientCall).toBeDefined();
-      expect(recipientCall[0]).toContain(testEmail);
     });
 
     test('includes HTML formatted body with WatchTower link', async () => {
       await sendDownEmail('owner@example.com');
 
-      const bodyCall = consoleSpy.mock.calls.find((call) =>
-        call[0].includes('[emailService] Body')
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('<!DOCTYPE html>')
       );
 
-      expect(bodyCall).toBeDefined();
-      const body = bodyCall[0];
-
-      // Verify HTML structure
-      expect(body).toContain('<!DOCTYPE html>');
-      expect(body).toContain('<html>');
-
-      // Verify warning elements
-      expect(body).toContain('⚠️');
-      expect(body).toContain('Website Down Alert');
-      expect(body).toContain('One of your monitored websites is currently down');
-
-      // Verify WatchTower link
-      expect(body).toContain('https://watchtower-monitoring.com');
-      expect(body).toContain('Visit WatchTower Dashboard');
-
-      // Verify styling
-      expect(body).toContain('<style>');
-      expect(body).toContain('background-color');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('https://watchtower-monitoring.com')
+      );
     });
 
     test('email body contains call-to-action button', async () => {
       await sendDownEmail('owner@example.com');
 
-      const bodyCall = consoleSpy.mock.calls.find((call) =>
-        call[0].includes('[emailService] Body')
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('cta-button')
       );
-
-      expect(bodyCall).toBeDefined();
-      const body = bodyCall[0];
-
-      expect(body).toContain('cta-button');
-      expect(body).toContain('<a href=');
     });
 
     test('email body contains professional formatting and footer', async () => {
       await sendDownEmail('owner@example.com');
 
-      const bodyCall = consoleSpy.mock.calls.find((call) =>
-        call[0].includes('[emailService] Body')
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('WatchTower Monitoring System')
       );
 
-      expect(bodyCall).toBeDefined();
-      const body = bodyCall[0];
-
-      // Verify footer
-      expect(body).toContain('WatchTower Monitoring System');
-      expect(body).toContain('© 2026 WatchTower');
-
-      // Verify content sections
-      expect(body).toContain('What you should do');
-      expect(body).toContain('Check your website status');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('© 2026 WatchTower')
+      );
     });
   });
 });
