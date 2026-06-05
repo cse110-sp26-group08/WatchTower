@@ -12,18 +12,21 @@ import dotenv from 'dotenv';
 import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
+
 import {
   createErrorEndpoint,
   deleteErrorEndpoint,
   getErrorEndpoint,
   getErrorsByAppEndpoint,
 } from './endpoints/error.js';
+
 import {
   createPerformanceEndpoint,
   deletePerformanceEndpoint,
   getPerformanceByAppEndpoint,
   getPerformanceEndpoint,
 } from './endpoints/performance.js';
+
 import {
   createAppEndpoint,
   deleteAppEndpoint,
@@ -33,19 +36,26 @@ import {
   getAppsByOwnerEndpoint,
   updateAppEndpoint,
 } from './endpoints/apps.js';
+
 import {
   createUserEndpoint,
   deleteUserEndpoint,
   getUserEndpoint,
   updateUserEndpoint,
 } from './endpoints/users.js';
-import { checkLoginCredentials, createUser } from './controllers/userController.js';
+
+import {
+  checkLoginCredentials,
+  createUser,
+} from './controllers/userController.js';
+
 import { initDb } from './util/database.js';
 import { initializeEmailService } from './util/emailService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load env FIRST
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const telemetryCors = cors({
@@ -63,38 +73,49 @@ function createApp() {
   const app = express();
   const formidableMiddleware = formidable();
 
-  // Initialize email service after dotenv is loaded
-  initializeEmailService();
-
+  // -----------------------------
+  // Middleware
+  // -----------------------------
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
   app.use((req, res, next) => {
     if (req.is('application/json') || req.is('application/x-www-form-urlencoded')) {
       next();
       return;
     }
-
     formidableMiddleware(req, res, next);
   });
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'watchtower-development-secret',
-    resave: false,
-    saveUninitialized: false,
-  }));
 
-  // Serve static assets for the frontend
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || 'watchtower-development-secret',
+      resave: false,
+      saveUninitialized: false,
+    })
+  );
+
+  // -----------------------------
+  // Static files
+  // -----------------------------
   app.use('/styling', express.static(path.join(__dirname, '../frontend/styling')));
   app.use('/js', express.static(path.join(__dirname, '../frontend/js')));
   app.use('/templates', express.static(path.join(__dirname, '../frontend/templates')));
-  
-  // Serve collector.js with CORS headers so it can be loaded from any domain
-  app.use('/assets', cors({
-    origin: '*',
-    methods: ['GET', 'HEAD', 'OPTIONS'],
-    allowedHeaders: ['Content-Type'],
-    credentials: false,
-  }), express.static(path.join(__dirname, '../frontend/assets')));
 
+  app.use(
+    '/assets',
+    cors({
+      origin: '*',
+      methods: ['GET', 'HEAD', 'OPTIONS'],
+      allowedHeaders: ['Content-Type'],
+      credentials: false,
+    }),
+    express.static(path.join(__dirname, '../frontend/assets'))
+  );
+
+  // -----------------------------
+  // Auth middleware
+  // -----------------------------
   function requireSession(req, res, next) {
     if (req.session?.user) {
       next();
@@ -103,7 +124,9 @@ function createApp() {
     res.redirect('/login');
   }
 
-  // Serve Pages
+  // -----------------------------
+  // Pages
+  // -----------------------------
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/index.html'));
   });
@@ -125,7 +148,8 @@ function createApp() {
       req.session.user = user;
       res.status(200).json({ user });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      const message =
+        error instanceof Error ? error.message : 'An unknown error occurred';
       res.status(500).json({ message });
     }
   });
@@ -134,13 +158,10 @@ function createApp() {
     res.sendFile(path.join(__dirname, '../frontend/webpages/signup.html'));
   });
 
-  app.get('/docs', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/docs.html'));
-  });
-
   app.post('/signup', async (req, res) => {
     try {
-      const { username, email, password, confirmPassword } = req.fields || req.body;
+      const { username, email, password, confirmPassword } =
+        req.fields || req.body;
 
       if (password !== confirmPassword) {
         res.status(400).json({ message: 'Passwords do not match' });
@@ -154,7 +175,8 @@ function createApp() {
       req.session.user = safeUser;
       res.status(201).json({ user: safeUser });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      const message =
+        error instanceof Error ? error.message : 'An unknown error occurred';
       res.status(400).json({ message });
     }
   });
@@ -166,11 +188,11 @@ function createApp() {
     });
   });
 
-  app.get('/apps', requireSession, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
+  app.get('/docs', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/docs.html'));
   });
 
-  app.get('/app_selection.html', requireSession, (req, res) => {
+  app.get('/apps', requireSession, (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/app_selection.html'));
   });
 
@@ -179,39 +201,41 @@ function createApp() {
   });
 
   app.get('/advanced-performance-metrics', requireSession, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/advanced_performance_metrics.html'));
+    res.sendFile(
+      path.join(__dirname, '../frontend/webpages/advanced_performance_metrics.html')
+    );
   });
 
   app.get('/advanced-error-metrics', requireSession, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/webpages/advanced_error_metrics.html'));
+    res.sendFile(
+      path.join(__dirname, '../frontend/webpages/advanced_error_metrics.html')
+    );
   });
 
   app.get('/settings', requireSession, (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/webpages/settings.html'));
   });
 
-  // API ENDPOINTS
-  // Error Endpoints
+  // -----------------------------
+  // API routes
+  // -----------------------------
   app.options('/api/events/error', telemetryCors);
   app.post('/api/events/error', telemetryCors, createErrorEndpoint);
   app.get('/api/events/error/apps/:appId', getErrorsByAppEndpoint);
   app.get('/api/events/error/:id', getErrorEndpoint);
   app.delete('/api/events/error/:id', deleteErrorEndpoint);
 
-  // Performance Endpoints
   app.options('/api/events/performance', telemetryCors);
   app.post('/api/events/performance', telemetryCors, createPerformanceEndpoint);
   app.get('/api/events/performance/apps/:appId', getPerformanceByAppEndpoint);
   app.get('/api/events/performance/:id', getPerformanceEndpoint);
   app.delete('/api/events/performance/:id', deletePerformanceEndpoint);
 
-  // User Endpoints
   app.post('/api/users', createUserEndpoint);
   app.get('/api/users/:id', getUserEndpoint);
   app.patch('/api/users/:id', updateUserEndpoint);
   app.delete('/api/users/:id', deleteUserEndpoint);
 
-  // App Endpoints
   app.post('/api/apps', createAppEndpoint);
   app.post('/api/apps/:id/forceStatus', forceStatusEndpoint);
   app.get('/api/apps/:id/apikey', getAppApiKeyEndpoint);
@@ -228,8 +252,11 @@ const port = process.env.PORT || 3000;
 
 if (process.env.NODE_ENV !== 'test') {
   initDb();
+
+  // Email service MUST NOT run in tests
+  initializeEmailService();
+
   app.listen(port, () => {
-    // eslint-disable-next-line no-console
     console.log(`WatchTower backend listening on http://localhost:${port}`);
   });
 }
