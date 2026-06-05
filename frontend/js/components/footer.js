@@ -13,6 +13,12 @@ const defaultFooterHomeHref = isFooterProjectRootStaticServer
 const defaultFooterDocsHref = isFooterProjectRootStaticServer
     ? new URL('../../webpages/docs.html', footerScriptUrl).href
     : '/docs';
+const defaultFooterPrivacyHref = isFooterProjectRootStaticServer
+    ? new URL('../../webpages/privacy.html', footerScriptUrl).href
+    : '/privacy';
+const defaultFooterTermsHref = isFooterProjectRootStaticServer
+    ? new URL('../../webpages/terms.html', footerScriptUrl).href
+    : '/terms';
 const defaultFooterProductHref = 'https://github.com/cse110-sp26-group08/WatchTower/blob/main/documentation/rest-api.md';
 
 class WatchTowerFooter extends WatchTowerBaseElement {
@@ -28,8 +34,8 @@ class WatchTowerFooter extends WatchTowerBaseElement {
         const homeHref = this.getOption('home-href', defaultFooterHomeHref);
         const productHref = this.getOption('product-href', defaultFooterProductHref);
         const docsHref = this.getOption('docs-href', defaultFooterDocsHref);
-        const privacyHref = this.getOption('privacy-href', '#privacy-policy');
-        const termsHref = this.getOption('terms-href', '#terms-conditions');
+        const privacyHref = this.getOption('privacy-href', defaultFooterPrivacyHref);
+        const termsHref = this.getOption('terms-href', defaultFooterTermsHref);
         const logoSrc = this.getAssetPath('watchtower-logo.png', defaultFooterAssetBase);
         const stylesheetHref = this.getStylePath('footer.css', defaultFooterStyleBase);
 
@@ -44,7 +50,7 @@ class WatchTowerFooter extends WatchTowerBaseElement {
                         </a>
 
                         <nav class="footer-links" aria-label="Footer navigation">
-                            <a href="${productHref}">Product</a>
+                            <a href="${productHref}" target="_blank" rel="noopener noreferrer">Product</a>
                             <a href="${docsHref}">Docs</a>
                         </nav>
                     </div>
