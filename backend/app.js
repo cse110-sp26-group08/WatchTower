@@ -41,9 +41,11 @@ function createApp() {
 
   // CORS for telemetry endpoints — open to any origin since collector.js runs on user apps
   app.use('/api/events/*', async (c, next) => {
-    c.header('Access-Control-Allow-Origin', c.req.header('Origin') || '*');
+    const origin = c.req.header('Origin');
+    c.header('Access-Control-Allow-Origin', origin || '*');
     c.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
     c.header('Access-Control-Allow-Headers', 'Content-Type');
+    if (origin) c.header('Access-Control-Allow-Credentials', 'true');
     if (c.req.method === 'OPTIONS') return c.body(null, 204);
     await next();
   });
