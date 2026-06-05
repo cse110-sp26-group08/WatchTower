@@ -421,9 +421,14 @@ function renderLogs(app, filteredErrors, filteredPerformance) {
 
     recentRows.forEach((row) => {
         const tableRow = document.createElement('tr');
+        const values = [formatTimestamp(row.time), row.project, row.status, row.message];
 
-        [formatTimestamp(row.time), row.project, row.status, row.message].forEach((value) => {
+        values.forEach((value, index) => {
             const cell = document.createElement('td');
+            if (index === values.length - 1) {
+                cell.className = 'logs-message-cell';
+                cell.title = value;
+            }
             cell.textContent = value;
             tableRow.appendChild(cell);
         });
@@ -465,14 +470,19 @@ function renderChartTable(filteredErrors) {
 
     sortedErrors.forEach((event) => {
         const row = document.createElement('tr');
-
-        [
+        const values = [
             formatTimestamp(event.timestamp || event.receivedAt),
             normalizeSeverity(event.metadata?.severity),
             event.metadata?.message || 'Error event',
             event.url || 'N/A',
-        ].forEach((value) => {
+        ];
+
+        values.forEach((value, index) => {
             const cell = document.createElement('td');
+            if (index >= 2) {
+                cell.className = index === 2 ? 'chart-message-cell' : 'chart-url-cell';
+                cell.title = value;
+            }
             cell.textContent = value;
             row.appendChild(cell);
         });
