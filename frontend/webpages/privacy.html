@@ -1,39 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WatchTower Privacy Policy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" href="../styling/navbar.css" as="style">
+  <link rel="preload" href="../styling/footer.css" as="style">
+  <link rel="stylesheet" href="../styling/base.css">
+  <link rel="stylesheet" href="../styling/legal.css">
 </head>
-<body>
-  <main style="max-width:900px;margin:40px auto;padding:0 20px;font-family:Arial,sans-serif;line-height:1.6;">
-    <h1>Privacy Policy</h1>
-    <p>Last Updated: June 2026</p>
 
-    <p>WatchTower is a monitoring platform that helps developers track application performance, uptime, and errors. This Privacy Policy explains what information we collect and how it is used.</p>
+<body class="legal-page">
+  <watchtower-navbar></watchtower-navbar>
 
-    <h2>Information We Collect</h2>
-    <ul>
-      <li>Account information such as username and email address.</li>
-      <li>Application metadata submitted by users.</li>
-      <li>Error, uptime, and performance metrics collected through WatchTower integrations.</li>
-    </ul>
+  <main class="legal-container">
+    <header class="legal-header">
+      <h1>Privacy Policy</h1>
+      <p class="legal-updated">Last Updated: June 2026</p>
+      <p class="legal-intro">
+        WatchTower helps developers monitor application errors, uptime, and performance. This policy explains what
+        information we collect and how it is used.
+      </p>
+    </header>
 
-    <h2>How We Use Information</h2>
-    <ul>
-      <li>Provide monitoring and analytics services.</li>
-      <li>Display application metrics and alerts.</li>
-      <li>Improve platform reliability and performance.</li>
-    </ul>
+    <div class="legal-card">
+      <section class="legal-section">
+        <h2>Information We Collect</h2>
+        <ul>
+          <li>Account information such as username and email address.</li>
+          <li>Application names, URLs, and API keys used to connect monitored apps.</li>
+          <li>Error, uptime, and performance metrics sent by the collector.</li>
+        </ul>
+      </section>
 
-    <h2>Data Security</h2>
-    <p>We take reasonable measures to protect user data and account information. However, no system can guarantee complete security.</p>
+      <section class="legal-section">
+        <h2>How We Use Information</h2>
+        <p>
+          WatchTower uses collected information to provide monitoring features, display application health data,
+          notify users about issues, and improve platform reliability.
+        </p>
+      </section>
 
-    <h2>Third-Party Services</h2>
-    <p>WatchTower may rely on third-party hosting, database, or email providers to operate the platform.</p>
+      <section class="legal-section">
+        <h2>Data Security</h2>
+        <p>
+          WatchTower takes reasonable steps to protect account and monitoring data. Users should avoid sending
+          sensitive personal data through application logs.
+        </p>
+      </section>
 
-    <h2>Contact</h2>
-    <p>If you have questions regarding this Privacy Policy, please contact the WatchTower team.</p>
+      <section class="legal-section">
+        <h2>Third-Party Services</h2>
+        <p>
+          WatchTower may rely on third-party infrastructure, hosting, database, and email services to operate the
+          platform.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>Contact</h2>
+        <p>If you have questions about this Privacy Policy, please contact the WatchTower team.</p>
+      </section>
+    </div>
   </main>
+
+  <watchtower-footer></watchtower-footer>
+  <script src="../js/components/wt-base-element.js"></script>
+  <script src="../js/components/navbar.js"></script>
+  <script src="../js/components/footer.js"></script>
 </body>
+
 </html>
