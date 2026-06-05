@@ -288,7 +288,6 @@ function readJsonStorage(key) {
 function getFilteredErrors(errors) {
   const range = document.getElementById('time-range')?.value || '24h';
   const severity = document.getElementById('severity-filter')?.value || 'all';
-  const selectedType = typeFilter?.value || 'all';
   const selectedDateRange = getSelectedDateRange();
   const cutoff = Date.now() - (RANGE_MS[range] || RANGE_MS['24h']);
 
