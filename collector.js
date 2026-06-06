@@ -14,7 +14,7 @@
  * @param release The release version of app
  */
 function Collector(apiKey, release) {
-    const baseUrl = "https://watchtower-backend.YOUR_ACCOUNT.workers.dev"; // Replace YOUR_ACCOUNT with your CF account subdomain
+    const baseUrl = "https://watchtower.team7ate92.workers.dev"; // Replace team7ate92 with your CF account subdomain
 
     const routes = {
         error: `${baseUrl}/api/events/error`,

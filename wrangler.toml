@@ -1,7 +1,12 @@
-name = "watchtower-backend"
+name = "watchtower"
 main = "backend/worker.js"
 compatibility_date = "2025-06-01"
 compatibility_flags = ["nodejs_compat"]
+
+# Serve the frontend static files from the same Worker (avoids cross-origin issues)
+[assets]
+directory = "./frontend"
+binding = "ASSETS"
 
 # Cron trigger: check uptime for all apps every 5 minutes
 [[triggers]]

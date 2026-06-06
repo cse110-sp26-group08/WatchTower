@@ -28,7 +28,12 @@ export default {
    */
   async fetch(request, env, ctx) {
     ensureDb(env);
-    return app.fetch(request, env, ctx);
+    const { pathname } = new URL(request.url);
+    // API and auth routes go to Hono; everything else is served as a static asset
+    const isApiRoute = pathname.startsWith('/api/') ||
+      pathname === '/login' || pathname === '/signup' || pathname === '/logout';
+    if (isApiRoute) return app.fetch(request, env, ctx);
+    return env.ASSETS.fetch(request);
   },
 
   /**
