@@ -6,8 +6,7 @@
     "start": "npm --prefix backend start",
     "dev": "npx wrangler dev",
     "test": "npm --prefix backend test",
-    "deploy:worker": "npx wrangler deploy",
-    "deploy:pages": "npx wrangler pages deploy frontend --project-name watchtower-frontend",
+    "deploy": "npx wrangler deploy",
     "migrate": "npm --prefix backend run migrate"
   },
   "devDependencies": {

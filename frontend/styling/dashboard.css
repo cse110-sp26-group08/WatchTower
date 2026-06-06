@@ -59,10 +59,25 @@ header.page-header {
   justify-content: space-between;
   align-items: flex-start;
   gap: 24px;
+  flex-wrap: wrap;
+}
+
+.filters {
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  width: fit-content;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 18px;
+  background: white;
+  border: 1px solid rgb(33 31 36 / 6%);
+  box-shadow: 0 10px 24px rgb(33 31 36 / 5%);
 }
 
 .header-content {
-  flex-shrink: 0;
   max-width: 440px;
 }
 

@@ -31,17 +31,6 @@ import {
 } from './endpoints/users.js';
 import { checkLoginCredentials, createUser } from './controllers/userController.js';
 
-// In production, fetch the HTML file from the Workers Assets binding.
-// In local dev, call next() so dev.js's htmlFile handlers take over.
-async function htmlPage(c, next, assetPath) {
-  if (c.env?.ASSETS) {
-    const url = new URL(c.req.url);
-    url.pathname = assetPath;
-    return c.env.ASSETS.fetch(new Request(url.toString()));
-  }
-  return next();
-}
-
 /**
  * Create and return the Hono application.
  * Does not start a server — use worker.js (CF Workers) or dev.js (Node.js local).
@@ -71,19 +60,14 @@ function createApp() {
 
       const secret = c.env?.JWT_SECRET ?? process.env.JWT_SECRET ?? 'dev-secret';
       const token = await signJwt({ userId: user.id, email: user.email, username: user.username }, secret);
-      c.header('Set-Cookie', `${COOKIE_NAME}=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 86400}`);
+      const secure = (c.env?.NODE_ENV ?? process.env.NODE_ENV) === 'production' ? '; Secure' : '';
+      c.header('Set-Cookie', `${COOKIE_NAME}=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 86400}${secure}`);
       return c.json({ user }, 200);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unknown error occurred';
       return c.json({ message }, 500);
     }
   });
-
-  // Page routes — serve via Workers Assets in production, fall through to dev.js in local dev
-  app.get('/signup', (c, next) => htmlPage(c, next, '/webpages/signup.html'));
-  app.get('/docs', (c, next) => htmlPage(c, next, '/webpages/docs.html'));
-  app.get('/privacy', (c, next) => htmlPage(c, next, '/webpages/privacy.html'));
-  app.get('/terms', (c, next) => htmlPage(c, next, '/webpages/terms.html'));
 
   app.post('/signup', async (c) => {
     try {
@@ -99,7 +83,8 @@ function createApp() {
 
       const secret = c.env?.JWT_SECRET ?? process.env.JWT_SECRET ?? 'dev-secret';
       const token = await signJwt({ userId: safeUser.id, email: safeUser.email, username: safeUser.username }, secret);
-      c.header('Set-Cookie', `${COOKIE_NAME}=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 86400}`);
+      const secure = (c.env?.NODE_ENV ?? process.env.NODE_ENV) === 'production' ? '; Secure' : '';
+      c.header('Set-Cookie', `${COOKIE_NAME}=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 86400}${secure}`);
       return c.json({ user: safeUser }, 201);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unknown error occurred';

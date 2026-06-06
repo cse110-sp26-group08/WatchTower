@@ -39,7 +39,6 @@ app.get('/', htmlFile('index.html'));
 app.get('/login', htmlFile('login.html'));
 app.get('/signup', htmlFile('signup.html'));
 app.get('/apps', htmlFile('app_selection.html'));
-app.get('/app_selection.html', htmlFile('app_selection.html'));
 app.get('/dashboard', htmlFile('dashboard.html'));
 app.get('/advanced-performance-metrics', htmlFile('advanced_performance_metrics.html'));
 app.get('/advanced-error-metrics', htmlFile('advanced_error_metrics.html'));

@@ -1,4 +1,4 @@
-/* global flatpickr, Chart, getStoredUser, escapeHtml, average */
+/* global Chart, getStoredUser, escapeHtml, average */
 
 let refreshIntervalId = null;
 const AUTO_REFRESH_MS = 5000;
@@ -30,7 +30,6 @@ async function initPerformancePage() {
     const layout = document.querySelector('wt-dash-layout');
     if (layout && selectedApp.name) layout.setAttribute('app-name', selectedApp.name);
 
-    initDatePicker();
     bindControls();
 
     await loadSelectedAppPerformance();
@@ -50,24 +49,12 @@ function getStoredSelectedApp() {
     }
 }
 
-function initDatePicker() {
-    flatpickr('#date-range', {
-        mode: 'range',
-        dateFormat: 'm/d/Y',
-        defaultDate: [
-            new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-            new Date()
-        ],
-        onReady: () => updateKpiPeriods(),
-        onChange: () => {
-            updateKpiPeriods();
-            loadSelectedAppPerformance();
-        }
-    });
-}
-
 function bindControls() {
     document.querySelector('#line-toggle').addEventListener('change', loadSelectedAppPerformance);
+    document.querySelector('wt-date-filter')?.addEventListener('datechange', () => {
+        updateKpiPeriods();
+        loadSelectedAppPerformance();
+    });
 
     const autoRefreshToggle = document.querySelector('.toggle-switch input');
 
@@ -123,21 +110,18 @@ async function loadPerformanceData(appId) {
 
 
 function filterEventsByDateRange(events) {
-    const dateRangeValue = document.querySelector('#date-range').value;
+    const filter = document.querySelector('wt-date-filter');
+    const from = filter?.from;
+    const to = filter?.to;
 
-    if (!dateRangeValue || !dateRangeValue.includes(' to ')) {
-        return events;
-    }
+    if (!from || !to) return events;
 
-    const [startValue, endValue] = dateRangeValue.split(' to ');
-    const startDate = new Date(startValue);
-    const endDate = new Date(endValue);
-
+    const endDate = new Date(to);
     endDate.setHours(23, 59, 59, 999);
 
     return events.filter((event) => {
         const eventDate = new Date(event.timestamp || event.receivedAt);
-        return eventDate >= startDate && eventDate <= endDate;
+        return eventDate >= from && eventDate <= endDate;
     });
 }
 
@@ -754,33 +738,30 @@ function formatMetric(value, unit) {
 }
 
 function updateKpiPeriods() {
-    const dateRangeValue = document.querySelector('#date-range').value;
+    const filter = document.querySelector('wt-date-filter');
+    const from = filter?.from;
+    const to = filter?.to;
     const periods = document.querySelectorAll('.kpi-period');
+    const periodText = (from && to)
+        ? `${from.toLocaleDateString()} – ${to.toLocaleDateString()}`
+        : 'Selected date range';
 
     periods.forEach((period) => {
-        period.textContent = dateRangeValue || 'Selected date range';
+        period.textContent = periodText;
     });
 }
 
 function getPreviousDateRange() {
-    const dateRangeValue = document.querySelector('#date-range').value;
+    const filter = document.querySelector('wt-date-filter');
+    const from = filter?.from;
+    const to = filter?.to;
 
-    if (!dateRangeValue || !dateRangeValue.includes(' to ')) {
-        return null;
-    }
+    if (!from || !to) return null;
 
-    const [startValue, endValue] = dateRangeValue.split(' to ');
-    const startDate = new Date(startValue);
-    const endDate = new Date(endValue);
-
-    const rangeMs = endDate - startDate;
-
-    const previousEndDate = new Date(startDate);
+    const rangeMs = to - from;
+    const previousEndDate = new Date(from);
     previousEndDate.setDate(previousEndDate.getDate() - 1);
-
-    const previousStartDate = new Date(previousEndDate);
-    previousStartDate.setTime(previousEndDate.getTime() - rangeMs);
-
+    const previousStartDate = new Date(previousEndDate.getTime() - rangeMs);
     previousEndDate.setHours(23, 59, 59, 999);
 
     return { previousStartDate, previousEndDate };

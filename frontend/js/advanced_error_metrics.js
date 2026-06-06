@@ -1,4 +1,4 @@
-/* global flatpickr, escapeHtml */
+/* global escapeHtml */
 
 const RANGE_MS = {
   '24h': 24 * 60 * 60 * 1000,
@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initAdvancedErrorMetrics() {
-  initDatePicker();
   bindAdvancedErrorControls();
   const selectedApp = await resolveSelectedApp();
   if (!selectedApp?.id) {
@@ -41,24 +40,6 @@ async function initAdvancedErrorMetrics() {
   startAutoRefresh();
 }
 
-function initDatePicker() {
-  if (!window.flatpickr) {
-    return;
-  }
-
-  flatpickr('#date-range', {
-    mode: 'range',
-    dateFormat: 'm/d/Y',
-    defaultDate: [
-      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-      new Date(),
-    ],
-    onChange: () => {
-      redrawFromState();
-    },
-  });
-}
-
 function bindAdvancedErrorControls() {
   document.getElementById('refresh-dashboard')?.addEventListener('click', async () => {
     const selectedApp = advancedState.app || await resolveSelectedApp();
@@ -69,6 +50,7 @@ function bindAdvancedErrorControls() {
 
   document.getElementById('time-range')?.addEventListener('change', redrawFromState);
   document.getElementById('severity-filter')?.addEventListener('change', redrawFromState);
+  document.querySelector('wt-date-filter')?.addEventListener('datechange', redrawFromState);
 
   const autoRefreshToggle = document.querySelector('.toggle-switch input');
   const toggleStatus = document.querySelector('.toggle-status');
@@ -303,19 +285,13 @@ function getFilteredErrors(errors) {
 }
 
 function getSelectedDateRange() {
-  const dateRangeValue = document.getElementById('date-range')?.value?.trim() || '';
-  if (!dateRangeValue || !dateRangeValue.includes(' to ')) {
-    return null;
-  }
+  const filter = document.querySelector('wt-date-filter');
+  const from = filter?.from;
+  const to = filter?.to;
+  if (!from || !to) return null;
 
-  const [startValue, endValue] = dateRangeValue.split(' to ');
-  const startDate = new Date(startValue);
-  const endDate = new Date(endValue);
-
-  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
-    return null;
-  }
-
+  const startDate = new Date(from);
+  const endDate = new Date(to);
   startDate.setHours(0, 0, 0, 0);
   endDate.setHours(23, 59, 59, 999);
 

@@ -81,6 +81,7 @@ function bindDashboardControls() {
 
     document.getElementById('time-range').addEventListener('change', () => redrawFromState());
     document.getElementById('severity-filter').addEventListener('change', () => redrawFromState());
+    document.querySelector('wt-date-filter')?.addEventListener('datechange', () => redrawFromState());
 
     document.querySelectorAll('.graph-setting').forEach((setting) => {
         setting.addEventListener('click', () => {
@@ -137,6 +138,12 @@ async function refreshDashboard(selectedApp, options = {}) {
             errorResponse.json(),
             performanceResponse.json(),
         ]);
+
+        if (appResponse.status === 404) {
+            localStorage.removeItem('watchtowerSelectedApp');
+            window.location.replace('/apps');
+            return;
+        }
 
         const app = appResponse.ok && appData.app
             ? { ...appData.app, url: selectedApp.url }
@@ -206,21 +213,45 @@ function redrawFromState() {
     renderLogs(app, filteredErrors, filteredPerformance);
 }
 
+function getSelectedDateRange() {
+    const filter = document.querySelector('wt-date-filter');
+    const from = filter?.from;
+    const to = filter?.to;
+    if (!from || !to) return null;
+    const start = new Date(from);
+    const end = new Date(to);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    return { startTime: start.getTime(), endTime: end.getTime() };
+}
+
 function filterErrors(errors, range, severity) {
+    const dateRange = getSelectedDateRange();
     const cutoff = Date.now() - RANGE_MS[range];
 
     return errors.filter((event) => {
         const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
+        if (!Number.isFinite(timestamp)) return false;
         const eventSeverity = normalizeSeverityBucket(event.metadata?.severity);
-        const withinRange = Number.isFinite(timestamp) && timestamp >= cutoff;
+        const withinRange = dateRange
+            ? timestamp >= dateRange.startTime && timestamp <= dateRange.endTime
+            : timestamp >= cutoff;
         const severityMatch = severity === 'all' || eventSeverity === severity;
         return withinRange && severityMatch;
     });
 }
 
 function filterErrorsForPreviousPeriod(errors, range, severity) {
-    const end = Date.now() - RANGE_MS[range];
-    const start = end - RANGE_MS[range];
+    const dateRange = getSelectedDateRange();
+    let start, end;
+    if (dateRange) {
+        const span = dateRange.endTime - dateRange.startTime;
+        end = dateRange.startTime - 1;
+        start = end - span;
+    } else {
+        end = Date.now() - RANGE_MS[range];
+        start = end - RANGE_MS[range];
+    }
 
     return errors.filter((event) => {
         const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
@@ -232,17 +263,29 @@ function filterErrorsForPreviousPeriod(errors, range, severity) {
 }
 
 function filterPerformance(events, range) {
+    const dateRange = getSelectedDateRange();
     const cutoff = Date.now() - RANGE_MS[range];
 
     return events.filter((event) => {
         const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
-        return Number.isFinite(timestamp) && timestamp >= cutoff;
+        if (!Number.isFinite(timestamp)) return false;
+        return dateRange
+            ? timestamp >= dateRange.startTime && timestamp <= dateRange.endTime
+            : timestamp >= cutoff;
     });
 }
 
 function filterPerformanceForPreviousPeriod(events, range) {
-    const end = Date.now() - RANGE_MS[range];
-    const start = end - RANGE_MS[range];
+    const dateRange = getSelectedDateRange();
+    let start, end;
+    if (dateRange) {
+        const span = dateRange.endTime - dateRange.startTime;
+        end = dateRange.startTime - 1;
+        start = end - span;
+    } else {
+        end = Date.now() - RANGE_MS[range];
+        start = end - RANGE_MS[range];
+    }
 
     return events.filter((event) => {
         const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
@@ -494,8 +537,10 @@ function renderChartTable(filteredErrors) {
 }
 
 function renderLineChart(filteredErrors) {
+    const dateRange = getSelectedDateRange();
     const range = document.getElementById('time-range').value;
-    const bucketSize = range === '24h' ? 'hour' : 'day';
+    const spanDays = dateRange ? (dateRange.endTime - dateRange.startTime) / 86400000 : null;
+    const bucketSize = (spanDays !== null ? spanDays : (range === '24h' ? 0 : 1)) <= 1 ? 'hour' : 'day';
     const buckets = bucketErrors(filteredErrors, bucketSize);
 
     createOrUpdateChart('line', {

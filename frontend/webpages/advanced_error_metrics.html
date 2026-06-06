@@ -23,18 +23,7 @@
                     <p>Analyze error events and severity breakdowns across your application.</p>
                 </div>
                 <form class="filters">
-                    <div class="filter-card">
-                        <div class="filter-icon">
-                            <img src="../assets/calendar-icon.svg" alt="Calendar Icon">
-                        </div>
-
-                        <input
-                            id="date-range"
-                            class="date-range-input"
-                            type="text"
-                            placeholder="Select date range"
-                        >
-                    </div>
+                    <wt-date-filter></wt-date-filter>
 
                     <div class="filter-card toggle-card">
                         <span class="refresh-icon" aria-hidden="true">↻</span>
@@ -173,6 +162,7 @@
     <script src="../js/components/dash_navbar.js"></script>
     <script src="../js/components/wt-dash-layout.js"></script>
     <script src="../js/components/wt-metric-card.js"></script>
+    <script src="../js/components/wt-date-filter.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
     <script src="../js/utils.js" defer></script>
