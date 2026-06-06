@@ -591,6 +591,11 @@ header.page-header {
     gap: 24px;
   }
 
+  .status-card,
+  .health-score {
+    min-height: auto;
+  }
+
   .graph-card-header {
     flex-direction: column;
   }
