@@ -64,7 +64,7 @@ function renderApps(apps, ownerId) {
               <div>
                 <h3>${escapeHtml(app.name)}</h3>
               </div>
-              <p class="app-description">${appUrl ? escapeHtml(appUrl) : 'No URL saved yet'}</p>
+              <p class="app-description" title="${escapeHtml(appUrl || 'No URL saved yet')}">${appUrl ? escapeHtml(appUrl) : 'No URL saved yet'}</p>
             </div>
             <div class="app-card-footer">
               <span class="app-open-label">Open dashboard</span>

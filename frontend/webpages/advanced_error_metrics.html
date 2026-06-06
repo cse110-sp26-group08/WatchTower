@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../styling/base.css">
     <link rel="stylesheet" href="../styling/dashboard.css">
     <link rel="stylesheet" href="../styling/advanced_error_metrics.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="icon" type="image/x-icon" href="assets/favicon-here.ico">
 </head>
 
@@ -21,6 +22,31 @@
                     <h1>Errors</h1>
                     <p>Analyze error events and severity breakdowns across your application.</p>
                 </div>
+                <form class="filters">
+                    <div class="filter-card">
+                        <div class="filter-icon">
+                            <img src="../assets/calendar-icon.svg" alt="Calendar Icon">
+                        </div>
+
+                        <input
+                            id="date-range"
+                            class="date-range-input"
+                            type="text"
+                            placeholder="Select date range"
+                        >
+                    </div>
+
+                    <div class="filter-card toggle-card">
+                        <span class="refresh-icon" aria-hidden="true">↻</span>
+                        <span class="toggle-label">Auto Refresh</span>
+
+                        <label class="toggle-switch">
+                            <span class="toggle-status">ON</span>
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </form>
             </header>
             <section class="errors-overview">
                 <div class="errors-overview-header">
@@ -75,11 +101,6 @@
                     <option value="low">Low</option>
                 </select>
 
-                <label for="type-filter">Type:</label>
-                <select id="type-filter">
-                    <option value="all">All Types</option>
-                </select>
-
                 <button type="button" id="refresh-dashboard">Refresh</button>
             </div>
 
@@ -90,13 +111,6 @@
                 </summary>
 
                 <div class="more-info-content">
-                    <div class="graph-setting-container">
-                        <div class="graph-setting setting1 active" data-chart-view="line">
-                            <img src="assets/graph-icon1.png" alt="icon1">
-                            <p>Line Graph</p>
-                        </div>
-                    </div>
-
                     <div class="graph">
                         <div class="graph-card">
                             <div class="graph-card-header">
@@ -160,8 +174,8 @@
     <script src="../js/components/wt-dash-layout.js"></script>
     <script src="../js/components/wt-metric-card.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
     <script src="../js/utils.js" defer></script>
-    <script src="../js/dashboard.js" defer></script>
     <script src="../js/advanced_error_metrics.js" defer></script>
     <script src="../js/auth.js" defer></script>
 </body>
