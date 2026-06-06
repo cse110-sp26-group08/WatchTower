@@ -45,6 +45,8 @@ app.get('/advanced-performance-metrics', htmlFile('advanced_performance_metrics.
 app.get('/advanced-error-metrics', htmlFile('advanced_error_metrics.html'));
 app.get('/settings', htmlFile('settings.html'));
 app.get('/docs', htmlFile('docs.html'));
+app.get('/privacy', htmlFile('privacy.html'));
+app.get('/terms', htmlFile('terms.html'));
 
 const port = process.env.PORT || 3000;
 serve({ fetch: app.fetch, port }, () => {

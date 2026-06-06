@@ -31,6 +31,17 @@ import {
 } from './endpoints/users.js';
 import { checkLoginCredentials, createUser } from './controllers/userController.js';
 
+// In production, fetch the HTML file from the Workers Assets binding.
+// In local dev, call next() so dev.js's htmlFile handlers take over.
+async function htmlPage(c, next, assetPath) {
+  if (c.env?.ASSETS) {
+    const url = new URL(c.req.url);
+    url.pathname = assetPath;
+    return c.env.ASSETS.fetch(new Request(url.toString()));
+  }
+  return next();
+}
+
 /**
  * Create and return the Hono application.
  * Does not start a server — use worker.js (CF Workers) or dev.js (Node.js local).
@@ -67,6 +78,12 @@ function createApp() {
       return c.json({ message }, 500);
     }
   });
+
+  // Page routes — serve via Workers Assets in production, fall through to dev.js in local dev
+  app.get('/signup', (c, next) => htmlPage(c, next, '/webpages/signup.html'));
+  app.get('/docs', (c, next) => htmlPage(c, next, '/webpages/docs.html'));
+  app.get('/privacy', (c, next) => htmlPage(c, next, '/webpages/privacy.html'));
+  app.get('/terms', (c, next) => htmlPage(c, next, '/webpages/terms.html'));
 
   app.post('/signup', async (c) => {
     try {
@@ -125,6 +142,13 @@ function createApp() {
   app.get('/api/apps/:id', getAppEndpoint);
   app.patch('/api/apps/:id', updateAppEndpoint);
   app.delete('/api/apps/:id', deleteAppEndpoint);
+
+  // Catch-all: serve remaining static assets from Workers Assets (production)
+  // or fall through to dev.js static middleware (local dev)
+  app.all('*', async (c, next) => {
+    if (c.env?.ASSETS) return c.env.ASSETS.fetch(c.req.raw);
+    return next();
+  });
 
   return app;
 }
