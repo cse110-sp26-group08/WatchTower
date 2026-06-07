@@ -8,11 +8,13 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import dotenv from 'dotenv';
 import { createApp } from './app.js';
 import { initDb } from './util/database.js';
+import { initializeEmailService } from './util/emailService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 initDb();
+initializeEmailService();
 
 const app = createApp();
 

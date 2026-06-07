@@ -5,16 +5,25 @@ import { initDb } from './util/database.js';
 import { selectAllApps } from './schema/appModel.js';
 import { checkDowntimeStatus } from './endpoints/apps.js';
 import { checkAndNotifyDowntime } from './util/downtimeNotificationEnsurer.js';
+import { initializeEmailService } from './util/emailService.js';
 
 const app = createApp();
 
 // Initialised once per isolate lifetime; env is only available inside handlers.
 let dbReady = false;
+let emailReady = false;
 
 function ensureDb(env) {
   if (!dbReady) {
     initDb(env.DATABASE_URL);
     dbReady = true;
+  }
+}
+
+function ensureEmail(env) {
+  if (!emailReady && env.SENDGRID_API_KEY) {
+    initializeEmailService(env.SENDGRID_API_KEY);
+    emailReady = true;
   }
 }
 
@@ -28,6 +37,7 @@ export default {
    */
   async fetch(request, env, ctx) {
     ensureDb(env);
+    ensureEmail(env);
     return app.fetch(request, env, ctx);
   },
 
@@ -40,6 +50,7 @@ export default {
    */
   async scheduled(event, env, ctx) {
     ensureDb(env);
+    ensureEmail(env);
     ctx.waitUntil(
       (async () => {
         const allApps = await selectAllApps();
