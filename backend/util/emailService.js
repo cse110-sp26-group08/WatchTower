@@ -1,28 +1,51 @@
 /* eslint-env node */
 
+import sgMail from '@sendgrid/mail';
+
 /**
- * Placeholder email service.
+ * Email service using SendGrid.
  *
- * Replace the body of `sendEmail` with a real transport (e.g. nodemailer,
- * SendGrid, AWS SES) once the email integration is ready.
+ * Configuration via environment variables:
+ * - SENDGRID_API_KEY: SendGrid API key
+ * - SENDGRID_FROM: Sender email address (must be verified in SendGrid)
  *
  * @module utils/emailService
  */
 
+// Initialize SendGrid with API key (will be set by app.js after dotenv loads)
+function initializeEmailService() {
+  if (!process.env.SENDGRID_API_KEY) {
+    throw new Error('SENDGRID_API_KEY is not set in environment variables');
+  }
+  console.log(`[emailService] Initializing with API key: ${process.env.SENDGRID_API_KEY.substring(0, 10)}...`);
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log('[emailService] SendGrid initialized successfully');
+}
+
 /**
  * Send an email to a recipient.
  *
- * @param {object} options
- * @param {string} options.to      - Recipient email address.
- * @param {string} options.subject - Email subject line.
- * @param {string} options.body    - Plain-text email body.
+ * @param {string} to      - Recipient email address.
+ * @param {string} subject - Email subject line.
+ * @param {string} body    - Plain-text or HTML email body.
  * @returns {Promise<void>}
  */
 async function sendEmail(to, subject, body) {
-  // TODO: replace with real email transport
-  console.log(`[emailService] Sending email to ${to}`);
-  console.log(`[emailService] Subject : ${subject}`);
-  console.log(`[emailService] Body    : ${body}`);
+  try {
+    const msg = {
+      to,
+      from: process.env.SENDGRID_FROM || 'noreply@watchtower.com',
+      subject,
+      html: body,
+      text: body.replace(/<[^>]*>/g, ''), // Strip HTML tags for plain text fallback
+    };
+
+    const response = await sgMail.send(msg);
+    console.log(`[emailService] Email sent successfully to ${to}. Status: ${response[0].statusCode}`);
+  } catch (error) {
+    console.error(`[emailService] Error sending email to ${to}:`, error.message);
+    throw error;
+  }
 }
 
 /**
@@ -32,7 +55,7 @@ async function sendEmail(to, subject, body) {
  * @returns {Promise<void>}
  */
 async function sendDownEmail(email) {
-  const subject = '⚠️ Website Down Alert - WatchTower Notification';
+  const subject = 'Website Down Alert - WatchTower Notification';
   const htmlBody = `
     <!DOCTYPE html>
     <html>
@@ -86,8 +109,7 @@ async function sendDownEmail(email) {
     </html>
   `;
 
-  // TODO: replace sendEmail call with HTML-capable transport (e.g. nodemailer with html option)
   await sendEmail(email, subject, htmlBody);
 }
 
-export { sendEmail, sendDownEmail };
+export { initializeEmailService, sendEmail, sendDownEmail };
