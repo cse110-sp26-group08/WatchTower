@@ -222,6 +222,13 @@ button {
   min-height: 120px;
 }
 
+.sparkline-canvas {
+  display: block;
+  width: 100%;
+  height: 42px;
+  margin-top: 14px;
+}
+
 .kpi-grid .sparkline-canvas {
   margin-top: auto;
   padding-top: 14px;
@@ -336,13 +343,6 @@ button {
   margin: 6px 0 0;
   color: var(--muted);
   font-size: 0.85rem;
-}
-
-.sparkline-canvas {
-  display: block;
-  width: 100%;
-  height: 42px;
-  margin-top: 14px;
 }
 
 .chart-grid {
