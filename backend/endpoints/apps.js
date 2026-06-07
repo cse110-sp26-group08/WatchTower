@@ -26,11 +26,11 @@ async function checkDowntimeStatus(appId) {
 
   let isUp;
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    const response = await fetch(app.url, { method: 'GET', signal: controller.signal });
-    clearTimeout(timeout);
-    isUp = response.status >= 200 && response.status < 400;
+    const response = await fetch(app.url, {
+      method: 'GET',
+      signal: AbortSignal.timeout(10000),
+    });
+    isUp = response.status < 500;
   } catch {
     isUp = false;
   }
@@ -147,11 +147,24 @@ async function getAppApiKeyEndpoint(c) {
  */
 async function updateAppEndpoint(c) {
   try {
+    const appId = c.req.param('id');
     const payload = await c.req.json();
-    const app = await updateAppById(c.req.param('id'), payload);
+
+    const existing = await getAppById(appId);
+    if (!existing) {
+      return c.json({ error: 'App not found' }, 404);
+    }
+
+    const app = await updateAppById(appId, payload);
 
     if (!app) {
       return c.json({ error: 'App not found' }, 404);
+    }
+
+    if (payload.url) {
+      await checkDowntimeStatus(appId);
+      const refreshed = await getAppById(appId);
+      return c.json({ app: refreshed }, 200);
     }
 
     return c.json({ app }, 200);

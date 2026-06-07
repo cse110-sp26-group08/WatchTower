@@ -55,9 +55,16 @@ export default {
       (async () => {
         const allApps = await selectAllApps();
         for (const monitoredApp of allApps) {
-          if (monitoredApp.url) {
+          if (!monitoredApp.url) continue;
+          try {
             await checkDowntimeStatus(monitoredApp.id);
+          } catch (err) {
+            console.error(`checkDowntimeStatus failed for app ${monitoredApp.id}:`, err);
+          }
+          try {
             await checkAndNotifyDowntime(monitoredApp.id);
+          } catch (err) {
+            console.error(`checkAndNotifyDowntime failed for app ${monitoredApp.id}:`, err);
           }
         }
       })(),

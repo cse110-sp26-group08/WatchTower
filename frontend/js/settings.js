@@ -66,7 +66,7 @@ function bindSaveForm(appId) {
         }
 
         saveBtn.disabled = true;
-        saveBtn.textContent = 'Saving…';
+        saveBtn.textContent = url ? 'Checking URL…' : 'Saving…';
 
         try {
             const res = await fetch(`/api/apps/${appId}`, {
@@ -93,7 +93,15 @@ function bindSaveForm(appId) {
             }
 
             document.getElementById('settings-modal-app-name').textContent = data.app.name;
-            feedback.textContent = 'Changes saved.';
+
+            if (url) {
+                const downOrNot = Array.isArray(data.app.downOrNot) ? data.app.downOrNot : [];
+                const isUp = downOrNot.length > 0 ? downOrNot[downOrNot.length - 1] : null;
+                const statusText = isUp === true ? ' — site is UP' : isUp === false ? ' — site is DOWN' : '';
+                feedback.textContent = `Changes saved${statusText}.`;
+            } else {
+                feedback.textContent = 'Changes saved.';
+            }
             feedback.classList.add('settings-feedback-success');
         } catch {
             feedback.textContent = 'Network error. Please try again.';
