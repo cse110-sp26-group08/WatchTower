@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initDashboard().catch((error) => {
         console.error('Dashboard failed to initialize:', error);
-        setStatus('DOWN', 'Could not load dashboard data.', 'No app data was available for this dashboard.');
+        setStatus('DOWN', 'No app data was available for this dashboard.');
     });
 });
 
@@ -13,32 +13,25 @@ const RANGE_MS = {
     '30d': 30 * 24 * 60 * 60 * 1000,
 };
 
-let dashboardChart = null;
-let selectedChartView = 'line';
 let dashboardState = null;
 let refreshAbortController = null;
-const EMPTY_VALUE = 'No data';
 const WARNING_CRITICAL_THRESHOLD = 5;
 
 async function initDashboard() {
     const selectedApp = await resolveSelectedApp();
 
     if (!selectedApp?.id) {
-        setStatus('DOWN', 'No selected project.', 'Return to app selection and choose a project.');
-        renderEmptyLogs('No selected app.');
-        populateProjectDetails({ app: null, owner: null, errors: [], performanceEvents: [] });
+        setProjectName('No project selected');
+        setStatus('DOWN', 'Return to app selection and choose a project.');
         renderHealthBars([], []);
         return;
     }
 
     setProjectName(selectedApp.name || 'Selected project');
-    populateProjectDetails({
-        app: selectedApp,
-        owner: null,
-        errors: [],
-        performanceEvents: [],
-    });
-    bindDashboardControls();
+    populateProjectDetails({ app: selectedApp });
+    bindApiKeyWidget(selectedApp.id);
+    bindHealthScoreNavigation();
+    bindPageLifecycle();
     await refreshDashboard(selectedApp, { force: true });
 }
 
@@ -71,26 +64,7 @@ async function resolveSelectedApp() {
     return storedApp;
 }
 
-function bindDashboardControls() {
-    document.getElementById('refresh-dashboard').addEventListener('click', async () => {
-        const selectedApp = readJsonStorage('watchtowerSelectedApp');
-        if (selectedApp?.id) {
-            await refreshDashboard(selectedApp, { force: true });
-        }
-    });
-
-    document.getElementById('time-range').addEventListener('change', () => redrawFromState());
-    document.getElementById('severity-filter').addEventListener('change', () => redrawFromState());
-
-    document.querySelectorAll('.graph-setting').forEach((setting) => {
-        setting.addEventListener('click', () => {
-            selectedChartView = setting.dataset.chartView || 'line';
-            document.querySelectorAll('.graph-setting').forEach((item) => item.classList.remove('active'));
-            setting.classList.add('active');
-            redrawFromState();
-        });
-    });
-
+function bindPageLifecycle() {
     document.addEventListener('visibilitychange', async () => {
         if (document.hidden) {
             abortActiveRefresh();
@@ -108,6 +82,89 @@ function bindDashboardControls() {
     });
 }
 
+function getNavHref(key) {
+    const scriptEl = document.querySelector('script[src*="components/dash_navbar.js"]');
+    const isStatic = scriptEl && new URL(scriptEl.src).pathname.endsWith('/frontend/js/components/dash_navbar.js');
+    const base = scriptEl ? scriptEl.src : '';
+    if (key === 'performance') {
+        return isStatic
+            ? new URL('../../webpages/advanced_performance_metrics.html', base).href
+            : '/advanced-performance-metrics';
+    }
+    return isStatic
+        ? new URL('../../webpages/advanced_error_metrics.html', base).href
+        : '/advanced-error-metrics';
+}
+
+function bindHealthScoreNavigation() {
+    [
+        { prefix: 'performance', key: 'performance' },
+        { prefix: 'reliability', key: 'errors' },
+    ].forEach(({ prefix, key }) => {
+        const el = document.querySelector(`wt-health-score[prefix="${prefix}"]`);
+        if (!el) return;
+        const card = el.querySelector('.health-score');
+        if (!card) return;
+        card.classList.add('health-score-clickable');
+        card.addEventListener('click', () => {
+            window.location.href = getNavHref(key);
+        });
+    });
+}
+
+function bindApiKeyWidget(appId) {
+    const toggleBtn = document.getElementById('apikey-toggle');
+    const valueEl = document.getElementById('apikey-value');
+    const copyBtn = document.getElementById('apikey-copy');
+    if (!toggleBtn || !valueEl) return;
+
+    const MASK = '•'.repeat(16);
+    const EYE_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    const EYE_OFF_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+    const COPY_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+    const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+    let realKey = null;
+    let visible = false;
+
+    async function loadKey() {
+        if (realKey !== null) return;
+        try {
+            const response = await fetch(`/api/apps/${appId}/apikey`, { cache: 'no-store' });
+            const data = await response.json();
+            realKey = (response.ok && data.apiKey) ? data.apiKey : '';
+        } catch {
+            realKey = '';
+        }
+    }
+
+    toggleBtn.addEventListener('click', async () => {
+        await loadKey();
+        visible = !visible;
+        valueEl.textContent = (visible && realKey) ? realKey : MASK;
+        toggleBtn.innerHTML = visible ? EYE_OFF_SVG : EYE_SVG;
+        toggleBtn.setAttribute('aria-label', visible ? 'Hide API key' : 'Show API key');
+        if (copyBtn) {
+            copyBtn.hidden = !(visible && realKey);
+            copyBtn.innerHTML = COPY_SVG;
+        }
+    });
+
+    if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+            await loadKey();
+            if (!realKey) return;
+            try {
+                await navigator.clipboard.writeText(realKey);
+                copyBtn.innerHTML = CHECK_SVG;
+                setTimeout(() => { copyBtn.innerHTML = COPY_SVG; }, 2000);
+            } catch {
+                // clipboard access denied — fail silently
+            }
+        });
+    }
+}
+
 async function refreshDashboard(selectedApp, options = {}) {
     if (!selectedApp?.id || document.hidden) {
         return;
@@ -123,7 +180,7 @@ async function refreshDashboard(selectedApp, options = {}) {
     refreshAbortController = new AbortController();
     const { signal } = refreshAbortController;
 
-    setStatus('UP', `Checking ${selectedApp.name || 'project'}...`, 'Refreshing dashboard statistics from recent events.');
+    setStatus('UP', `Checking ${selectedApp.name || 'project'}...`);
 
     try {
         const [appResponse, errorResponse, performanceResponse] = await Promise.all([
@@ -141,13 +198,11 @@ async function refreshDashboard(selectedApp, options = {}) {
         const app = appResponse.ok && appData.app
             ? { ...appData.app, url: selectedApp.url }
             : selectedApp;
-        const owner = await fetchOwner(app.ownerId);
         const errors = Array.isArray(errorData.events) ? errorData.events : [];
         const performanceEvents = Array.isArray(performanceData.events) ? performanceData.events : [];
 
         dashboardState = {
             app,
-            owner,
             errors,
             performanceEvents,
         };
@@ -156,7 +211,7 @@ async function refreshDashboard(selectedApp, options = {}) {
     } catch (error) {
         if (error.name !== 'AbortError') {
             console.error('Error refreshing dashboard:', error);
-            setStatus('DOWN', 'Could not refresh dashboard.', 'The latest monitoring events could not be loaded.');
+            setStatus('DOWN', 'The latest monitoring events could not be loaded.');
         }
     } finally {
         if (refreshAbortController?.signal === signal) {
@@ -177,33 +232,18 @@ function abortActiveRefresh() {
 }
 
 
-// Both current-period and previous-period sets are derived here so that
-// each render function (metrics, chart, logs) can compute deltas without
-// re-filtering independently.
 function redrawFromState() {
     if (!dashboardState) {
         return;
     }
 
-    const { app, owner, errors, performanceEvents } = dashboardState;
-    const range = document.getElementById('time-range').value;
-    const severity = document.getElementById('severity-filter').value;
-    const filteredErrors = filterErrors(errors, range, severity);
-    const previousErrors = filterErrorsForPreviousPeriod(errors, range, severity);
-    const filteredPerformance = filterPerformance(performanceEvents, range);
-    const previousPerformance = filterPerformanceForPreviousPeriod(performanceEvents, range);
+    const { app, errors, performanceEvents } = dashboardState;
+    const filteredErrors = filterErrors(errors, '24h', 'all');
+    const filteredPerformance = filterPerformance(performanceEvents, '24h');
 
-    populateProjectDetails({
-        app,
-        owner,
-        errors: filteredErrors,
-        performanceEvents: filteredPerformance,
-    });
+    populateProjectDetails({ app });
     renderStatus(app, filteredErrors, filteredPerformance);
-    renderMetrics(errors, filteredErrors, previousErrors, filteredPerformance, previousPerformance);
     renderHealthBars(filteredErrors, filteredPerformance);
-    renderGraph(filteredErrors, filteredPerformance);
-    renderLogs(app, filteredErrors, filteredPerformance);
 }
 
 function filterErrors(errors, range, severity) {
@@ -218,35 +258,12 @@ function filterErrors(errors, range, severity) {
     });
 }
 
-function filterErrorsForPreviousPeriod(errors, range, severity) {
-    const end = Date.now() - RANGE_MS[range];
-    const start = end - RANGE_MS[range];
-
-    return errors.filter((event) => {
-        const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
-        const eventSeverity = normalizeSeverityBucket(event.metadata?.severity);
-        const withinRange = Number.isFinite(timestamp) && timestamp >= start && timestamp < end;
-        const severityMatch = severity === 'all' || eventSeverity === severity;
-        return withinRange && severityMatch;
-    });
-}
-
 function filterPerformance(events, range) {
     const cutoff = Date.now() - RANGE_MS[range];
 
     return events.filter((event) => {
         const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
         return Number.isFinite(timestamp) && timestamp >= cutoff;
-    });
-}
-
-function filterPerformanceForPreviousPeriod(events, range) {
-    const end = Date.now() - RANGE_MS[range];
-    const start = end - RANGE_MS[range];
-
-    return events.filter((event) => {
-        const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
-        return Number.isFinite(timestamp) && timestamp >= start && timestamp < end;
     });
 }
 
@@ -259,94 +276,42 @@ function renderStatus(app, filteredErrors, filteredPerformance) {
     const latestCheck = downOrNot.length > 0 ? downOrNot[downOrNot.length - 1] : null;
 
     if (latestCheck === false) {
-        setStatus(
-            'DOWN',
-            `${app.name || 'Project'} is down.`,
-            'The most recent uptime check failed to reach the service.'
-        );
+        setStatus('DOWN', 'The most recent uptime check failed to reach the service.');
         return;
     }
 
     if (criticalErrors.length > WARNING_CRITICAL_THRESHOLD) {
-        setStatus(
-            'WARN',
-            `${app.name || 'Project'} is up with elevated critical errors.`,
-            `${criticalErrors.length} critical errors were captured recently.`
-        );
+        setStatus('WARN', `${criticalErrors.length} critical errors were captured recently.`);
         return;
     }
 
     if (criticalErrors.length > 0) {
-        setStatus(
-            'UP',
-            `${app.name || 'Project'} is up with critical issues to review.`,
-            `${criticalErrors.length} critical errors were captured recently.`
-        );
+        setStatus('UP', `${criticalErrors.length} critical errors were captured recently.`);
         return;
     }
 
     if (filteredErrors.length > 0) {
-        setStatus(
-            'UP',
-            `${app.name || 'Project'} is up with recent non-critical issues.`,
-            `${filteredErrors.length} non-critical errors were recorded in the selected range.`
-        );
+        setStatus('UP', `${filteredErrors.length} non-critical errors were recorded in the last 24h.`);
         return;
     }
 
     if (latestCheck === true) {
         setStatus(
             'UP',
-            `${app.name || 'Project'} is up.`,
             filteredPerformance.length > 0
-                ? 'Recent performance telemetry is flowing and no matching errors were found.'
-                : 'The service is reachable and no errors were found in the selected range.'
+                ? 'Performance telemetry is flowing and no errors were found.'
+                : 'The service is reachable and no errors were found.'
         );
         return;
     }
 
     // No URL configured — fall back to telemetry as the only signal.
     if (filteredPerformance.length > 0) {
-        setStatus(
-            'UP',
-            `${app.name || 'Project'} is up.`,
-            'Recent performance telemetry is flowing and no matching errors were found.'
-        );
+        setStatus('UP', 'Performance telemetry is flowing and no errors were found.');
         return;
     }
 
-    setStatus(
-        'DOWN',
-        `${app.name || 'Project'} has no recent telemetry.`,
-        'No recent error or performance events were found for the selected range.'
-    );
-}
-
-function renderMetrics(allErrors, filteredErrors, previousErrors, filteredPerformance, previousPerformance) {
-    const todayErrors = allErrors.filter((event) => {
-        const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
-        return Number.isFinite(timestamp) && timestamp >= Date.now() - RANGE_MS['24h'];
-    }).length;
-    const yesterdayErrors = allErrors.filter((event) => {
-        const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
-        return Number.isFinite(timestamp)
-            && timestamp >= Date.now() - (2 * RANGE_MS['24h'])
-            && timestamp < Date.now() - RANGE_MS['24h'];
-    }).length;
-
-    const avgResponse = average(getResponseTimes(filteredPerformance));
-    const previousAvgResponse = average(getResponseTimes(previousPerformance));
-    const criticalErrors = filteredErrors.filter(isCriticalError).length;
-    const activeUrls = countUniqueUrls(filteredErrors, filteredPerformance);
-
-    document.getElementById('errors-today-value').textContent = String(todayErrors);
-    document.getElementById('errors-today-compare').textContent = buildDeltaText(todayErrors, yesterdayErrors, 'from yesterday');
-    document.getElementById('avg-response-value').textContent = avgResponse ? `${Math.round(avgResponse)} ms` : EMPTY_VALUE;
-    document.getElementById('avg-response-compare').textContent = buildDeltaText(Math.round(avgResponse || 0), Math.round(previousAvgResponse || 0), 'from previous period');
-    document.getElementById('critical-errors-value').textContent = String(criticalErrors);
-    document.getElementById('critical-errors-compare').textContent = `${filteredErrors.length} total matching errors`;
-    document.getElementById('active-urls-value').textContent = String(activeUrls);
-    document.getElementById('active-urls-compare').textContent = activeUrls ? 'unique endpoints in range' : 'no tracked URLs';
+    setStatus('DOWN', 'No recent error or performance events were found.');
 }
 
 function renderHealthBars(filteredErrors, filteredPerformance) {
@@ -390,207 +355,6 @@ function getHealthScoreMeta(score) {
     return { label: 'Poor', className: 'score-red' };
 }
 
-function renderGraph(filteredErrors, filteredPerformance) {
-    const graphTitle = document.getElementById('graph-title');
-    const graphSummary = document.getElementById('graph-summary');
-    const chartCanvasShell = document.getElementById('chart-canvas-shell');
-    const chartTableShell = document.getElementById('chart-table-shell');
-    const noEvents = !filteredErrors.length && !filteredPerformance.length;
-
-    if (selectedChartView === 'table') {
-        graphTitle.textContent = 'Recent event table';
-        graphSummary.textContent = filteredErrors.length
-            ? `${filteredErrors.length} matching errors shown in tabular form.`
-            : 'No matching error events in the selected range.';
-        chartCanvasShell.hidden = true;
-        chartTableShell.hidden = false;
-        renderChartTable(filteredErrors);
-        destroyChart();
-        return;
-    }
-
-    chartCanvasShell.hidden = false;
-    chartTableShell.hidden = true;
-
-    graphTitle.textContent = 'Error volume over time';
-    graphSummary.textContent = noEvents
-        ? 'No recent error or performance events were found for the selected range.'
-        : 'Recent error volume grouped by day or hour for the selected range.';
-    renderLineChart(filteredErrors);
-}
-
-function renderLogs(app, filteredErrors, filteredPerformance) {
-    const logsBody = document.getElementById('logs-table-body');
-    const recentRows = [
-        ...filteredErrors.map((event) => ({
-            time: event.timestamp || event.receivedAt,
-            project: app.name || 'Selected project',
-            status: normalizeSeverity(event.metadata?.severity),
-            message: event.metadata?.message || 'Error event',
-        })),
-        ...filteredPerformance.slice(-5).map((event) => ({
-            time: event.timestamp || event.receivedAt,
-            project: app.name || 'Selected project',
-            status: 'UP',
-            message: buildPerformanceMessage(event),
-        })),
-    ]
-        .sort((left, right) => Date.parse(right.time || 0) - Date.parse(left.time || 0))
-        .slice(0, 10);
-
-    if (!recentRows.length) {
-        renderEmptyLogs('No recent logs or outages for the selected range.');
-        return;
-    }
-
-    const fragment = document.createDocumentFragment();
-
-    recentRows.forEach((row) => {
-        const tableRow = document.createElement('tr');
-        const values = [formatTimestamp(row.time), row.project, row.status, row.message];
-
-        values.forEach((value, index) => {
-            const cell = document.createElement('td');
-            if (index === values.length - 1) {
-                cell.className = 'logs-message-cell';
-                cell.title = value;
-            }
-            cell.textContent = value;
-            tableRow.appendChild(cell);
-        });
-
-        fragment.appendChild(tableRow);
-    });
-
-    logsBody.replaceChildren(fragment);
-}
-
-function renderEmptyLogs(message) {
-    const logsBody = document.getElementById('logs-table-body');
-    const row = document.createElement('tr');
-    const cell = document.createElement('td');
-
-    cell.colSpan = 4;
-    cell.textContent = message;
-    row.appendChild(cell);
-    logsBody.replaceChildren(row);
-}
-
-function renderChartTable(filteredErrors) {
-    const tableBody = document.getElementById('chart-table-body');
-
-    if (!filteredErrors.length) {
-        const row = document.createElement('tr');
-        const cell = document.createElement('td');
-
-        cell.colSpan = 4;
-        cell.textContent = 'No matching error events in the selected range.';
-        row.appendChild(cell);
-        tableBody.replaceChildren(row);
-        return;
-    }
-
-    const fragment = document.createDocumentFragment();
-    const sortedErrors = [...filteredErrors]
-        .sort((left, right) => Date.parse(right.timestamp || 0) - Date.parse(left.timestamp || 0));
-
-    sortedErrors.forEach((event) => {
-        const row = document.createElement('tr');
-        const values = [
-            formatTimestamp(event.timestamp || event.receivedAt),
-            normalizeSeverity(event.metadata?.severity),
-            event.metadata?.message || 'Error event',
-            event.url || 'N/A',
-        ];
-
-        values.forEach((value, index) => {
-            const cell = document.createElement('td');
-            if (index >= 2) {
-                cell.className = index === 2 ? 'chart-message-cell' : 'chart-url-cell';
-                cell.title = value;
-            }
-            cell.textContent = value;
-            row.appendChild(cell);
-        });
-
-        fragment.appendChild(row);
-    });
-
-    tableBody.replaceChildren(fragment);
-}
-
-function renderLineChart(filteredErrors) {
-    const range = document.getElementById('time-range').value;
-    const bucketSize = range === '24h' ? 'hour' : 'day';
-    const buckets = bucketErrors(filteredErrors, bucketSize);
-
-    createOrUpdateChart('line', {
-        labels: buckets.labels,
-        datasets: [{
-            label: 'Errors',
-            data: buckets.values,
-            borderColor: '#1f49ff',
-            backgroundColor: 'rgba(31, 73, 255, 0.18)',
-            tension: 0.3,
-            fill: true,
-        }],
-    });
-}
-
-function createOrUpdateChart(type, data) {
-    const context = document.getElementById('dashboard-chart');
-
-    destroyChart();
-    dashboardChart = new window.Chart(context, {
-        type,
-        data,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: type !== 'line',
-                },
-            },
-            scales: type === 'pie' ? {} : {
-                y: {
-                    beginAtZero: true,
-                },
-            },
-        },
-    });
-}
-
-function destroyChart() {
-    if (dashboardChart) {
-        dashboardChart.destroy();
-        dashboardChart = null;
-    }
-}
-
-function bucketErrors(errors, bucketSize) {
-    const formatOptions = bucketSize === 'hour'
-        ? { hour: 'numeric', month: 'short', day: 'numeric' }
-        : { month: 'short', day: 'numeric' };
-    const map = new Map();
-
-    errors.forEach((event) => {
-        const date = new Date(event.timestamp || event.receivedAt || 0);
-        const key = bucketSize === 'hour'
-            ? `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${date.getHours()}`
-            : `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-        const label = date.toLocaleString(undefined, formatOptions);
-        const bucket = map.get(key) || { label, count: 0 };
-        bucket.count += 1;
-        map.set(key, bucket);
-    });
-
-    const sortedBuckets = [...map.entries()].sort(([left], [right]) => left.localeCompare(right)).map(([, value]) => value);
-    return {
-        labels: sortedBuckets.map((bucket) => bucket.label),
-        values: sortedBuckets.map((bucket) => bucket.count),
-    };
-}
 
 function calculatePerformanceScore(filteredPerformance) {
     const responseTimes = getResponseTimes(filteredPerformance);
@@ -616,21 +380,6 @@ function calculateReliabilityScore(filteredErrors, filteredPerformance) {
     return Math.max(0, Math.min(100, score));
 }
 
-function countUniqueUrls(filteredErrors, filteredPerformance) {
-    const urls = new Set();
-
-    [...filteredErrors, ...filteredPerformance].forEach((event) => {
-        if (event.url) {
-            urls.add(event.url);
-        }
-        if (event.metadata?.apiEndpoint) {
-            urls.add(event.metadata.apiEndpoint);
-        }
-    });
-
-    return urls.size;
-}
-
 function getResponseTimes(events) {
     return events
         .map((event) => Number(event.metadata?.apiLatencyMs ?? event.metadata?.loadTimeMs))
@@ -643,14 +392,13 @@ function setProjectName(name) {
     if (layout) layout.setAttribute('app-name', name || '');
 }
 
-function setStatus(status, description, detail) {
+function setStatus(status, detail) {
     const statusText = document.getElementById('status-text');
     const statusDescription = document.getElementById('status-description');
     const statusContainer = document.querySelector('.status-container');
 
     statusText.textContent = status;
     statusDescription.textContent = detail;
-    document.getElementById('status-project').textContent = description;
     statusContainer.classList.remove('status-up', 'status-down', 'status-warn');
 
     if (status === 'DOWN') {
@@ -670,36 +418,6 @@ function isCriticalError(event) {
     return normalizeSeverityBucket(event.metadata?.severity) === 'critical';
 }
 
-function normalizeSeverity(severity) {
-    return normalizeSeverityBucket(severity).toUpperCase();
-}
-
-function buildPerformanceMessage(event) {
-    const apiLatency = Number(event.metadata?.apiLatencyMs);
-    const loadTime = Number(event.metadata?.loadTimeMs);
-    const domContentLoaded = Number(event.metadata?.domContentLoadedMs);
-    const ttfb = Number(event.metadata?.ttfbMs);
-    const apiEndpoint = event.metadata?.apiEndpoint;
-
-    if (Number.isFinite(apiLatency)) {
-        return `${apiEndpoint || 'API'} latency ${Math.round(apiLatency)} ms`;
-    }
-
-    if (Number.isFinite(loadTime)) {
-        return `Load time ${Math.round(loadTime)} ms`;
-    }
-
-    if (Number.isFinite(domContentLoaded)) {
-        return `DOM ready ${Math.round(domContentLoaded)} ms`;
-    }
-
-    if (Number.isFinite(ttfb)) {
-        return `TTFB ${Math.round(ttfb)} ms`;
-    }
-
-    return 'Performance event received';
-}
-
 function formatTimestamp(value) {
     if (!value) {
         return 'Unknown time';
@@ -714,57 +432,14 @@ function formatTimestamp(value) {
     return date.toLocaleString();
 }
 
-function buildDeltaText(current, previous, suffix) {
-    const delta = current - previous;
-
-    if (delta === 0) {
-        return `No change ${suffix}`;
+function populateProjectDetails({ app }) {
+    const link = document.getElementById('project-url-link');
+    if (app?.url) {
+        link.href = app.url;
+        link.hidden = false;
+    } else {
+        link.hidden = true;
     }
-
-    const direction = delta > 0 ? '+' : '';
-    return `${direction}${delta} ${suffix}`;
-}
-
-async function fetchOwner(ownerId) {
-    if (!ownerId) {
-        return null;
-    }
-
-    try {
-        const response = await fetch(`/api/users/${ownerId}`, { cache: 'no-store' });
-        const data = await response.json();
-        return response.ok ? data.user || null : null;
-    } catch (error) {
-        console.error('Failed to fetch owner:', error);
-        return null;
-    }
-}
-
-function populateProjectDetails({ app, owner, errors, performanceEvents }) {
-    const events = [...errors, ...performanceEvents];
-    const latestEvent = events
-        .sort((left, right) => Date.parse(right.timestamp || right.receivedAt || 0)
-            - Date.parse(left.timestamp || left.receivedAt || 0))[0];
-    const latestRelease = findLatestRelease(events);
-
-    document.getElementById('more-info-title').textContent = `${app?.name || 'Project'} info`;
-    document.getElementById('detail-app-name').textContent = app?.name || EMPTY_VALUE;
-    document.getElementById('detail-owner-name').textContent = owner?.username || owner?.email || EMPTY_VALUE;
-    document.getElementById('detail-project-url').textContent = app?.url || EMPTY_VALUE;
-    document.getElementById('detail-latest-release').textContent = latestRelease || EMPTY_VALUE;
-    document.getElementById('detail-last-event').textContent = latestEvent
-        ? `${formatTimestamp(latestEvent.timestamp || latestEvent.receivedAt)} (${latestEvent.type})`
-        : EMPTY_VALUE;
-}
-
-function findLatestRelease(events) {
-    for (const event of events) {
-        if (event.metadata?.release) {
-            return String(event.metadata.release);
-        }
-    }
-
-    return '';
 }
 
 function normalizeSeverityBucket(severity) {

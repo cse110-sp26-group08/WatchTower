@@ -4,10 +4,14 @@ class WtHealthScore extends HTMLElement {
         const prefix = this.getAttribute('prefix') || '';
         const iconPath = this.getAttribute('icon-path') || '';
         const supportText = this.getAttribute('support-text') || '';
+        const eyebrow = this.getAttribute('eyebrow') || '';
 
         this.innerHTML = `
             <div class="health-score">
-                <span class="health-score-title">${title}</span>
+                <div class="health-score-header">
+                    ${eyebrow ? `<p class="status-eyebrow">${eyebrow}</p>` : ''}
+                    <h2 class="health-score-heading">${title}</h2>
+                </div>
                 <div class="health-ring score-red" id="${prefix}-bar-fill" aria-label="${title} score">
                     <div class="health-score-center">
                         <strong class="health-score-value" id="${prefix}-bar-value">0</strong>
