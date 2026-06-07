@@ -97,67 +97,44 @@
                 <button type="button" id="refresh-dashboard">Refresh</button>
             </div>
 
-            <details class="more-info-widget" open>
-                <summary class="more-info-header">
-                    <h2>Graphs</h2>
-                    <span class="more-info-toggle" aria-hidden="true"></span>
-                </summary>
-
-                <div class="more-info-content">
-                    <div class="graph">
-                        <div class="graph-card">
-                            <div class="graph-card-header">
-                                <div>
-                                    <p class="graph-eyebrow">Error telemetry</p>
-                                    <h2 id="graph-title">Error volume over time</h2>
-                                </div>
-                                <p class="graph-summary" id="graph-summary">Loading event data for the selected app.</p>
-                            </div>
-                            <div id="errors-chart-canvas-shell">
-                                <canvas id="dashboard-chart" aria-label="Error chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
+            <wt-dash-section eyebrow="Error telemetry">
+                <h3 slot="heading" id="graph-title">Error volume over time</h3>
+                <p slot="header-end" class="graph-summary" id="graph-summary">Loading event data for the selected app.</p>
+                <div class="chart-canvas-wrapper" id="errors-chart-canvas-shell">
+                    <canvas id="dashboard-chart" aria-label="Error chart"></canvas>
                 </div>
-            </details>
+            </wt-dash-section>
 
-            <details class="more-info-widget" open>
-                <summary class="more-info-header">
-                    <h2>All Errors</h2>
-                    <span class="more-info-toggle" aria-hidden="true"></span>
-                </summary>
-
-                <div class="more-info-content">
-                    <p class="errors-section-summary" id="errors-table-summary">Loading recent errors...</p>
-                    <div class="errors-table-shell">
-                        <table class="logs-table errors-table">
-                            <colgroup>
-                                <col style="width: 112px;">
-                                <col style="width: 92px;">
-                                <col style="width: 112px;">
-                                <col style="width: auto;">
-                                <col style="width: 260px;">
-                                <col style="width: 64px;">
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th class="time-column">Time</th>
-                                    <th class="severity-column">Severity</th>
-                                    <th class="compact-left-column">Type</th>
-                                    <th class="message-column">Message</th>
-                                    <th class="url-column">URL</th>
-                                    <th class="stack-column">Stack</th>
-                                </tr>
-                            </thead>
-                            <tbody id="errors-table-body">
-                                <tr>
-                                    <td colspan="6" class="empty-state">Loading recent errors...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <wt-dash-section eyebrow="Error records" heading="All Errors">
+                <p slot="header-end" class="errors-section-summary" id="errors-table-summary">Loading recent errors...</p>
+                <div class="errors-table-shell">
+                    <table class="logs-table errors-table">
+                        <colgroup>
+                            <col style="width: 112px;">
+                            <col style="width: 92px;">
+                            <col style="width: 112px;">
+                            <col style="width: auto;">
+                            <col style="width: 260px;">
+                            <col style="width: 64px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="time-column">Time</th>
+                                <th class="severity-column">Severity</th>
+                                <th class="compact-left-column">Type</th>
+                                <th class="message-column">Message</th>
+                                <th class="url-column">URL</th>
+                                <th class="stack-column">Stack</th>
+                            </tr>
+                        </thead>
+                        <tbody id="errors-table-body">
+                            <tr>
+                                <td colspan="6" class="empty-state">Loading recent errors...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </details>
+            </wt-dash-section>
         </main>
     </wt-dash-layout>
 
@@ -166,6 +143,7 @@
     <script src="../js/components/dash_navbar.js"></script>
     <script src="../js/components/wt-dash-layout.js"></script>
     <script src="../js/components/wt-metric-card.js"></script>
+    <script src="../js/components/wt-dash-section.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
     <script src="../js/utils.js" defer></script>

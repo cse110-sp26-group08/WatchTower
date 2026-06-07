@@ -200,9 +200,31 @@ button {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 18px;
-  margin-bottom: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+}
+
+.kpi-grid wt-metric-card {
+  display: block;
+  height: 100%;
+}
+
+.kpi-grid .metric {
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+}
+
+.kpi-grid .sparkline-canvas {
+  margin-top: auto;
+  padding-top: 14px;
 }
 
 .kpi-grid,
@@ -327,7 +349,6 @@ button {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 18px;
-  margin-bottom: 24px;
   width: 100%;
   max-width: 100%;
 }
@@ -338,7 +359,7 @@ button {
   overflow: hidden;
 }
 
-.chart-card:first-child {
+.chart-grid wt-dash-section:first-child {
   grid-column: span 2;
 }
 
@@ -346,7 +367,6 @@ button {
   position: relative;
   width: 100%;
   height: 320px;
-  margin-top: 18px;
 }
 
 .chart-card canvas {
@@ -357,7 +377,6 @@ button {
 .insight-list {
   display: grid;
   gap: 16px;
-  margin-top: 18px;
   width: 100%;
   max-width: 100%;
 }
@@ -402,7 +421,6 @@ button {
 
 .table-card {
   padding: 20px;
-  margin-bottom: 48px;
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
@@ -410,7 +428,6 @@ button {
 
 table {
   width: 100%;
-  margin-top: 18px;
   border-collapse: collapse;
 }
 

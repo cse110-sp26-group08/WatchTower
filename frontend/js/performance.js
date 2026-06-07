@@ -815,6 +815,7 @@ function formatChange(currentValue, previousValue, unit) {
 
 function setChangeText(elementId, currentValue, previousValue, unit) {
     const element = document.querySelector(elementId);
+    if (!element) return;
     const difference = currentValue - previousValue;
 
     element.textContent = formatChange(currentValue, previousValue, unit);
