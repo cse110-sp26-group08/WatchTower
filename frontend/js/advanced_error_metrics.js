@@ -1,10 +1,5 @@
 /* global flatpickr, escapeHtml */
 
-const RANGE_MS = {
-  '24h': 24 * 60 * 60 * 1000,
-  '7d': 7 * 24 * 60 * 60 * 1000,
-  '30d': 30 * 24 * 60 * 60 * 1000,
-};
 const AUTO_REFRESH_MS = 5000;
 
 let advancedState = {
@@ -67,7 +62,6 @@ function bindAdvancedErrorControls() {
     }
   });
 
-  document.getElementById('time-range')?.addEventListener('change', redrawFromState);
   document.getElementById('severity-filter')?.addEventListener('change', redrawFromState);
 
   const autoRefreshToggle = document.querySelector('.toggle-switch input');
@@ -238,7 +232,7 @@ function renderStatus(app, filteredErrors, allErrors) {
     setStatus(
       'UP',
       `${app.name || 'Project'} has no errors in this range.`,
-      'Try changing the time range or severity filter.',
+      'Try changing the date range or severity filter.',
     );
     return;
   }
@@ -286,19 +280,18 @@ function readJsonStorage(key) {
 }
 
 function getFilteredErrors(errors) {
-  const range = document.getElementById('time-range')?.value || '24h';
   const severity = document.getElementById('severity-filter')?.value || 'all';
-  const selectedDateRange = getSelectedDateRange();
-  const cutoff = Date.now() - (RANGE_MS[range] || RANGE_MS['24h']);
+  const selectedDateWindow = getSelectedDateRange();
+  const fallbackStartTime = Date.now() - (7 * 24 * 60 * 60 * 1000);
+  const windowStartTime = selectedDateWindow?.startTime ?? fallbackStartTime;
+  const windowEndTime = selectedDateWindow?.endTime ?? Date.now();
 
   return errors.filter((event) => {
     const timestamp = Date.parse(event.timestamp || event.receivedAt || 0);
     const eventSeverity = normalizeSeverity(event.metadata?.severity);
-    const withinRange = selectedDateRange
-      ? timestamp >= selectedDateRange.startTime && timestamp <= selectedDateRange.endTime
-      : timestamp >= cutoff;
+    const withinDateWindow = timestamp >= windowStartTime && timestamp <= windowEndTime;
     const severityMatch = severity === 'all' || eventSeverity === severity;
-    return Number.isFinite(timestamp) && withinRange && severityMatch;
+    return Number.isFinite(timestamp) && withinDateWindow && severityMatch;
   });
 }
 
@@ -326,7 +319,6 @@ function getSelectedDateRange() {
 }
 
 function renderGraph(filteredErrors) {
-  const range = document.getElementById('time-range')?.value || '24h';
   const chartCanvasShell = document.getElementById('errors-chart-canvas-shell');
   const graphTitle = document.getElementById('graph-title');
   const graphSummary = document.getElementById('graph-summary');
@@ -336,10 +328,10 @@ function renderGraph(filteredErrors) {
   graphTitle.textContent = 'Error volume by severity';
   graphSummary.textContent = `${filteredErrors.length} error${filteredErrors.length === 1 ? '' : 's'} in the selected range.`;
   chartCanvasShell.hidden = false;
-  renderSeverityLineChart(filteredErrors, range);
+  renderSeverityLineChart(filteredErrors, getSelectedDateRange());
 }
 
-function renderSeverityLineChart(filteredErrors, range) {
+function renderSeverityLineChart(filteredErrors, selectedDateWindow) {
   const severities = ['critical', 'high', 'medium', 'low'];
   const colors = {
     critical: '#f04438',
@@ -347,7 +339,7 @@ function renderSeverityLineChart(filteredErrors, range) {
     medium: '#eab308',
     low: '#16a34a',
   };
-  const bucketSet = createErrorIntervalBuckets(range);
+  const bucketSet = createErrorIntervalBuckets(selectedDateWindow);
   const datasets = severities.map((severityLevel) => {
     const severityErrors = filteredErrors.filter((event) => {
       return normalizeSeverity(event.metadata?.severity) === severityLevel;
@@ -402,29 +394,26 @@ function destroyChart() {
   }
 }
 
-function createErrorIntervalBuckets(range) {
-  const intervals = {
-    '24h': 60 * 60 * 1000,
-    '7d': 24 * 60 * 60 * 1000,
-    '30d': 2 * 24 * 60 * 60 * 1000,
-  };
-  const ranges = {
-    '24h': 24 * 60 * 60 * 1000,
-    '7d': 7 * 24 * 60 * 60 * 1000,
-    '30d': 30 * 24 * 60 * 60 * 1000,
-  };
+function createErrorIntervalBuckets(dateWindow) {
+  const fallbackRangeMs = 7 * 24 * 60 * 60 * 1000;
+  const startTime = dateWindow?.startTime ?? (Date.now() - fallbackRangeMs);
+  const endTime = dateWindow?.endTime ?? Date.now();
+  const dateWindowMs = Math.max(endTime - startTime, 1);
+  let intervalMs = 60 * 60 * 1000;
 
-  const intervalMs = intervals[range] || intervals['24h'];
-  const rangeMs = ranges[range] || ranges['24h'];
-  const endTime = Date.now();
-  const startTime = endTime - rangeMs;
+  if (dateWindowMs > 7 * 24 * 60 * 60 * 1000) {
+    intervalMs = 2 * 24 * 60 * 60 * 1000;
+  } else if (dateWindowMs > 24 * 60 * 60 * 1000) {
+    intervalMs = 24 * 60 * 60 * 1000;
+  }
+
   const firstBucketStart = Math.floor(startTime / intervalMs) * intervalMs;
   const buckets = [];
 
   for (let bucketStart = firstBucketStart; bucketStart <= endTime; bucketStart += intervalMs) {
     buckets.push({
       key: String(bucketStart),
-      label: formatBucketLabel(bucketStart, range),
+      label: formatBucketLabel(bucketStart, dateWindow),
     });
   }
 
@@ -454,9 +443,12 @@ function countErrorsInBuckets(errors, bucketSet) {
   return bucketSet.keys.map((key) => countsByKey.get(key) || 0);
 }
 
-function formatBucketLabel(bucketStart, range) {
+function formatBucketLabel(bucketStart, dateWindow) {
   const date = new Date(bucketStart);
-  const options = range === '24h'
+  const dateWindowMs = dateWindow
+    ? Math.max((dateWindow.endTime || 0) - (dateWindow.startTime || 0), 0)
+    : 24 * 60 * 60 * 1000;
+  const options = dateWindowMs <= 24 * 60 * 60 * 1000
     ? { hour: 'numeric', minute: '2-digit' }
     : { month: 'short', day: 'numeric', hour: 'numeric' };
 

@@ -158,6 +158,18 @@ function createApp() {
     res.sendFile(path.join(__dirname, '../frontend/webpages/signup.html'));
   });
 
+  app.get('/docs', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/docs.html'));
+  });
+
+  app.get('/privacy', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/privacy.html'));
+  });
+
+  app.get('/terms', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/webpages/terms.html'));
+  });
+
   app.post('/signup', async (req, res) => {
     try {
       const { username, email, password, confirmPassword } =

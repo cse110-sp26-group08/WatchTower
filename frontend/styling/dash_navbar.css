@@ -20,7 +20,7 @@
   display: block;
   height: var(--sub-navbar-height);
   position: relative;
-  z-index: 999;
+  z-index: 1001;
   font-family: var(--font-family-primary);
   color: #211f24;
 }
@@ -43,7 +43,7 @@ a {
   border-bottom: 1px solid var(--sub-navbar-border);
   background: var(--sub-navbar-bg);
   backdrop-filter: blur(10px);
-  z-index: 999;
+  z-index: 1001;
   transition:
     background-color 180ms ease,
     border-color 180ms ease;
@@ -204,45 +204,137 @@ a {
   filter: invert(55%) sepia(80%) saturate(400%) hue-rotate(130deg) brightness(95%);
 }
 
-/* Main navbar expands to 214px at ≤980px — keep sub-header visible below it */
-@media (width <= 980px) {
-  .sub-header {
-    top: 214px;
-  }
-}
-
 @media (width <= 900px) {
   :host {
-    height: auto;
+    height: var(--sub-navbar-height);
+    min-height: var(--sub-navbar-height);
   }
 
   .sub-header {
-    height: auto;
+    height: var(--sub-navbar-height);
+    min-height: var(--sub-navbar-height);
     position: fixed;
+    top: 74px;
   }
 
   .sub-nav {
-    grid-template-columns: 1fr auto 1fr;
-    height: auto;
-    padding: 8px 20px;
+    grid-template-columns: minmax(0, max-content) minmax(max-content, 1fr) auto;
+    height: var(--sub-navbar-height);
+    min-height: var(--sub-navbar-height);
+    padding: 0 14px;
     gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .sub-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-back {
+    min-width: 0;
+    flex-shrink: 0;
+  }
+
+  .app-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-links {
+    justify-self: center;
+    width: auto;
+    min-width: max-content;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+
+  .nav-actions {
+    justify-self: end;
+    flex-shrink: 0;
   }
 }
 
-/* Main navbar grows to 242px at ≤620px */
 @media (width <= 620px) {
   .sub-header {
-    top: 242px;
+    top: 112px;
   }
 }
 
 @media (width <= 640px) {
   .sub-nav {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: minmax(0, max-content) minmax(max-content, 1fr) auto;
+    padding: 0 10px;
+    gap: 6px;
+  }
+
+  .back-link {
+    width: 26px;
+    height: 26px;
+  }
+
+  .back-arrow {
+    width: 16px;
+    height: 16px;
+  }
+
+  .app-name {
+    max-width: 92px;
+    font-size: 13px;
+  }
+
+  .nav-links {
+    gap: 2px;
+  }
+
+  .nav-link {
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+
+  .settings-link {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (width <= 420px) {
+  :host {
+    height: var(--sub-navbar-height);
+    min-height: var(--sub-navbar-height);
+  }
+
+  .sub-header {
+    top: 150px;
+    height: var(--sub-navbar-height);
+    min-height: var(--sub-navbar-height);
+  }
+
+  .sub-nav {
+    height: var(--sub-navbar-height);
+    min-height: var(--sub-navbar-height);
+    padding: 0 8px;
     gap: 4px;
   }
 
   .app-name {
-    max-width: 120px;
+    max-width: 76px;
+    font-size: 13px;
+  }
+
+  .nav-links {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow: visible;
+    padding-bottom: 0;
+    min-width: max-content;
+  }
+
+  .nav-link {
+    padding: 5px 7px;
+    font-size: 12px;
   }
 }

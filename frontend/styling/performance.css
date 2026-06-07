@@ -66,7 +66,7 @@ header p {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   width: fit-content;
   margin: 0;
   padding: 8px 10px;
@@ -325,7 +325,7 @@ button {
 
 .chart-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 2fr 1fr;
   gap: 18px;
   margin-bottom: 24px;
   width: 100%;
@@ -500,7 +500,6 @@ th {
   }
 
   .filters {
-    flex-wrap: wrap;
     justify-content: center;
   }
 
@@ -508,7 +507,24 @@ th {
     grid-template-columns: 1fr;
   }
 
+  .chart-card:first-child {
+    grid-column: auto;
+  }
+
   .table-card {
     overflow-x: auto;
+  }
+}
+
+@media (width <= 500px) {
+  .insight-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .insight-metric {
+    min-width: auto;
+    text-align: left;
   }
 }

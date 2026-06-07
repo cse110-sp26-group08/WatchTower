@@ -293,18 +293,137 @@ a {
 
 @media (width <= 980px) {
   :host {
-    height: 214px;
+    height: auto;
+    min-height: 74px;
   }
 
   .site-header {
-    min-height: 214px;
+    min-height: 74px;
+  }
+
+  .site-nav {
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    min-height: 74px;
+    padding: 12px 20px;
+  }
+
+  .brand-mark {
+    justify-self: start;
+  }
+
+  .nav-actions {
+    justify-self: end;
+  }
+
+  .nav-links {
+    justify-content: center;
+    gap: 24px;
+    transform: none;
+  }
+}
+
+@media (width <= 620px) {
+  :host {
+    height: auto;
+    min-height: 112px;
+  }
+
+  .site-header {
+    min-height: 112px;
+  }
+
+  .site-nav {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand actions"
+      "links links";
+    row-gap: 8px;
+    min-height: 112px;
+    border-radius: 0;
+    padding: 10px 14px;
+  }
+
+  .brand-mark {
+    grid-area: brand;
+    justify-self: start;
+  }
+
+  .nav-links {
+    grid-area: links;
+    width: 100%;
+    justify-content: center;
+    gap: clamp(16px, 6vw, 28px);
+    font-size: 14px;
+  }
+
+  .nav-actions {
+    grid-area: actions;
+    width: auto;
+    flex-wrap: nowrap;
+    justify-content: end;
+    gap: 8px;
+  }
+
+  .brand-link {
+    width: 142px;
+    height: 36px;
+  }
+
+  .brand-logo {
+    width: 142px;
+    height: 26px;
+    transform: translateY(-2px);
+  }
+
+  .github-link {
+    width: 38px;
+    height: 38px;
+  }
+
+  .github-icon-default,
+  .github-icon-hover {
+    width: 24px;
+    height: 24px;
+  }
+
+  .nav-login {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+    transform: none;
+  }
+
+  .button {
+    min-height: 38px;
+    padding-inline: 12px;
+    font-size: 14px;
+  }
+
+  .nav-actions .button,
+  .button-logout {
+    transform: none;
+  }
+}
+
+@media (width <= 420px) {
+  :host {
+    min-height: 150px;
+  }
+
+  .site-header {
+    min-height: 150px;
   }
 
   .site-nav {
     grid-template-columns: 1fr;
-    gap: 16px;
-    min-height: 214px;
-    padding: 18px 24px;
+    grid-template-areas:
+      "brand"
+      "links"
+      "actions";
+    justify-items: center;
+    min-height: 150px;
   }
 
   .brand-mark,
@@ -312,49 +431,7 @@ a {
     justify-self: center;
   }
 
-  .nav-links {
-    justify-content: center;
-    gap: 34px;
-    transform: none;
-  }
-}
-
-@media (width <= 620px) {
-  :host {
-    height: 242px;
-  }
-
-  .site-nav {
-    min-height: 242px;
-    border-radius: 0;
-    padding-inline: 16px;
-  }
-
-  .brand-link {
-    width: 154px;
-  }
-
-  .brand-logo {
-    width: 154px;
-    height: 28px;
-    transform: translateY(-3px);
-  }
-
   .nav-actions {
-    width: 100%;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 12px;
-  }
-
-  .nav-login {
-    min-height: 42px;
-    display: inline-flex;
-    align-items: center;
-  }
-
-  .button {
-    min-height: 44px;
-    padding-inline: 18px;
   }
 }
