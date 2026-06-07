@@ -452,25 +452,21 @@ function renderLatencyChart(events) {
     if (!canvas || !window.Chart) return;
 
     if (!events.length) {
-    const ctx = canvas.getContext('2d');
+        if (latencyChart) {
+            latencyChart.destroy();
+            latencyChart = null;
+        }
 
-    canvas.width = canvas.clientWidth || 600;
-    canvas.height = canvas.clientHeight || 260;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.font = '16px sans-serif';
-    ctx.fillStyle = '#9ca3af';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    ctx.fillText(
-        'No latency data available',
-        canvas.width / 2,
-        canvas.height / 2
-    );
-
-    return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.clientWidth || 600;
+        canvas.height = canvas.clientHeight || 260;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '16px sans-serif';
+        ctx.fillStyle = '#9ca3af';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('No latency data available', canvas.width / 2, canvas.height / 2);
+        return;
     }
 
     const grouped = groupEventsByDate(events);
@@ -520,6 +516,7 @@ function renderLatencyChart(events) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            spanGaps: false,
 
             plugins: {
                 legend: {
@@ -556,23 +553,20 @@ function renderEndpointPerformanceChart(events) {
     if (!canvas || !window.Chart) return;
 
     if (!events.length) {
-        const ctx = canvas.getContext('2d');
+        if (endpointChart) {
+            endpointChart.destroy();
+            endpointChart = null;
+        }
 
+        const ctx = canvas.getContext('2d');
         canvas.width = canvas.clientWidth || 600;
         canvas.height = canvas.clientHeight || 260;
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = '16px sans-serif';
         ctx.fillStyle = '#9ca3af';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-
-        ctx.fillText(
-            'No endpoint performance data available',
-            canvas.width / 2,
-            canvas.height / 2
-        );
-
+        ctx.fillText('No endpoint performance data available', canvas.width / 2, canvas.height / 2);
         return;
     }
 
@@ -664,9 +658,9 @@ function groupEventsByDate(events) {
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([, bucket]) => ({
             label: bucket.label,
-            avgLatency: Math.round(average(bucket.latencies)),
-            p95Latency: Math.round(percentile(bucket.latencies, 95)),
-            avgLoadTime: Math.round(average(bucket.loadTimes))
+            avgLatency: bucket.latencies.length ? Math.round(average(bucket.latencies)) : null,
+            p95Latency: bucket.latencies.length ? Math.round(percentile(bucket.latencies, 95)) : null,
+            avgLoadTime: bucket.loadTimes.length ? Math.round(average(bucket.loadTimes)) : null,
         }));
 }
 
