@@ -253,6 +253,20 @@ function filterPerformanceForPreviousPeriod(events, range) {
 function renderStatus(app, filteredErrors, filteredPerformance) {
     const criticalErrors = filteredErrors.filter(isCriticalError);
 
+    // Use the downOrNot array (HTTP uptime check results) as the primary signal.
+    // latestCheck is true (up), false (down), or null (no URL / no checks yet).
+    const downOrNot = Array.isArray(app.downOrNot) ? app.downOrNot : [];
+    const latestCheck = downOrNot.length > 0 ? downOrNot[downOrNot.length - 1] : null;
+
+    if (latestCheck === false) {
+        setStatus(
+            'DOWN',
+            `${app.name || 'Project'} is down.`,
+            'The most recent uptime check failed to reach the service.'
+        );
+        return;
+    }
+
     if (criticalErrors.length > WARNING_CRITICAL_THRESHOLD) {
         setStatus(
             'WARN',
@@ -280,6 +294,18 @@ function renderStatus(app, filteredErrors, filteredPerformance) {
         return;
     }
 
+    if (latestCheck === true) {
+        setStatus(
+            'UP',
+            `${app.name || 'Project'} is up.`,
+            filteredPerformance.length > 0
+                ? 'Recent performance telemetry is flowing and no matching errors were found.'
+                : 'The service is reachable and no errors were found in the selected range.'
+        );
+        return;
+    }
+
+    // No URL configured — fall back to telemetry as the only signal.
     if (filteredPerformance.length > 0) {
         setStatus(
             'UP',
