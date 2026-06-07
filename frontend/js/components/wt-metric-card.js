@@ -7,6 +7,7 @@ class WtMetricCard extends HTMLElement {
         const compareId = this.getAttribute('compare-id') || '';
         const compareText = this.getAttribute('compare-text') || '';
         const imgSrc = this.getAttribute('img-src') || '';
+        const sparklineId = this.getAttribute('sparkline-id') || '';
 
         const valueClasses = ['metric-val', valueClass].filter(Boolean).join(' ');
         const compareContent = imgSrc
@@ -20,6 +21,7 @@ class WtMetricCard extends HTMLElement {
                 <div class="compare-yesterday">
                     ${compareContent}
                 </div>
+                ${sparklineId ? `<canvas id="${sparklineId}" class="sparkline-canvas"></canvas>` : ''}
             </div>
         `;
     }
