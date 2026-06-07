@@ -72,6 +72,7 @@ body {
   border-radius: var(--radius-md);
   background: var(--panel);
   box-shadow: var(--shadow);
+  height: fit-content;
 }
 
 .projects-panel {
@@ -145,6 +146,7 @@ body {
 .app-card {
   width: 100%;
   min-height: 220px;
+  max-height: 320px;
   padding: 18px;
   display: grid;
   gap: 14px;
@@ -470,3 +472,8 @@ body {
     font-size: var(--font-size-md);
   }
 }
+@media (height >= 1000px) {
+    .selection-card {
+      padding: 20px 20px 100px;
+    }
+  }
