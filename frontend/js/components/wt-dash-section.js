@@ -1,3 +1,21 @@
+/**
+ * `<wt-dash-section>` — a styled card container used throughout the dashboard pages.
+ * Provides a consistent card chrome (border, shadow, padding) with a header slot
+ * for an eyebrow + heading and a default slot for the card body.
+ *
+ * Inlines its styles rather than loading a stylesheet because this component
+ * is used on multiple pages and the styles are tightly coupled to the layout
+ * — extracting them to a file would add a network round-trip for a small amount of CSS.
+ *
+ * Attributes:
+ *   heading  - Main card title rendered as an <h3>.
+ *   eyebrow  - Small uppercase label rendered above the heading.
+ *
+ * Named slots:
+ *   heading    - Alternative to the heading attribute when rich markup is needed.
+ *   header-end - Content placed at the right side of the header (e.g. a filter control).
+ *   (default)  - The card body.
+ */
 class WtDashSection extends HTMLElement {
     connectedCallback() {
         const heading = this.getAttribute('heading') || '';

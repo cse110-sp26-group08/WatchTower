@@ -16,11 +16,18 @@ function init() {
 
     currentUser = user;
     bindProjectDialogControls();
+    // Expose on window so the "Create new project" button in HTML can call it directly
     window.watchtowerOpenCreateProject = openCreateProjectDialog;
     loadApps(user.id);
 }
 
-
+/**
+ * Fetches all apps for the given owner and hands them to renderApps.
+ * Shows a loading state while the request is in flight so the list
+ * doesn't sit blank.
+ *
+ * @param {number} ownerId
+ */
 async function loadApps(ownerId) {
     const appsList = document.getElementById('apps-list');
     appsList.innerHTML = '<div class="empty-state">Loading project cards...</div>';
@@ -37,6 +44,14 @@ async function loadApps(ownerId) {
     }
 }
 
+/**
+ * Builds the project card list using a DocumentFragment to avoid
+ * repeated reflows from individual DOM insertions.
+ * The "add" card always appears first.
+ *
+ * @param {Array<{ id: number, name: string, url?: string }>} apps
+ * @param {number} ownerId
+ */
 function renderApps(apps, ownerId) {
     const appsList = document.getElementById('apps-list');
     appsList.innerHTML = '';
@@ -89,6 +104,15 @@ function renderApps(apps, ownerId) {
     appsList.appendChild(fragment);
 }
 
+/**
+ * Creates the "+ Create new project" card that opens the dialog.
+ * Guards against the edge case where currentUser has changed since the
+ * list was last rendered — redirects to login rather than creating a project
+ * under the wrong account.
+ *
+ * @param {number} ownerId
+ * @returns {HTMLElement}
+ */
 function createAddProjectCard(ownerId) {
     const wrapper = document.createElement('div');
     wrapper.className = 'add-project-card-wrapper';
@@ -114,6 +138,10 @@ function createAddProjectCard(ownerId) {
     return wrapper;
 }
 
+/**
+ * Wires up the dialog close button and form submit.
+ * Called once on init — the dialog itself persists in the DOM.
+ */
 function bindProjectDialogControls() {
     const dialog = document.getElementById('create-project-dialog');
     const form = document.getElementById('create-project-form');
@@ -129,6 +157,10 @@ function bindProjectDialogControls() {
     });
 }
 
+/**
+ * Resets the form, opens the native <dialog>, and pre-fills the URL
+ * field with "https://" so users don't have to type the protocol.
+ */
 function openCreateProjectDialog() {
     const dialog = document.getElementById('create-project-dialog');
     const nameInput = document.getElementById('project-name-input');
@@ -141,6 +173,11 @@ function openCreateProjectDialog() {
     urlInput.value = 'https://';
 }
 
+/**
+ * Validates form inputs, POSTs to /api/apps, and refreshes the card list on success.
+ * Intentionally non-destructive on failure — leaves the dialog open with the
+ * error message visible so the user can correct and retry.
+ */
 async function createProjectFromDialog() {
     const user = currentUser;
     const message = document.getElementById('create-app-message');
@@ -200,12 +237,27 @@ async function createProjectFromDialog() {
     }
 }
 
-
+/**
+ * Updates a status/feedback element's text and CSS class in one call.
+ * type is appended as a modifier class (e.g. 'error' → 'form-message error').
+ * Pass an empty string to reset to the base class only.
+ *
+ * @param {HTMLElement} element
+ * @param {string} text
+ * @param {string} type - 'error' | 'success' | ''
+ */
 function updateMessage(element, text, type) {
     element.textContent = text;
     element.className = `form-message${type ? ` ${type}` : ''}`;
 }
 
+/**
+ * Thin wrapper around the URL constructor — easiest reliable way to
+ * check if a string is a parseable URL without a regex.
+ *
+ * @param {string} value
+ * @returns {boolean}
+ */
 function isValidUrl(value) {
     try {
         new URL(value);
@@ -214,4 +266,3 @@ function isValidUrl(value) {
         return false;
     }
 }
-

@@ -1,3 +1,16 @@
+/**
+ * `<wt-health-score>` — circular score ring for performance and reliability metrics.
+ * The ring fill is driven by a CSS custom property (--score-angle) set by dashboard.js
+ * after the score is calculated. The component itself just provides the markup structure.
+ *
+ * Attributes:
+ *   title        - Heading text above the ring.
+ *   prefix       - Used to generate element IDs (e.g. "performance" → "performance-bar-fill").
+ *                  dashboard.js looks these up by ID to update values.
+ *   icon-path    - SVG path data for the support icon shown below the ring.
+ *   support-text - Caption text shown next to the support icon.
+ *   eyebrow      - Optional small label above the title.
+ */
 class WtHealthScore extends HTMLElement {
     connectedCallback() {
         const title = this.getAttribute('title') || '';

@@ -7,16 +7,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Millisecond offsets for the three time-window options
 const RANGE_MS = {
     '24h': 24 * 60 * 60 * 1000,
     '7d': 7 * 24 * 60 * 60 * 1000,
     '30d': 30 * 24 * 60 * 60 * 1000,
 };
 
+// Module-level state shared across refresh cycles
 let dashboardState = null;
 let refreshAbortController = null;
+
+// More than this many critical errors in 24h flips the badge from UP to WARN
 const WARNING_CRITICAL_THRESHOLD = 5;
 
+/**
+ * Bootstraps the dashboard: resolves the current app, sets up the API key
+ * widget, registers lifecycle listeners, and kicks off the first data load.
+ */
 async function initDashboard() {
     const selectedApp = await resolveSelectedApp();
 
@@ -64,6 +72,11 @@ async function resolveSelectedApp() {
     return storedApp;
 }
 
+/**
+ * Pauses and resumes data polling based on tab visibility, and aborts
+ * in-flight requests when the user navigates away.
+ * Avoids unnecessary network traffic while the tab is hidden.
+ */
 function bindPageLifecycle() {
     document.addEventListener('visibilitychange', async () => {
         if (document.hidden) {
@@ -82,6 +95,15 @@ function bindPageLifecycle() {
     });
 }
 
+/**
+ * Resolves the href for a dashboard sub-page, accounting for whether we're
+ * running through Express or a static file server.
+ * Uses the dash_navbar script src as the base rather than window.location so
+ * it works consistently regardless of which page we're currently on.
+ *
+ * @param {'performance' | 'errors'} key
+ * @returns {string}
+ */
 function getNavHref(key) {
     const scriptEl = document.querySelector('script[src*="components/dash_navbar.js"]');
     const isStatic = scriptEl && new URL(scriptEl.src).pathname.endsWith('/frontend/js/components/dash_navbar.js');
@@ -96,6 +118,10 @@ function getNavHref(key) {
         : '/advanced-error-metrics';
 }
 
+/**
+ * Makes the performance and reliability health score rings clickable,
+ * navigating to their respective detail pages.
+ */
 function bindHealthScoreNavigation() {
     [
         { prefix: 'performance', key: 'performance' },
@@ -112,6 +138,13 @@ function bindHealthScoreNavigation() {
     });
 }
 
+/**
+ * Sets up the API key reveal/hide toggle and copy button.
+ * The key is fetched lazily on first toggle — no need to load it until
+ * the user actually wants to see it.
+ *
+ * @param {number} appId
+ */
 function bindApiKeyWidget(appId) {
     const toggleBtn = document.getElementById('apikey-toggle');
     const valueEl = document.getElementById('apikey-value');
@@ -127,6 +160,7 @@ function bindApiKeyWidget(appId) {
     let realKey = null;
     let visible = false;
 
+    // Fetch once and cache — null means "not fetched yet", '' means "no key available"
     async function loadKey() {
         if (realKey !== null) return;
         try {
@@ -165,6 +199,18 @@ function bindApiKeyWidget(appId) {
     }
 }
 
+/**
+ * Fetches fresh app, error, and performance data from the API and stores the
+ * result in dashboardState for redraws.
+ *
+ * Uses an AbortController so a quick tab-switch doesn't leave two concurrent
+ * fetches racing each other. { force: true } aborts any in-flight request
+ * before starting a new one; without it, concurrent non-forced calls are
+ * dropped entirely.
+ *
+ * @param {{ id: number, name?: string, url?: string }} selectedApp
+ * @param {{ force?: boolean }} [options]
+ */
 async function refreshDashboard(selectedApp, options = {}) {
     if (!selectedApp?.id || document.hidden) {
         return;
@@ -195,6 +241,7 @@ async function refreshDashboard(selectedApp, options = {}) {
             performanceResponse.json(),
         ]);
 
+        // Merge the user-supplied URL back in if the server record doesn't have one
         const app = appResponse.ok && appData.app
             ? { ...appData.app, url: selectedApp.url }
             : selectedApp;
@@ -231,7 +278,10 @@ function abortActiveRefresh() {
     }
 }
 
-
+/**
+ * Re-renders all dashboard sections from dashboardState without re-fetching.
+ * Called after every successful refresh and after filter changes.
+ */
 function redrawFromState() {
     if (!dashboardState) {
         return;
@@ -246,6 +296,14 @@ function redrawFromState() {
     renderHealthBars(filteredErrors, filteredPerformance);
 }
 
+/**
+ * Filters error events to a time window and optional severity bucket.
+ *
+ * @param {object[]} errors
+ * @param {'24h' | '7d' | '30d'} range
+ * @param {'all' | 'critical' | 'warning' | 'error'} severity
+ * @returns {object[]}
+ */
 function filterErrors(errors, range, severity) {
     const cutoff = Date.now() - RANGE_MS[range];
 
@@ -258,6 +316,11 @@ function filterErrors(errors, range, severity) {
     });
 }
 
+/**
+ * @param {object[]} events
+ * @param {'24h' | '7d' | '30d'} range
+ * @returns {object[]}
+ */
 function filterPerformance(events, range) {
     const cutoff = Date.now() - RANGE_MS[range];
 
@@ -267,6 +330,18 @@ function filterPerformance(events, range) {
     });
 }
 
+/**
+ * Determines the overall UP / WARN / DOWN badge using a priority chain:
+ *
+ * 1. Latest uptime check result (HTTP ping) — authoritative if present
+ * 2. Critical error count vs WARNING_CRITICAL_THRESHOLD
+ * 3. Any errors at all
+ * 4. Performance telemetry as a fallback signal when no URL is configured
+ *
+ * @param {{ downOrNot?: boolean[] }} app
+ * @param {object[]} filteredErrors
+ * @param {object[]} filteredPerformance
+ */
 function renderStatus(app, filteredErrors, filteredPerformance) {
     const criticalErrors = filteredErrors.filter(isCriticalError);
 
@@ -314,6 +389,10 @@ function renderStatus(app, filteredErrors, filteredPerformance) {
     setStatus('DOWN', 'No recent error or performance events were found.');
 }
 
+/**
+ * @param {object[]} filteredErrors
+ * @param {object[]} filteredPerformance
+ */
 function renderHealthBars(filteredErrors, filteredPerformance) {
     const performanceScore = calculatePerformanceScore(filteredPerformance);
     const reliabilityScore = calculateReliabilityScore(filteredErrors, filteredPerformance);
@@ -322,6 +401,14 @@ function renderHealthBars(filteredErrors, filteredPerformance) {
     setHealthBar('reliability', reliabilityScore);
 }
 
+/**
+ * Applies a health score (0–100) to the CSS ring element.
+ * The --score-angle custom property drives the conic-gradient fill
+ * (0deg = empty, 360deg = full).
+ *
+ * @param {'performance' | 'reliability'} prefix
+ * @param {number} value - Raw score, clamped to [0, 100].
+ */
 function setHealthBar(prefix, value) {
     const safeValue = Math.max(0, Math.min(100, Math.round(value)));
     const scoreRing = document.getElementById(`${prefix}-bar-fill`);
@@ -339,6 +426,12 @@ function setHealthBar(prefix, value) {
     scoreLabel.textContent = scoreMeta.label;
 }
 
+/**
+ * Maps a score to a display label and CSS class name.
+ *
+ * @param {number} score
+ * @returns {{ label: string, className: string }}
+ */
 function getHealthScoreMeta(score) {
     if (score >= 80) {
         return { label: 'Excellent', className: 'score-blue' };
@@ -355,7 +448,15 @@ function getHealthScoreMeta(score) {
     return { label: 'Poor', className: 'score-red' };
 }
 
-
+/**
+ * Performance score based on average response time.
+ * Formula: 100 minus a linear penalty starting at 200ms.
+ * At 200ms avg → score 100; every 8ms above 200ms → -1 point.
+ * Returns 0 when no data is available.
+ *
+ * @param {object[]} filteredPerformance
+ * @returns {number} Score in [0, 100].
+ */
 function calculatePerformanceScore(filteredPerformance) {
     const responseTimes = getResponseTimes(filteredPerformance);
     if (!responseTimes.length) {
@@ -367,6 +468,16 @@ function calculatePerformanceScore(filteredPerformance) {
     return Math.max(0, Math.min(100, score));
 }
 
+/**
+ * Reliability score weighted by error severity.
+ * Critical errors cost 12 points each, warnings cost 4, other errors cost 6 —
+ * all divided by the total signal count (errors + perf events) to normalize
+ * for app volume. Returns 0 when there are no events at all.
+ *
+ * @param {object[]} filteredErrors
+ * @param {object[]} filteredPerformance
+ * @returns {number} Score in [0, 100].
+ */
 function calculateReliabilityScore(filteredErrors, filteredPerformance) {
     const signalCount = filteredErrors.length + filteredPerformance.length;
     if (!signalCount) {
@@ -380,18 +491,35 @@ function calculateReliabilityScore(filteredErrors, filteredPerformance) {
     return Math.max(0, Math.min(100, score));
 }
 
+/**
+ * Pulls numeric response times from performance events.
+ * Prefers apiLatencyMs (from the fetch interceptor) and falls back to
+ * loadTimeMs (from the page load timing).
+ *
+ * @param {object[]} events
+ * @returns {number[]}
+ */
 function getResponseTimes(events) {
     return events
         .map((event) => Number(event.metadata?.apiLatencyMs ?? event.metadata?.loadTimeMs))
         .filter((value) => Number.isFinite(value));
 }
 
+/**
+ * @param {string} name - Text for the project name heading and layout component.
+ */
 function setProjectName(name) {
     document.getElementById('status-project').textContent = name;
     const layout = document.querySelector('wt-dash-layout');
     if (layout) layout.setAttribute('app-name', name || '');
 }
 
+/**
+ * Updates the status badge and removes/adds the appropriate status class.
+ *
+ * @param {'UP' | 'DOWN' | 'WARN'} status
+ * @param {string} detail - One-sentence description shown below the badge.
+ */
 function setStatus(status, detail) {
     const statusText = document.getElementById('status-text');
     const statusDescription = document.getElementById('status-description');
@@ -414,10 +542,18 @@ function setStatus(status, detail) {
     statusContainer.classList.add('status-up');
 }
 
+/**
+ * @param {object} event - Error event from the API.
+ * @returns {boolean}
+ */
 function isCriticalError(event) {
     return normalizeSeverityBucket(event.metadata?.severity) === 'critical';
 }
 
+/**
+ * @param {string | null | undefined} value - Raw ISO timestamp or epoch string.
+ * @returns {string} Locale-formatted string, or "Unknown time" on bad input.
+ */
 function formatTimestamp(value) {
     if (!value) {
         return 'Unknown time';
@@ -432,6 +568,11 @@ function formatTimestamp(value) {
     return date.toLocaleString();
 }
 
+/**
+ * Shows or hides the project URL link in the status section.
+ *
+ * @param {{ app: { url?: string } }} param0
+ */
 function populateProjectDetails({ app }) {
     const link = document.getElementById('project-url-link');
     if (app?.url) {
@@ -442,6 +583,14 @@ function populateProjectDetails({ app }) {
     }
 }
 
+/**
+ * Collapses severity strings into three buckets used for scoring and display.
+ * "high" maps to "critical" and "low" maps to "warning" to match the collector's
+ * output, which uses a four-level scale the dashboard flattens to three.
+ *
+ * @param {string | null | undefined} severity
+ * @returns {'critical' | 'warning' | 'error'}
+ */
 function normalizeSeverityBucket(severity) {
     const value = String(severity || '').trim().toLowerCase();
 
@@ -460,6 +609,13 @@ function normalizeSeverityBucket(severity) {
     return 'error';
 }
 
+/**
+ * Reads and parses a JSON value from localStorage.
+ * Returns null on missing key or parse failure without throwing.
+ *
+ * @param {string} key
+ * @returns {object | null}
+ */
 function readJsonStorage(key) {
     const rawValue = localStorage.getItem(key);
 

@@ -21,6 +21,12 @@ function configurePageLinks() {
     }
 }
 
+/**
+ * Returns the validation error message for a signup field, or empty string if valid.
+ *
+ * @param {HTMLInputElement} input
+ * @returns {string}
+ */
 function getFieldValidationMessage(input) {
     const value = input.value.trim();
 
@@ -43,12 +49,22 @@ function getFieldValidationMessage(input) {
     return '';
 }
 
+/**
+ * @param {HTMLInputElement} input
+ * @returns {boolean} True if the field passes validation.
+ */
 function validateField(input) {
     const message = getFieldValidationMessage(input);
     setFieldError(input, message);
     return !message;
 }
 
+/**
+ * Validates all signup fields and focuses the first failing one.
+ *
+ * @param {HTMLFormElement} signupForm
+ * @returns {boolean}
+ */
 function validateSignupForm(signupForm) {
     const fields = signupForm.querySelectorAll('input[name="username"], input[name="email"], input[name="password"]');
     let isValid = true;
@@ -66,11 +82,23 @@ function validateSignupForm(signupForm) {
     return isValid;
 }
 
+/**
+ * @param {HTMLFormElement} signupForm
+ */
 function addValidationListeners(signupForm) {
     const fields = signupForm.querySelectorAll('input[name="username"], input[name="email"], input[name="password"]');
     fields.forEach((field) => attachFieldValidation(field, validateField));
 }
 
+/**
+ * Shows a server-side signup error on the relevant field.
+ * The server response message is inspected for "username" to decide whether
+ * to target the username or email field — e.g. "Username already taken" goes
+ * to username, "Email already in use" goes to email.
+ *
+ * @param {HTMLFormElement} signupForm
+ * @param {string} [message]
+ */
 function showSignupFailure(signupForm, message) {
     const normalizedMessage = message || 'Could not create account.';
     const lowerMessage = normalizedMessage.toLowerCase();
@@ -99,6 +127,7 @@ function addSignupFormListener() {
         const username = formData.get('username').trim();
         const email = formData.get('email').trim();
         const password = formData.get('password');
+        // confirmPassword falls back to password if the field isn't in the form
         const confirmPassword = formData.get('confirmPassword') || password;
         if (password !== confirmPassword) {
             setFieldError(signupForm.elements.password, 'Passwords do not match. Please try again.');
@@ -115,8 +144,9 @@ function addSignupFormListener() {
             });
 
             const data = await response.json();
-        
+
             if (response.ok) {
+                // Store user so other pages can check auth without a round-trip
                 localStorage.setItem('watchtowerUser', JSON.stringify(data.user));
                 window.location.href = '/apps';
             } else {
