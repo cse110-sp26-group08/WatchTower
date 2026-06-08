@@ -133,9 +133,9 @@ The collector is a single JavaScript file (`collector.js`) that you drop into an
 - **Page performance** load time, DOM content loaded time, time to first byte (TTFB), and JS memory usage
 - **API latency** intercepts all `fetch()` calls and records how long each one takes
 
-**Step 1 - Copy `collector.js` into your project**
+**Step 1 - Download `collector.js` from the live site**
 
-Grab `collector.js` from the root of this repository and place it somewhere your HTML can reach, for example:
+Download `collector.js` from the [WatchTower docs page](https://watchtower.team7ate92.workers.dev) and place it somewhere your HTML can reach, for example:
 
 ```text
 your-project/
