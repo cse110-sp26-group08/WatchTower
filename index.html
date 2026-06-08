@@ -371,7 +371,7 @@
     <a href="#register">Register Your App</a>
     <a href="#collector">Add the Collector</a>
 
-    <span class="section-label">Demo</span>
+    <span class="section-label">Screenshots</span>
     <a href="#demo">Screenshots</a>
 
     <span class="section-label">Reference</span>
@@ -460,7 +460,9 @@
     └── .env.test   ← place here</code></pre>
             <p>Both files follow this structure:</p>
             <pre><code>DATABASE_URL=&lt;your-postgres-connection-string&gt;
-PORT=3000</code></pre>
+PORT=3000
+SENDGRID_API_KEY=&lt;your-sendgrid-api-key&gt;
+SENDGRID_FROM=&lt;your-verified-sender-email&gt;</code></pre>
             <div class="callout warn" style="margin-top: 0.75rem;">
               Do not commit these files — they are already listed in <code>.gitignore</code>.
             </div>
@@ -555,23 +557,31 @@ PORT=3000</code></pre>
 
     <!-- Demo -->
     <section id="demo">
-      <h2>Demo</h2>
+      <h2>Screenshots</h2>
       <div class="demo-grid">
         <div class="demo-card">
-          <div class="demo-img">[ Screenshot placeholder ]</div>
+          <img src="screenshots/landing.png" alt="Landing Page" style="width:100%;display:block;" />
+          <div class="demo-label">Landing Page</div>
+        </div>
+        <div class="demo-card">
+          <img src="screenshots/login.png" alt="Sign Up / Login" style="width:100%;display:block;" />
           <div class="demo-label">Sign Up / Login</div>
         </div>
         <div class="demo-card">
-          <div class="demo-img">[ Screenshot placeholder ]</div>
+          <img src="screenshots/apps.png" alt="App Selection" style="width:100%;display:block;" />
+          <div class="demo-label">App Selection</div>
+        </div>
+        <div class="demo-card">
+          <img src="screenshots/apps_dashboard.png" alt="App Dashboard" style="width:100%;display:block;" />
           <div class="demo-label">App Dashboard</div>
         </div>
         <div class="demo-card">
-          <div class="demo-img">[ Screenshot placeholder ]</div>
-          <div class="demo-label">App Detail / Performance View</div>
+          <img src="screenshots/performance.png" alt="Performance View" style="width:100%;display:block;" />
+          <div class="demo-label">Performance View</div>
         </div>
         <div class="demo-card">
-          <div class="demo-img">[ Screenshot placeholder ]</div>
-          <div class="demo-label">Downtime Alert Email</div>
+          <img src="screenshots/errors.png" alt="Error Tracking" style="width:100%;display:block;" />
+          <div class="demo-label">Error Tracking</div>
         </div>
       </div>
     </section>

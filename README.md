@@ -22,6 +22,7 @@ WatchTower is a web application that lets developers monitor the uptime and perf
   - [Using WatchTower](#using-watchtower)
     - [1. Create an Account and Register Your App](#1-create-an-account-and-register-your-app)
     - [2. Add the Collector to Your Project](#2-add-the-collector-to-your-project)
+  - [Screenshots](#screenshots)
 
 ---
 
@@ -89,6 +90,8 @@ Both files follow this structure:
 ```text
 DATABASE_URL=<your-postgres-connection-string>
 PORT=3000
+SENDGRID_API_KEY=<your-sendgrid-api-key>
+SENDGRID_FROM=<your-verified-sender-email>
 ```
 
 > Do not commit these files, they are already listed in `.gitignore`.
@@ -171,3 +174,25 @@ const baseUrl = "https://your-watchtower-host.com";
 ```
 
 </details>
+
+---
+
+## Screenshots
+
+**Landing Page**
+![Landing Page](screenshots/landing.png)
+
+**Sign Up / Login**
+![Sign Up / Login](screenshots/login.png)
+
+**App Selection**
+![App Selection](screenshots/apps.png)
+
+**App Dashboard**
+![App Dashboard](screenshots/apps_dashboard.png)
+
+**Performance View**
+![Performance View](screenshots/performance.png)
+
+**Error Tracking**
+![Error Tracking](screenshots/errors.png)
