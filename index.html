@@ -375,7 +375,10 @@
     <a href="#demo">Screenshots</a>
 
     <span class="section-label">Reference</span>
+    <a href="https://watchtower.team7ate92.workers.dev" target="_blank">Live Site ↗</a>
+    <a href="https://cse110-sp26-group08.github.io/WatchTower/" target="_blank">GitHub Pages ↗</a>
     <a href="https://github.com/cse110-sp26-group08/WatchTower/blob/main/documentation/rest-api.md" target="_blank">REST API Docs ↗</a>
+    <a href="https://github.com/cse110-sp26-group08/WatchTower/wiki" target="_blank">Project Wiki ↗</a>
   </nav>
 
   <!-- Main -->
@@ -384,9 +387,12 @@
     <!-- Hero -->
     <div class="hero">
       <h1>WatchTower</h1>
-      <p>Monitor the uptime and performance of your web apps. Register an app, drop in one script tag, and WatchTower handles the rest — surfacing errors, performance metrics, and alerting you when something goes down.</p>
-      <div style="margin-top: 1rem; font-size: 0.9rem;">
-        <a href="https://github.com/cse110-sp26-group08/WatchTower/blob/main/documentation/rest-api.md" target="_blank">View REST API Docs →</a>
+      <p>WatchTower is a web application that lets developers monitor the uptime and performance of their web apps. Users register their apps, and WatchTower continuously polls them, surfacing downtime events, performance metrics, and sending email alerts when an app goes down.</p>
+      <div style="margin-top: 1rem; font-size: 0.9rem; display: flex; flex-wrap: wrap; gap: 1rem;">
+        <a href="https://watchtower.team7ate92.workers.dev" target="_blank">Live Site →</a>
+        <a href="https://cse110-sp26-group08.github.io/WatchTower/" target="_blank">GitHub Pages Docs →</a>
+        <a href="https://github.com/cse110-sp26-group08/WatchTower/blob/main/documentation/rest-api.md" target="_blank">REST API Docs →</a>
+        <a href="https://github.com/cse110-sp26-group08/WatchTower/wiki" target="_blank">Project Wiki →</a>
       </div>
       <div class="badge-row">
         <span class="badge blue">Node.js + Express</span>
@@ -402,22 +408,26 @@
         <div><span class="dir">WatchTower/</span></div>
         <div>├── <span class="dir">backend/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Node.js / Express server</span></div>
         <div>│ &nbsp; ├── <span class="file">app.js</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Server entry point</span></div>
-        <div>│ &nbsp; ├── <span class="dir">controllers/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Business logic (user, app, event)</span></div>
+        <div>│ &nbsp; ├── <span class="dir">controllers/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Business logic (users, apps, events)</span></div>
         <div>│ &nbsp; ├── <span class="dir">endpoints/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Express route handlers</span></div>
-        <div>│ &nbsp; ├── <span class="dir">schema/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Drizzle ORM models</span></div>
-        <div>│ &nbsp; ├── <span class="dir">util/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># DB connection, email service, downtime notifier</span></div>
+        <div>│ &nbsp; ├── <span class="dir">schema/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Drizzle ORM table definitions</span></div>
+        <div>│ &nbsp; ├── <span class="dir">util/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Shared utilities (DB, email, downtime, IDs)</span></div>
         <div>│ &nbsp; ├── <span class="dir">migrations/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Drizzle database migrations</span></div>
-        <div>│ &nbsp; ├── <span class="dir">tests/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Jest integration tests</span></div>
-        <div>│ &nbsp; └── <span class="file">.env</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Environment variables (not committed)</span></div>
+        <div>│ &nbsp; ├── <span class="dir">tests/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Jest integration and controller tests</span></div>
+        <div>│ &nbsp; ├── <span class="file">drizzle.config.js</span> &nbsp;&nbsp; <span class="comment"># Drizzle migration configuration</span></div>
+        <div>│ &nbsp; └── <span class="file">package.json</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Backend scripts and dependencies</span></div>
         <div>├── <span class="dir">frontend/</span></div>
-        <div>│ &nbsp; ├── <span class="file">index.html</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Root HTML entry point</span></div>
-        <div>│ &nbsp; ├── <span class="dir">webpages/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Per-page HTML files</span></div>
-        <div>│ &nbsp; ├── <span class="dir">js/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Client-side JavaScript</span></div>
-        <div>│ &nbsp; └── <span class="dir">styling/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># CSS stylesheets</span></div>
-        <div>├── <span class="file">collector.js</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Client-side monitoring script</span></div>
-        <div>├── <span class="dir">planning/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Sprint plans, wireframes, ADRs</span></div>
-        <div>├── <span class="dir">documentation/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># REST API reference and backend docs</span></div>
-        <div>└── <span class="file">package.json</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Root scripts (delegates to backend)</span></div>
+        <div>│ &nbsp; ├── <span class="dir">webpages/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># App pages (homepage, login, signup, dashboard, apps, docs, metrics, settings)</span></div>
+        <div>│ &nbsp; ├── <span class="dir">js/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Client-side scripts and web components</span></div>
+        <div>│ &nbsp; ├── <span class="dir">styling/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># CSS stylesheets</span></div>
+        <div>│ &nbsp; ├── <span class="dir">templates/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Reusable HTML templates</span></div>
+        <div>│ &nbsp; └── <span class="dir">assets/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Icons and static images</span></div>
+        <div>├── <span class="dir">documentation/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># REST API reference and backend utility docs</span></div>
+        <div>├── <span class="dir">planning/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Planning docs, ADRs, research, and design artifacts</span></div>
+        <div>├── <span class="dir">retrospectives/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Sprint retrospective summaries</span></div>
+        <div>├── <span class="file">collector.js</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Client-side monitoring script for external apps</span></div>
+        <div>├── <span class="file">index.html</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Marketing / landing page entry file at repo root</span></div>
+        <div>└── <span class="file">package.json</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="comment"># Root scripts for installing and starting the project</span></div>
       </div>
     </section>
 
@@ -441,14 +451,9 @@
           <div class="step-num">2</div>
           <div class="step-body">
             <h3>Download Environment Files</h3>
-            <p>The project uses different databases depending on the branch:</p>
-            <ul style="color: var(--text-muted); padding-left: 1.25rem; margin-bottom: 0.75rem;">
-              <li><strong style="color: var(--text);">main branch</strong> — SQL-based (PostgreSQL) via Drizzle ORM</li>
-              <li><strong style="color: var(--text);">Older branches</strong> — MongoDB</li>
-            </ul>
-            <p>Obtain the appropriate files from the project team and place them inside <code>backend/</code>.</p>
-
-            <h3>SQL branches (<code>main</code>) — two files required</h3>
+            <p>The current project uses a SQL-based (PostgreSQL) database via Drizzle ORM.</p>
+            <p>Obtain the appropriate environment files from the project team and place them inside <code>backend/</code>.</p>
+            <p>This setup requires two files:</p>
             <pre><code>WatchTower/
 └── backend/
     ├── .env        ← place here
@@ -456,19 +461,6 @@
             <p>Both files follow this structure:</p>
             <pre><code>DATABASE_URL=&lt;your-postgres-connection-string&gt;
 PORT=3000</code></pre>
-
-            <details>
-              <summary>On an older MongoDB branch? — one file required</summary>
-              <div class="details-body">
-                <pre><code>WatchTower/
-└── backend/
-    └── .env        ← place here</code></pre>
-                <p>This file follows this structure:</p>
-                <pre><code>MONGODB_URI=&lt;your-mongodb-atlas-connection-string&gt;
-PORT=3000</code></pre>
-              </div>
-            </details>
-
             <div class="callout warn" style="margin-top: 0.75rem;">
               Do not commit these files — they are already listed in <code>.gitignore</code>.
             </div>

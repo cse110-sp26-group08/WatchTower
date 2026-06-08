@@ -12,7 +12,7 @@ function init() {
 function configurePageLinks() {
     const homeLink = document.querySelector('[data-home-link]');
     if (homeLink) {
-        homeLink.href = isStaticFrontendPreview() ? '../index.html' : '/';
+        homeLink.href = isStaticFrontendPreview() ? '../webpages/index.html' : '/';
     }
 
     const loginLink = document.querySelector('[data-login-link]');

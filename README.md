@@ -40,8 +40,7 @@ WatchTower/
 |   |-- drizzle.config.js     # Drizzle migration configuration
 |   `-- package.json          # Backend scripts and dependencies
 |-- frontend/
-|   |-- index.html            # Frontend root HTML entry point
-|   |-- webpages/             # App pages (login, signup, dashboard, apps, docs, metrics, settings)
+|   |-- webpages/             # App pages (homepage, login, signup, dashboard, apps, docs, metrics, settings)
 |   |-- js/                   # Client-side scripts and web components
 |   |-- styling/              # CSS stylesheets
 |   |-- templates/            # Reusable HTML templates
