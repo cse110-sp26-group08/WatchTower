@@ -1,17 +1,21 @@
 /**
- * Initializes the Watchtower collector for a monitored application.
- * Automatically attaches global error listeners, tracks page performance,
- * and intercepts fetch() calls to monitor API latency.
- * 
- * @example
- * Drop this script tag into any app 
- * <script id="collector-script" 
- *     src="link to collector file" 
- *     data-apikey="[apiKey]" 
- *     data-release="[release version]">
+ * WatchTower collector — drop-in script for monitored applications.
+ * Attaches global error listeners, records page load performance, and
+ * intercepts fetch() to track API latency. All data is sent to the
+ * WatchTower backend using sendBeacon (fire-and-forget, survives page unload)
+ * with a fetch() fallback for environments that don't support sendBeacon.
+ *
+ * Usage: add this script tag to the monitored app's HTML
+ * <script id="collector-script"
+ *     src="<url to this file>"
+ *     data-apikey="<your api key>"
+ *     data-release="<app version>">
  * </script>
- * @param apiKey The apiKey for app
- * @param release The release version of app
+ */
+
+/**
+ * @param {string} apiKey  - The app's WatchTower API key (from data-apikey).
+ * @param {string} release - The app version string (from data-release).
  */
 function Collector(apiKey, release) {
     const baseUrl = "http://localhost:3000"; // Update with your backend URL if different
@@ -21,19 +25,25 @@ function Collector(apiKey, release) {
         performance: `${baseUrl}/api/events/performance`,
     };
 
+    // Start intercepting fetch() before the page fires any requests
     trackApiPerformance();
 
     window.addEventListener("error", (e) => trackError(e.error));
     window.addEventListener("unhandledrejection", (e) => trackError(e.reason));
+
+    // Page load metrics are only available after the load event; if the script
+    // runs after load (e.g. deferred), grab them immediately.
     if (document.readyState === "complete") {
         trackPerformance();
     } else {
         window.addEventListener("load", () => trackPerformance());
     }
+
     /**
-     * Sends a Watchtower event payload to the matching API endpoint.
-     * Uses navigator.sendBeacon when available, then falls back to fetch if
-     * sendBeacon is unavailable or fails.
+     * Sends an event payload to the matching API endpoint.
+     * Prefers sendBeacon because it survives page unload — important for
+     * error events that fire as the user is navigating away.
+     *
      * @param {{
      *   type: "error" | "performance",
      *   apiKey: string,
@@ -50,7 +60,7 @@ function Collector(apiKey, release) {
      *   memoryMB?: number | null,
      *   release?: string,
      *   timestamp?: string
-     * }} payload - Event data to send.
+     * }} payload
      */
     function sendEvent(payload) {
         const endpoint = routes[payload.type];
@@ -68,11 +78,12 @@ function Collector(apiKey, release) {
             });
         }
     }
+
     /**
-     * Tracks a JavaScript error and sends it to the Watchtower error endpoint.
-     * Builds an error event payload using the configured API key and release,
-     * then sends the event through sendEvent().
-     * @param error - The error object or value to track.
+     * Builds and sends an error event. The error object may be anything
+     * (TypeError, string thrown, rejection value) so all fields are accessed defensively.
+     *
+     * @param {Error | unknown} error
      */
     function trackError(error) {
         sendEvent({
@@ -87,16 +98,18 @@ function Collector(apiKey, release) {
             timestamp: new Date().toISOString(),
         });
     }
+
     /**
-     * Determines the severity level for a JavaScript error.
+     * Maps an error to a severity level based on its type and message content.
      *
-     * Severity is based on the error type and message:
-     * - TypeError and ReferenceError are critical
-     * - SyntaxError, network, fetch, and failed errors are high
-     * - Timeout and RangeError errors are medium
-     * - All other errors are low
-     * @param error - The error object or value to evaluate.
-     * @returns The calculated severity level.
+     * Severity ladder:
+     * - critical: TypeError, ReferenceError (broken code paths)
+     * - high:     SyntaxError, network/fetch/failed errors (service problems)
+     * - medium:   timeout, RangeError (transient or data issues)
+     * - low:      everything else
+     *
+     * @param {Error | unknown} error
+     * @returns {"low" | "medium" | "high" | "critical"}
      */
     function getSeverity(error) {
         if (!error) return "low";
@@ -111,15 +124,14 @@ function Collector(apiKey, release) {
     }
 
     /**
-     * Tracks browser page performance using the Performance API.
-     * Collects metrics such as:
-     * - loadTimeMs: total time for the page to fully load
-     * - domContentLoadedMs: time until the DOM content is loaded
-     * - ttfbMs: time for the server/network response
-     * - memoryMB: estimated JavaScript memory usage in MB
+     * Records a single performance event using the Navigation Timing API.
+     * Metrics collected:
+     *   loadTimeMs         - Total page load time (loadEventEnd - startTime)
+     *   domContentLoadedMs - Time until DOMContentLoaded (domContentLoadedEventEnd - startTime)
+     *   ttfbMs             - Time to first byte (responseEnd - requestStart)
+     *   memoryMB           - JS heap size in MB (Chrome only via performance.memory)
      *
-     * Sends the collected performance metrics to the
-     * Watchtower performance endpoint using sendEvent().
+     * If there's no navigation entry (e.g. bfcache restore), the event is skipped.
      */
     function trackPerformance() {
         const navigation = performance.getEntriesByType("navigation");
@@ -146,14 +158,13 @@ function Collector(apiKey, release) {
             timestamp: new Date().toISOString(),
         });
     }
+
     /**
-     * Tracks API request performance by intercepting fetch() calls.
-     * Collects metrics such as:
-     * - apiEndpoint: the API route being requested
-     * - apiLatencyMs: total time for the API request to complete
-     *
-     * Sends the collected API performance metrics to the
-     * Watchtower performance endpoint using sendEvent().
+     * Wraps window.fetch to measure round-trip latency for every API request.
+     * Calls to the WatchTower endpoints themselves are passed through unwrapped
+     * to prevent an infinite loop of the collector reporting on itself.
+     * Latency is recorded even when the request rejects (network failure) so
+     * slow-then-broken patterns are still visible.
      */
     function trackApiPerformance() {
         const originalFetch = window.fetch;
@@ -163,6 +174,7 @@ function Collector(apiKey, release) {
             const apiEndpoint =
                 typeof args[0] === "string" ? args[0] : args[0]?.url;
 
+            // Skip measurement for our own reporting endpoints
             if (apiEndpoint === routes.performance || apiEndpoint === routes.error) {
                 return originalFetch(...args);
             }
@@ -200,6 +212,7 @@ function Collector(apiKey, release) {
         };
     }
 }
+
 const script = document.getElementById('collector-script');
 const apiKey = script.dataset.apikey;
 const release = script.dataset.release;

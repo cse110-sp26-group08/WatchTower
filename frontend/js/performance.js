@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initPerformancePage();
 });
 
+/**
+ * Entry point. Redirects to /login if no user session exists, then
+ * sets up the date picker, control bindings, and kicks off the first data load.
+ */
 async function initPerformancePage() {
     const user = getStoredUser();
 
@@ -37,6 +41,9 @@ async function initPerformancePage() {
     startAutoRefresh();
 }
 
+/**
+ * @returns {{ id: number, name?: string } | null}
+ */
 function getStoredSelectedApp() {
     const raw = localStorage.getItem('watchtowerSelectedApp');
 
@@ -50,6 +57,10 @@ function getStoredSelectedApp() {
     }
 }
 
+/**
+ * Initializes flatpickr on the date range input.
+ * Defaults to the last 7 days. Updates KPI period labels and reloads data on change.
+ */
 function initDatePicker() {
     flatpickr('#date-range', {
         mode: 'range',
@@ -66,6 +77,10 @@ function initDatePicker() {
     });
 }
 
+/**
+ * Wires up the metric line toggle (which series to show on the latency chart)
+ * and the auto-refresh toggle switch.
+ */
 function bindControls() {
     document.querySelector('#line-toggle').addEventListener('change', loadSelectedAppPerformance);
 
@@ -86,7 +101,6 @@ function bindControls() {
     });
 }
 
-
 async function loadSelectedAppPerformance() {
     const appId = currentAppId;
 
@@ -98,6 +112,12 @@ async function loadSelectedAppPerformance() {
     await loadPerformanceData(appId);
 }
 
+/**
+ * Fetches all performance events for an app, filters them to the selected
+ * date range, then drives every rendered section from the result.
+ *
+ * @param {number} appId
+ */
 async function loadPerformanceData(appId) {
     try {
         const response = await fetch(`/api/events/performance/apps/${appId}`, {
@@ -107,7 +127,7 @@ async function loadPerformanceData(appId) {
         const data = await response.json();
         const events = Array.isArray(data.events) ? data.events : [];
         const filteredEvents = filterEventsByDateRange(events);
-        
+
         updateKpiPeriods();
         renderKpis(filteredEvents, events);
         renderSparklines(filteredEvents, events);
@@ -121,7 +141,14 @@ async function loadPerformanceData(appId) {
     }
 }
 
-
+/**
+ * Filters events to the currently selected date range.
+ * End of day (23:59:59.999) is applied so events on the last selected
+ * day are included. Returns the full set if no range is selected.
+ *
+ * @param {object[]} events
+ * @returns {object[]}
+ */
 function filterEventsByDateRange(events) {
     const dateRangeValue = document.querySelector('#date-range').value;
 
@@ -141,6 +168,14 @@ function filterEventsByDateRange(events) {
     });
 }
 
+/**
+ * Renders all five KPI cards with current period values and period-over-period
+ * change indicators. allEvents is the full unfiltered set used to compute the
+ * previous period for the delta arrows.
+ *
+ * @param {object[]} events - Events in the selected date range.
+ * @param {object[]} [allEvents] - Full event set for previous-period comparison.
+ */
 function renderKpis(events, allEvents = events) {
     const previousEvents = filterEventsByPreviousDateRange(allEvents);
 
@@ -186,6 +221,12 @@ function renderKpis(events, allEvents = events) {
     setChangeText('#slowest-endpoint-change', slowestCurrent, slowestPrevious, 'ms');
 }
 
+/**
+ * Fills the bottleneck insight cards with the slowest endpoint and highest
+ * average TTFB endpoint, then colors the cards by severity.
+ *
+ * @param {object[]} events
+ */
 function renderBottleneckInsights(events) {
     const slowest = getSlowestEndpoint(events);
     const highestTtfb = getHighestAverageEndpoint(events, 'ttfbMs');
@@ -205,6 +246,12 @@ function renderBottleneckInsights(events) {
         highestTtfb.value ? `${Math.round(highestTtfb.value)} ms avg` : 'No data';
 }
 
+/**
+ * Applies severity CSS classes to the two bottleneck insight cards.
+ *
+ * @param {{ latency: number }} slowest
+ * @param {{ value: number }} highestTtfb
+ */
 function updateInsightCardColors(slowest, highestTtfb) {
     applySeverity(
         'slowest-endpoint-card',
@@ -219,6 +266,13 @@ function updateInsightCardColors(slowest, highestTtfb) {
     );
 }
 
+/**
+ * Removes old severity classes from a card and applies the new one.
+ *
+ * @param {string} cardId
+ * @param {string} metricId - Unused here but kept for future per-metric styling.
+ * @param {'critical' | 'warning' | 'healthy' | 'neutral'} severity
+ */
 function applySeverity(cardId, metricId, severity) {
     const card = document.getElementById(cardId);
 
@@ -234,30 +288,41 @@ function applySeverity(cardId, metricId, severity) {
     card.classList.add(severity);
 }
 
+/**
+ * Thresholds: > 800ms → critical, > 300ms → warning, otherwise healthy.
+ *
+ * @param {number} value - Average latency in ms.
+ * @returns {'critical' | 'warning' | 'healthy' | 'neutral'}
+ */
 function getLatencySeverity(value) {
-
     if (!value) return 'neutral';
-
     if (value > 800) return 'critical';
-
     if (value > 300) return 'warning';
-
     return 'healthy';
-
 }
 
+/**
+ * Thresholds: > 500ms → critical, > 200ms → warning, otherwise healthy.
+ * TTFB is more sensitive than overall latency — a slow first byte means
+ * the server itself is slow, not just the network.
+ *
+ * @param {number} value - Average TTFB in ms.
+ * @returns {'critical' | 'warning' | 'healthy' | 'neutral'}
+ */
 function getTtfbSeverity(value) {
-
     if (!value) return 'neutral';
-
     if (value > 500) return 'critical';
-
     if (value > 200) return 'warning';
-
     return 'healthy';
-
 }
 
+/**
+ * Renders the top-10 slowest API requests table sorted by apiLatencyMs descending.
+ * Uses innerHTML with escapeHtml rather than DOM APIs because the table is
+ * rebuilt entirely on each refresh and the escaping is simpler to audit in a template.
+ *
+ * @param {object[]} events
+ */
 function renderSlowRequestsTable(events) {
     const tbody = document.querySelector('#slow-requests-body');
 
@@ -295,12 +360,28 @@ function renderSlowRequestsTable(events) {
     `).join('');
 }
 
+/**
+ * Extracts numeric values for a given metadata field from an event array.
+ * Non-finite values (NaN, Infinity, missing) are dropped.
+ *
+ * @param {object[]} events
+ * @param {string} field - Key inside event.metadata.
+ * @returns {number[]}
+ */
 function getNumbers(events, field) {
     return events
         .map((event) => Number(event.metadata?.[field]))
         .filter((value) => Number.isFinite(value));
 }
 
+/**
+ * Computes the Nth percentile of a sorted numeric array.
+ * Uses ceiling-based index so p95 of a 20-element array is index 19 (worst of first 19).
+ *
+ * @param {number[]} values
+ * @param {number} percentileNumber - e.g. 95 for p95.
+ * @returns {number} 0 if the array is empty.
+ */
 function percentile(values, percentileNumber) {
     if (!values.length) return 0;
 
@@ -310,10 +391,26 @@ function percentile(values, percentileNumber) {
     return sorted[index];
 }
 
+/**
+ * Convenience wrapper — slowest endpoint is just the highest average apiLatencyMs.
+ *
+ * @param {object[]} events
+ * @returns {{ endpoint: string, latency: number }}
+ */
 function getSlowestEndpoint(events) {
     return getHighestAverageEndpoint(events, 'apiLatencyMs', 'latency');
 }
 
+/**
+ * Finds the endpoint with the highest average value for a given metadata field.
+ * Groups by endpoint URL, computes per-group averages, then returns the winner.
+ * Returns { endpoint: 'N/A', [valueKey]: 0 } when no data matches.
+ *
+ * @param {object[]} events
+ * @param {string} field - Metadata field to aggregate (e.g. 'apiLatencyMs').
+ * @param {string} [valueKey='value'] - Key name for the result value.
+ * @returns {{ endpoint: string, [valueKey]: number }}
+ */
 function getHighestAverageEndpoint(events, field, valueKey = 'value') {
     const endpointMap = new Map();
 
@@ -348,6 +445,10 @@ function getHighestAverageEndpoint(events, field, valueKey = 'value') {
     return result;
 }
 
+/**
+ * Starts polling at AUTO_REFRESH_MS if the toggle is checked.
+ * Always stops any existing interval first to prevent stacking.
+ */
 function startAutoRefresh() {
     stopAutoRefresh();
 
@@ -365,6 +466,14 @@ function stopAutoRefresh() {
     }
 }
 
+/**
+ * Renders sparklines for all five KPI cards.
+ * Each sparkline is colored based on whether current performance is better or
+ * worse than the previous period: green = improved, red = regressed, purple = baseline.
+ *
+ * @param {object[]} events - Current period events.
+ * @param {object[]} [allEvents] - Full set used to derive the previous period.
+ */
 function renderSparklines(events, allEvents = events) {
     const previousEvents = filterEventsByPreviousDateRange(allEvents);
 
@@ -386,6 +495,7 @@ function renderSparklines(events, allEvents = events) {
         )
     );
 
+    // Slowest endpoint sparkline is always red — it represents the worst case
     renderSparkline(
         'slowest-endpoint-sparkline',
         getNumbers(events, 'apiLatencyMs'),
@@ -413,6 +523,15 @@ function renderSparklines(events, allEvents = events) {
 
 // Raw canvas instead of Chart.js: sparklines need to be very lightweight
 // (many on screen at once) and don't need axes, tooltips, or animations.
+/**
+ * Draws a minimal line sparkline on a canvas element.
+ * Values are normalized to fill the canvas height so the shape is visible
+ * regardless of the absolute value range.
+ *
+ * @param {string} canvasId
+ * @param {number[]} values
+ * @param {string} [color='#8b5cf6'] - CSS color for the stroke.
+ */
 function renderSparkline(canvasId, values, color = '#8b5cf6') {
     const canvas = document.getElementById(canvasId);
 
@@ -427,7 +546,6 @@ function renderSparkline(canvasId, values, color = '#8b5cf6') {
 
     ctx.clearRect(0, 0, width, height);
 
-    // No data state
     if (!values || values.length < 2) {
         ctx.font = '14px sans-serif';
         ctx.fillStyle = '#9ca3af';
@@ -440,6 +558,7 @@ function renderSparkline(canvasId, values, color = '#8b5cf6') {
 
     const min = Math.min(...values);
     const max = Math.max(...values);
+    // Avoid division by zero when all values are identical
     const range = max - min || 1;
 
     ctx.beginPath();
@@ -461,6 +580,13 @@ function renderSparkline(canvasId, values, color = '#8b5cf6') {
     ctx.stroke();
 }
 
+/**
+ * Renders the main latency line chart. Supports three series (avg, p95, avg page load)
+ * controlled by the #line-toggle select. Shows a "no data" message on an empty canvas
+ * rather than an empty chart with just axes.
+ *
+ * @param {object[]} events
+ */
 function renderLatencyChart(events) {
     const canvas = document.getElementById('latency-chart');
     const selectedMetric = document.getElementById('line-toggle').value;
@@ -563,6 +689,12 @@ function renderLatencyChart(events) {
     });
 }
 
+/**
+ * Renders a horizontal bar chart of average latency per endpoint, sorted
+ * slowest first. Bar color is determined by getEndpointBarColor thresholds.
+ *
+ * @param {object[]} events
+ */
 function renderEndpointPerformanceChart(events) {
     const canvas = document.getElementById('endpoint-performance-chart');
 
@@ -635,6 +767,13 @@ function renderEndpointPerformanceChart(events) {
     });
 }
 
+/**
+ * Color thresholds for the endpoint bar chart.
+ * ≥ 700ms → red, ≥ 400ms → orange, ≥ 250ms → yellow, < 250ms → teal.
+ *
+ * @param {number} value - Average latency in ms.
+ * @returns {string} CSS hex color.
+ */
 function getEndpointBarColor(value) {
     if (value >= 700) return '#c86468';
     if (value >= 400) return '#f97316';
@@ -642,6 +781,15 @@ function getEndpointBarColor(value) {
     return '#0ac2a3';
 }
 
+/**
+ * Groups events by calendar date and computes average latency, p95, and average
+ * page load time per day. Entries are sorted chronologically for the chart.
+ * Null is used (instead of 0) when a bucket has no data for a metric so
+ * Chart.js renders a gap rather than a misleading zero.
+ *
+ * @param {object[]} events
+ * @returns {Array<{ label: string, avgLatency: number|null, p95Latency: number|null, avgLoadTime: number|null }>}
+ */
 function groupEventsByDate(events) {
     const map = new Map();
 
@@ -680,6 +828,13 @@ function groupEventsByDate(events) {
         }));
 }
 
+/**
+ * Groups events by endpoint and computes average API latency per endpoint.
+ * Events without an apiEndpoint or url are skipped.
+ *
+ * @param {object[]} events
+ * @returns {Array<{ endpoint: string, avgLatency: number }>}
+ */
 function groupEventsByEndpoint(events) {
     const map = new Map();
 
@@ -701,6 +856,10 @@ function groupEventsByEndpoint(events) {
     }));
 }
 
+/**
+ * Resets all KPI values to "No data" and clears charts.
+ * Called when no app is selected or the data fetch fails.
+ */
 function clearDashboard() {
     document.querySelector('#avg-response-time').textContent = 'No data';
     document.querySelector('#p95-latency').textContent = 'No data';
@@ -729,6 +888,10 @@ function clearDashboard() {
     `;
 }
 
+/**
+ * @param {string | null | undefined} value - ISO timestamp or epoch string.
+ * @returns {string}
+ */
 function formatTimestamp(value) {
     if (!value) return 'Unknown time';
 
@@ -739,6 +902,13 @@ function formatTimestamp(value) {
     return date.toLocaleString();
 }
 
+/**
+ * Formats a numeric metric with its unit. Returns 'N/A' for non-finite values.
+ *
+ * @param {number | string | null | undefined} value
+ * @param {string} unit - e.g. 'ms' or 'MB'.
+ * @returns {string}
+ */
 function formatMetric(value, unit) {
     const number = Number(value);
 
@@ -747,6 +917,9 @@ function formatMetric(value, unit) {
     return `${Math.round(number)} ${unit}`;
 }
 
+/**
+ * Updates the "vs. [date range]" period label shown under each KPI card.
+ */
 function updateKpiPeriods() {
     const dateRangeValue = document.querySelector('#date-range').value;
     const periods = document.querySelectorAll('.kpi-period');
@@ -756,6 +929,13 @@ function updateKpiPeriods() {
     });
 }
 
+/**
+ * Derives the previous date range by shifting the selected window one full
+ * period backward. Used to compute period-over-period delta arrows.
+ * Returns null if no range is selected.
+ *
+ * @returns {{ previousStartDate: Date, previousEndDate: Date } | null}
+ */
 function getPreviousDateRange() {
     const dateRangeValue = document.querySelector('#date-range').value;
 
@@ -780,6 +960,13 @@ function getPreviousDateRange() {
     return { previousStartDate, previousEndDate };
 }
 
+/**
+ * Filters events to the previous period window for delta comparison.
+ * Returns an empty array if no date range is selected (delta arrows show "No previous data").
+ *
+ * @param {object[]} events
+ * @returns {object[]}
+ */
 function filterEventsByPreviousDateRange(events) {
     const previousRange = getPreviousDateRange();
 
@@ -795,6 +982,15 @@ function filterEventsByPreviousDateRange(events) {
     });
 }
 
+/**
+ * Formats the change between two values as "↑/↓ N unit (X%)".
+ * Returns "No previous data" if either value is missing.
+ *
+ * @param {number} currentValue
+ * @param {number} previousValue
+ * @param {string} unit
+ * @returns {string}
+ */
 function formatChange(currentValue, previousValue, unit) {
     if (!currentValue || !previousValue) return 'No previous data';
 
@@ -807,6 +1003,16 @@ function formatChange(currentValue, previousValue, unit) {
     return `${arrow} ${absoluteDifference} ${unit} (${percent}%)`;
 }
 
+/**
+ * Writes the formatted change string to a DOM element and applies
+ * "positive" or "negative" classes. For performance metrics, lower is better —
+ * a decrease gets the "positive" class (green), an increase gets "negative" (red).
+ *
+ * @param {string} elementId - CSS selector string (e.g. '#avg-response-change').
+ * @param {number} currentValue
+ * @param {number} previousValue
+ * @param {string} unit
+ */
 function setChangeText(elementId, currentValue, previousValue, unit) {
     const element = document.querySelector(elementId);
     if (!element) return;
@@ -827,6 +1033,15 @@ function setChangeText(elementId, currentValue, previousValue, unit) {
     }
 }
 
+/**
+ * Returns a sparkline stroke color based on whether the current value is
+ * better (lower), worse (higher), or unchanged vs the previous period.
+ * Returns the neutral purple when either value is missing.
+ *
+ * @param {number} currentValue
+ * @param {number} previousValue
+ * @returns {string} CSS hex color.
+ */
 function getComparisonColor(currentValue, previousValue) {
     if (!currentValue || !previousValue) {
         return '#8b5cf6';
@@ -845,6 +1060,14 @@ function getComparisonColor(currentValue, previousValue) {
     return '#8b5cf6';
 }
 
+/**
+ * Truncates an endpoint URL to just the hostname for display in charts.
+ * Falls back to the raw string if it isn't a parseable URL (e.g. relative paths).
+ * Hostnames longer than 18 chars are clipped with an ellipsis.
+ *
+ * @param {string | null | undefined} endpoint
+ * @returns {string}
+ */
 function formatEndpoint(endpoint) {
     if (!endpoint || endpoint === 'N/A') {
         return 'N/A';

@@ -21,6 +21,13 @@ function configurePageLinks() {
     }
 }
 
+/**
+ * Validates a single login field and displays the appropriate error.
+ * Returns true if the field is valid so validateLoginForm can aggregate results.
+ *
+ * @param {HTMLInputElement} input
+ * @returns {boolean}
+ */
 function validateField(input) {
     const value = input.value.trim();
     let message = '';
@@ -37,6 +44,13 @@ function validateField(input) {
     return !message;
 }
 
+/**
+ * Runs validateField on every login input and moves focus to the first
+ * invalid field so keyboard and screen-reader users land in the right place.
+ *
+ * @param {HTMLFormElement} loginForm
+ * @returns {boolean} True if all fields passed.
+ */
 function validateLoginForm(loginForm) {
     const fields = loginForm.querySelectorAll('input[name="email"], input[name="password"]');
     let isValid = true;
@@ -54,11 +68,22 @@ function validateLoginForm(loginForm) {
     return isValid;
 }
 
+/**
+ * @param {HTMLFormElement} loginForm
+ */
 function addValidationListeners(loginForm) {
     const fields = loginForm.querySelectorAll('input[name="email"], input[name="password"]');
     fields.forEach((field) => attachFieldValidation(field, validateField));
 }
 
+/**
+ * Shows a server-side login error. We always attach the message to the email
+ * field (rather than password) because "invalid email or password" shouldn't
+ * hint which one was wrong.
+ *
+ * @param {HTMLFormElement} loginForm
+ * @param {string} [message]
+ */
 function showLoginFailure(loginForm, message) {
     const emailField = loginForm.elements.email;
     setFieldError(emailField, message || 'Invalid email or password.');
@@ -95,6 +120,7 @@ function addLoginFormListener() {
             const data = await response.json();
 
             if (response.ok) {
+                // Store user so other pages can check auth without a round-trip
                 localStorage.setItem('watchtowerUser', JSON.stringify(data.user));
                 window.location.href = '/apps';
             } else {

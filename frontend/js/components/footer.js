@@ -1,3 +1,4 @@
+// Resolve base URLs at load time while document.currentScript is still available.
 const footerScriptUrl = document.currentScript ? document.currentScript.src : '';
 const defaultFooterAssetBase = footerScriptUrl
     ? new URL('../../assets', footerScriptUrl).href
@@ -5,6 +6,8 @@ const defaultFooterAssetBase = footerScriptUrl
 const defaultFooterStyleBase = footerScriptUrl
     ? new URL('../../styling', footerScriptUrl).href
     : '/styling';
+
+// True when running from the filesystem (e.g. VS Code Live Server), not Express.
 const isFooterProjectRootStaticServer = footerScriptUrl
     && new URL(footerScriptUrl).pathname.endsWith('/frontend/js/components/footer.js');
 const defaultFooterHomeHref = isFooterProjectRootStaticServer
@@ -21,6 +24,18 @@ const defaultFooterTermsHref = isFooterProjectRootStaticServer
     : '/terms';
 const defaultFooterProductHref = 'https://github.com/cse110-sp26-group08/WatchTower/blob/main/documentation/rest-api.md';
 
+/**
+ * `<watchtower-footer>` — site-wide footer with navigation and legal links.
+ *
+ * Attributes:
+ *   home-href     - Override the brand logo link.
+ *   product-href  - Override the Product link (defaults to the GitHub REST API doc).
+ *   docs-href     - Override the Docs link.
+ *   privacy-href  - Override the Privacy Policy link.
+ *   terms-href    - Override the Terms & Conditions link.
+ *   style-base    - Base URL for loading footer.css.
+ *   asset-base    - Base URL for the WatchTower logo image.
+ */
 class WatchTowerFooter extends WatchTowerBaseElement {
     connectedCallback() {
         if (!this.shadowRoot) {
@@ -67,6 +82,8 @@ class WatchTowerFooter extends WatchTowerBaseElement {
             </footer>
         `;
 
+        // Use the inherited brand-click handler so clicking the logo on the home
+        // page reloads instead of doing nothing.
         const brandLink = this.shadowRoot.querySelector('.footer-brand');
         if (brandLink) {
             brandLink.addEventListener('click', (event) => {

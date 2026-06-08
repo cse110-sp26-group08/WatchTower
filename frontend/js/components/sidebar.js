@@ -1,7 +1,12 @@
+// Resolve hrefs at load time while document.currentScript is still available.
+// After this script executes, currentScript becomes null and can't be used.
 const sidebarScriptUrl = document.currentScript ? document.currentScript.src : '';
 const defaultSidebarStyleBase = sidebarScriptUrl
     ? new URL('../../styling', sidebarScriptUrl).href
     : '/styling';
+
+// True when running through a filesystem static server (e.g. VS Code Live Server)
+// rather than Express. Affects whether nav hrefs use .html file paths or clean routes.
 const isSidebarProjectRootStaticServer = sidebarScriptUrl
     && new URL(sidebarScriptUrl).pathname.endsWith('/frontend/js/components/sidebar.js');
 
@@ -18,6 +23,17 @@ const defaultSidebarPerformanceHref = isSidebarProjectRootStaticServer
     ? new URL('../../webpages/advanced_performance_metrics.html', sidebarScriptUrl).href
     : '/advanced-performance-metrics';
 
+/**
+ * `<watchtower-sidebar>` — left-side navigation for dashboard pages.
+ *
+ * Attributes:
+ *   active            - Highlights the matching nav item. One of: home, projects, errors, performance.
+ *   dashboard-href    - Override the home link URL.
+ *   apps-href         - Override the projects link URL.
+ *   errors-href       - Override the errors link URL.
+ *   performance-href  - Override the performance link URL.
+ *   style-base        - Base URL for loading sidebar.css (defaults to ../../styling relative to this script).
+ */
 class WatchTowerSidebar extends WatchTowerBaseElement {
     connectedCallback() {
         if (!this.shadowRoot) {

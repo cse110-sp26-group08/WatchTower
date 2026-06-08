@@ -1,3 +1,4 @@
+// Resolve base URLs at load time while document.currentScript is still available.
 const navbarScriptUrl = document.currentScript ? document.currentScript.src : '';
 const defaultAssetBase = navbarScriptUrl
     ? new URL('../../assets', navbarScriptUrl).href
@@ -5,6 +6,9 @@ const defaultAssetBase = navbarScriptUrl
 const defaultStyleBase = navbarScriptUrl
     ? new URL('../../styling', navbarScriptUrl).href
     : '/styling';
+
+// True when the page is served from the filesystem (e.g. VS Code Live Server)
+// rather than Express. In that case, nav links need to point to .html files.
 const isProjectRootStaticServer = navbarScriptUrl
     && new URL(navbarScriptUrl).pathname.endsWith('/frontend/js/components/navbar.js');
 const defaultHomeHref = isProjectRootStaticServer
@@ -21,9 +25,25 @@ const defaultDocsHref = isProjectRootStaticServer
     : '/docs';
 const defaultProductHref = 'https://github.com/cse110-sp26-group08/WatchTower/blob/main/documentation/rest-api.md';
 
+/**
+ * `<watchtower-navbar>` — main site navigation for marketing/auth pages.
+ *
+ * Attributes:
+ *   logged-in      - Boolean presence attribute. Swaps sign-in/get-started links for a logout button.
+ *   home-href      - Override the brand logo link.
+ *   product-href   - Override the Product nav link.
+ *   docs-href      - Override the Docs nav link.
+ *   github-href    - Override the GitHub icon link.
+ *   login-href     - Override the Sign In link.
+ *   signup-href    - Override the Get Started link.
+ *   contact-href   - Override the Contact Us link.
+ *   style-base     - Base URL for loading navbar.css.
+ *   asset-base     - Base URL for loading logo and icon assets.
+ */
 class WatchTowerNavbar extends WatchTowerBaseElement {
     constructor() {
         super();
+        // Bind here so we can remove the exact same function reference in disconnectedCallback
         this.updateScrolledState = this.updateScrolledState.bind(this);
     }
 
@@ -55,6 +75,7 @@ class WatchTowerNavbar extends WatchTowerBaseElement {
         const stylesheetHref = this.getStylePath('navbar.css', defaultStyleBase);
         const isLoggedIn = this.hasAttribute('logged-in');
 
+        // Logged-in state replaces auth links with a single logout button
         const navActions = isLoggedIn
             ? `<button type="button" class="button button-logout" id="navbar-logout-btn">Log out</button>`
             : `
@@ -107,6 +128,11 @@ class WatchTowerNavbar extends WatchTowerBaseElement {
         }
     }
 
+    /**
+     * Toggles the "is-scrolled" class on the header to trigger the
+     * drop-shadow transition. The 2px threshold prevents flickering from
+     * sub-pixel scroll events at the top of the page.
+     */
     updateScrolledState() {
         const header = this.shadowRoot ? this.shadowRoot.querySelector('.site-header') : null;
         if (header) {

@@ -1,3 +1,4 @@
+// Resolve base URLs at load time while document.currentScript is still available.
 const dashNavScriptUrl = document.currentScript ? document.currentScript.src : '';
 const defaultDashNavAssetBase = dashNavScriptUrl
     ? new URL('../../assets', dashNavScriptUrl).href
@@ -5,6 +6,8 @@ const defaultDashNavAssetBase = dashNavScriptUrl
 const defaultDashNavStyleBase = dashNavScriptUrl
     ? new URL('../../styling', dashNavScriptUrl).href
     : '/styling';
+
+// True when running from the filesystem (e.g. VS Code Live Server), not Express.
 const isDashNavProjectRootStaticServer = dashNavScriptUrl
     && new URL(dashNavScriptUrl).pathname.endsWith('/frontend/js/components/dash_navbar.js');
 
@@ -24,6 +27,21 @@ const defaultDashNavSettingsHref = isDashNavProjectRootStaticServer
     ? new URL('../../webpages/settings.html', dashNavScriptUrl).href
     : '/settings';
 
+/**
+ * `<watchtower-dash-navbar>` — top navigation bar shown inside the dashboard layout.
+ * Displays the current app name, page links, and a settings icon.
+ *
+ * Attributes:
+ *   app-name         - Text shown next to the back arrow. Updated reactively.
+ *   active           - Highlights the matching nav link. Auto-detected from the URL if omitted.
+ *   dashboard-href   - Override the Home link.
+ *   apps-href        - Override the "back to projects" link.
+ *   errors-href      - Override the Errors link.
+ *   performance-href - Override the Performance link.
+ *   settings-href    - Override the Settings link.
+ *   style-base       - Base URL for loading dash_navbar.css.
+ *   asset-base       - Base URL for the settings icon SVG.
+ */
 class WatchTowerDashNavbar extends WatchTowerBaseElement {
     static get observedAttributes() {
         return ['app-name'];
@@ -31,9 +49,13 @@ class WatchTowerDashNavbar extends WatchTowerBaseElement {
 
     constructor() {
         super();
+        // Bind here so the exact same reference is used for removeEventListener
         this.updateScrolledState = this.updateScrolledState.bind(this);
     }
 
+    /**
+     * Reactively updates the displayed app name without re-rendering the whole navbar.
+     */
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'app-name' && this.shadowRoot) {
             const el = this.shadowRoot.querySelector('.app-name');
@@ -54,6 +76,13 @@ class WatchTowerDashNavbar extends WatchTowerBaseElement {
         window.removeEventListener('scroll', this.updateScrolledState);
     }
 
+    /**
+     * Infers the active page from the URL pathname so pages don't need to
+     * set the 'active' attribute manually. Handles both Express routes
+     * (/advanced-error-metrics) and static file paths (advanced_error_metrics.html).
+     *
+     * @returns {'errors' | 'performance' | 'settings' | 'home'}
+     */
     detectActivePage() {
         const path = window.location.pathname;
         if (path.includes('advanced-error-metrics') || path.includes('advanced_error_metrics')) {
@@ -116,6 +145,10 @@ class WatchTowerDashNavbar extends WatchTowerBaseElement {
         `;
     }
 
+    /**
+     * Adds "is-scrolled" to the header once the user scrolls past 2px,
+     * which triggers a CSS drop-shadow transition.
+     */
     updateScrolledState() {
         const header = this.shadowRoot ? this.shadowRoot.querySelector('.sub-header') : null;
         if (header) {

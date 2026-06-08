@@ -4,6 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+/**
+ * Reads the currently selected app from localStorage.
+ * Returns null if missing or unparseable — callers redirect to /apps in that case.
+ *
+ * @returns {{ id: number, name: string, url?: string } | null}
+ */
 function getSelectedApp() {
     try {
         return JSON.parse(localStorage.getItem('watchtowerSelectedApp')) || null;
@@ -12,6 +18,11 @@ function getSelectedApp() {
     }
 }
 
+/**
+ * Entry point. Fetches app data and its API key in parallel, then
+ * wires up the form, copy button, and delete button.
+ * Redirects to /apps if no app is selected or the fetch fails.
+ */
 async function initSettings() {
     const app = getSelectedApp();
 
@@ -20,6 +31,8 @@ async function initSettings() {
         return;
     }
 
+    // Fetch app details and API key concurrently — both are needed before we
+    // can populate the form, so there's no reason to do them sequentially.
     const [appRes, keyRes] = await Promise.all([
         fetch(`/api/apps/${app.id}`),
         fetch(`/api/apps/${app.id}/apikey`),
@@ -39,6 +52,13 @@ async function initSettings() {
     bindDeleteButton(appData);
 }
 
+/**
+ * Fills the settings form fields with the current app values.
+ * Also sets the app name in the delete confirmation modal header.
+ *
+ * @param {{ name: string, url?: string }} app
+ * @param {string | null} apiKey
+ */
 function populateForm(app, apiKey) {
     document.getElementById('settings-name').value = app.name;
     document.getElementById('settings-url').value = app.url ?? '';
@@ -46,6 +66,13 @@ function populateForm(app, apiKey) {
     document.getElementById('settings-modal-app-name').textContent = app.name;
 }
 
+/**
+ * Attaches the save handler to the app info form.
+ * On success, syncs the updated name/url back into localStorage so the
+ * navbar and other pages that read from storage reflect the change immediately.
+ *
+ * @param {number} appId
+ */
 function bindSaveForm(appId) {
     const form = document.getElementById('settings-info-form');
     const feedback = document.getElementById('settings-save-feedback');
@@ -83,6 +110,7 @@ function bindSaveForm(appId) {
                 return;
             }
 
+            // Keep localStorage in sync so the dash navbar shows the updated name
             const stored = getSelectedApp();
             if (stored) {
                 localStorage.setItem('watchtowerSelectedApp', JSON.stringify({
@@ -105,6 +133,13 @@ function bindSaveForm(appId) {
     });
 }
 
+/**
+ * Wires up the "Copy" button for the API key field.
+ * Disables the button entirely if no key is available rather than
+ * showing a misleading copy affordance.
+ *
+ * @param {string | null} apiKey
+ */
 function bindCopyButton(apiKey) {
     const copyBtn = document.getElementById('settings-copy-btn');
     const feedback = document.getElementById('settings-copy-feedback');
@@ -127,6 +162,14 @@ function bindCopyButton(apiKey) {
     });
 }
 
+/**
+ * Wires up the delete button and its confirmation modal.
+ * The modal backdrop doubles as a click-outside-to-dismiss target.
+ * After a successful delete, clears the selected app from localStorage
+ * before redirecting so the next page doesn't pick up a stale reference.
+ *
+ * @param {{ id: number, name: string }} app
+ */
 function bindDeleteButton(app) {
     const deleteBtn = document.getElementById('settings-delete-btn');
     const backdrop = document.getElementById('settings-modal-backdrop');
@@ -141,6 +184,7 @@ function bindDeleteButton(app) {
         backdrop.hidden = true;
     });
 
+    // Close on click outside the modal panel
     backdrop.addEventListener('click', (e) => {
         if (e.target === backdrop) backdrop.hidden = true;
     });
