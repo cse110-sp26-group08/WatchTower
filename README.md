@@ -1,6 +1,6 @@
 # WatchTower
 
-WatchTower is a web application that lets developers monitor the uptime and performance of their web apps. Users register their apps, and WatchTower continuously polls them, surfacing downtime events, performance metrics, and sending email alerts when an app goes down. Here is the deployed version of our website https://watchtower.team7ate92.workers.dev.
+WatchTower is a web application that lets developers monitor the uptime and performance of their web apps. Users register their apps, and WatchTower continuously polls them, surfacing downtime events, performance metrics, and sending email alerts when an app goes down. 
 
 > Prefer a nicer reading experience? [View these docs on the GitHub Pages site.](https://cse110-sp26-group08.github.io/WatchTower/)
 >
@@ -8,6 +8,9 @@ WatchTower is a web application that lets developers monitor the uptime and perf
 >
 > Looking for the project wiki? [View the GitHub wiki.](https://github.com/cse110-sp26-group08/WatchTower/wiki)
 
+> The deployed version of our website: [https://watchtower.team7ate92.workers.dev](https://watchtower.team7ate92.workers.dev)
+>
+> Watch the Public Final Video [Here](https://youtu.be/a1JPuAqYE6w)
 ---
 
 ## Table of Contents
