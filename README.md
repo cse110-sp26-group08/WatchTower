@@ -11,6 +11,8 @@ WatchTower is a web application that lets developers monitor the uptime and perf
 > The deployed version of our website: [https://watchtower.team7ate92.workers.dev](https://watchtower.team7ate92.workers.dev)
 >
 > Watch the Public Final Video [Here](https://youtu.be/zy2QQ2NDx3U)
+>
+> Watch the Private Final Video [Here](https://youtu.be/wlo9LohG2W0)
 ---
 
 ## Table of Contents
